@@ -1,9 +1,7 @@
 maps
 dotnet
 bin
-node_modules/*
-!node_modules/@types/
-node_modules/@types/node
+node_modules
 plugins
 conf.json
 node.dll
@@ -19,7 +17,8 @@ client_packages
 client_build
 bags.txt
 BugTrap-x64.dll
-client_files/browser
 client_files/browser/*
 client_files/game_resources
 server-crash.log
+migrations
+migrations/*
