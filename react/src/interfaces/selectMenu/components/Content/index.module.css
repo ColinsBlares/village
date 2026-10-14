@@ -1,0 +1,9 @@
+.content {
+	background: rgba(0, 0, 0, 0.6);
+	border-radius: 0 0 1vh 1vh;
+	padding: 1vh 0;
+}
+
+.inactive {
+	filter: blur(2px);
+}

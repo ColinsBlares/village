@@ -1,0 +1,9 @@
+.number {
+	bottom: 8vh;
+	font-size: 2.5vh;
+	opacity: 0.6;
+	position: relative;
+	right: -41vh;
+	transform: rotate(90deg);
+	width: fit-content;
+}

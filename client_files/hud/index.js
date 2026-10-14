@@ -8,7 +8,9 @@ let playersListState = false;
 mp.events.add('hud.load', () => {
     var anchor = mp.utils.getMinimapAnchor();
     var resolution = mp.game.graphics.getScreenActiveResolution(0, 0);
-    mp.callCEFV(`hud.leftWeather = ${resolution.x * (anchor.rightX * 1.1)}`);
+    mp.events.call('hud.setData', {
+        leftWeather: resolution.x * (anchor.rightX * 1.1)
+    });
     mp.events.call('hud.enable', true);
 
     mp.keys.bind(0x74, true, function() { /// Включение/отключение худа на F5
@@ -40,18 +42,21 @@ mp.events.add('hud.load', () => {
 });
 
 mp.events.add('hud.enable', (state) => {
-    mp.callCEFVN({
-        "hud.show": state
-    });
+    mp.callCEFR('hud.show', [state]);
     hudState = state;
 });
 
 mp.events.add("hud.setData", (data) => {
+    var payload = {};
+    var hasChanges = false;
     for (var key in data) {
         if (prevValues[key] == data[key] && !ignoreValues.includes(key)) continue;
         prevValues[key] = data[key];
-        if (typeof data[key] == 'string') data[key] = `'${data[key]}'`;
-        mp.callCEFV(`hud.${key} = ${data[key]}`);
+        payload[key] = data[key];
+        hasChanges = true;
+    }
+    if (hasChanges) {
+        mp.callCEFR('hud.setData', [payload]);
     }
 });
 

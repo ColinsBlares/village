@@ -1,0 +1,27 @@
+.keys {
+	font-weight: bold;
+	left: 2.99vh;
+	top: 50.6%;
+	transform: translate(0, -50%);
+}
+
+.keys > div {
+	align-items: center;
+	display: flex;
+	margin-bottom: 0.5556vh;
+	font-weight: 500;
+	font-size: 0.625vw;
+}
+
+.keys span {
+	align-items: center;
+	background: #fff;
+	border-radius: 0.5vh;
+	font-size: 0.729vw;
+	color: #000;
+	display: flex;
+	height: 1.302vw;
+	justify-content: center;
+	margin-right: 0.365vw;
+	width: 1.302vw;
+}

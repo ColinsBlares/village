@@ -1,0 +1,66 @@
+.form {
+	height: 100%;
+	padding-right: 1vh;
+}
+
+.header {
+	color: #ffdf29;
+	font-size: 1.7vh;
+	margin-bottom: 1vh;
+}
+
+.info {
+	height: 87%;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.info > div {
+	margin-bottom: 1vh;
+}
+
+.info::-webkit-scrollbar {
+	width: 0.5vh;
+}
+
+.info::-webkit-scrollbar-thumb {
+	border-radius: 2vh;
+	background-color: #ffdf29;
+}
+
+.input {
+	background: #0000003b;
+	border: none;
+	color: #b9b9b9;
+	font-size: 1.6vh;
+	outline: none;
+	padding: 1vh;
+	width: 93%;
+	margin-bottom: 1vh;
+}
+
+.input::placeholder {
+	opacity: 0.8;
+}
+
+.steps .button {
+	margin-top: 0.5vh;
+}
+
+.button {
+	background: #0000008c;
+	border: 1px solid #444;
+	display: flex;
+	font-size: 1.3vh;
+	justify-content: center;
+	padding: 0.5vh;
+	width: fit-content;
+	margin: auto;
+	margin-top: 1vh;
+	cursor: pointer;
+}
+
+.button:hover {
+	border-color: #555;
+	color: #ddd;
+}

@@ -1,0 +1,15 @@
+.root {
+	background: #000a;
+	color: #fff;
+	font-family: Ubuntu, sans-serif;
+	height: 50vh;
+	left: 50%;
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 70vh;
+}
+
+.root img {
+	width: 50vh;
+}

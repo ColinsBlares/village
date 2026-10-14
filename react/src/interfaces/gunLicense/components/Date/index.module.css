@@ -1,0 +1,13 @@
+.date {
+	border: 1px solid #000;
+	display: flex;
+	justify-content: space-between;
+	margin-left: 3vh;
+	margin-top: 1vh;
+	padding: 0.5vh 2vh;
+	width: 60%;
+}
+
+.key {
+	font-weight: bold;
+}

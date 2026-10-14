@@ -1,0 +1,17 @@
+.body {
+	margin-top: 2vh;
+	overflow: hidden;
+	min-height: 0;
+}
+
+.longName {
+	height: 100%;
+}
+
+.pane {
+	height: 100%;
+}
+
+.paneHidden {
+	display: none;
+}

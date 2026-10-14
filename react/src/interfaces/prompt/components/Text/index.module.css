@@ -1,0 +1,12 @@
+.text {
+	padding: 1vh;
+	text-align: center;
+}
+
+.text span {
+	background: #ffdf29;
+	border-radius: 5px;
+	color: #000;
+	font-weight: bold;
+	padding: 0.2vh 0.5vh;
+}

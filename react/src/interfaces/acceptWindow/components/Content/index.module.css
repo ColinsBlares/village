@@ -1,0 +1,10 @@
+.content {
+	margin-top: 2vh;
+	font-size: 1.67vh;
+}
+
+.content span {
+	font-weight: 500;
+	color: #6ee425;
+	white-space: nowrap;
+}

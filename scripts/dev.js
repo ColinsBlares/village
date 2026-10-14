@@ -53,9 +53,7 @@ function isModuleDir(name) {
 }
 
 function isBrowserScript(normalized) {
-    if (normalized === 'browser/index.js') return true;
-    if (!normalized.startsWith('browser/js/') || !normalized.endsWith('.js')) return false;
-    return normalized.indexOf('/', 'browser/js/'.length) === -1;
+    return normalized === 'browser/index.js';
 }
 
 function logDone(fromPosix, outPosix, started) {

@@ -1,0 +1,13 @@
+.identifier {
+	position: absolute;
+	font-weight: 700;
+	font-size: 2vh;
+	left: 5.1vh;
+	top: 18.4vh;
+}
+
+.fib {
+	right: 5vh;
+	top: 10vh;
+	left: auto;
+}

@@ -1,0 +1,34 @@
+.hud {
+	color: #fff;
+	font-family: 'Montserrat', sans-serif;
+	height: 100%;
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+}
+
+.hud > div {
+	position: absolute;
+}
+
+.panelRightTop {
+	right: 2vh;
+	top: 2vh;
+}
+
+.panelRightBottom {
+	right: 1.8vh;
+	bottom: 1.8vh;
+	display: flex;
+	height: 6.5vh;
+}
+
+.panelLeftBottom {
+	bottom: 1.8vh;
+	display: flex;
+	align-items: flex-start;
+	flex-direction: column;
+	gap: 1.1111vh;
+}

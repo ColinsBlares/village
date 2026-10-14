@@ -1,0 +1,43 @@
+.loader {
+	left: 45%;
+	position: absolute;
+	top: 40%;
+}
+
+.rolling {
+	animation: login 1s ease-in-out;
+	height: 5vh !important;
+	position: absolute;
+	transform: translate(-100px, -100px) scale(1) translate(100px, 100px);
+	width: 5vh !important;
+}
+
+.spin,
+.spin:after {
+	border: 1vh solid #ffdf29;
+	border-radius: 50%;
+	border-top-color: transparent;
+	height: 5vh;
+	position: absolute;
+	width: 5vh;
+}
+
+.spin {
+	animation: lds-rolling 1.2s linear infinite;
+	left: 45%;
+	top: 45%;
+}
+
+.spin:after {
+	transform: rotate(90deg);
+}
+
+@keyframes lds-rolling {
+	0% {
+		transform: translate(-50%, -50%) rotate(0deg);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) rotate(360deg);
+	}
+}

@@ -1,0 +1,18 @@
+.coins {
+	display: flex;
+	color: #ffdf29;
+	font-size: 2vh;
+	margin-top: 1vh;
+}
+
+.logo {
+	background-color: #ffdf29;
+	border-radius: 50%;
+	color: #151515;
+	font-weight: bold;
+	text-align: center;
+	height: 2.2vh;
+	width: 2.2vh;
+	font-size: 1.7vh;
+	margin: 0 0.8vh 0 0.1vh;
+}

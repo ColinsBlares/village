@@ -1,0 +1,28 @@
+.root {
+	background-color: #faefef;
+	background-size: cover;
+	background-repeat: no-repeat;
+	border-radius: 2vh;
+	box-shadow: 0 1vh 1vh #0008;
+	font-family: Montserrat;
+	left: 50%;
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 50vh;
+}
+
+.line {
+	background-image: linear-gradient(to right, black 35%, rgba(255, 255, 255, 0) 0%);
+	background-position: bottom;
+	background-size: 2vh 1px;
+	background-repeat: repeat-x;
+	height: 1px;
+	width: 100%;
+}
+
+.content {
+	font-size: 2vh;
+	line-height: 4.2vh;
+	padding: 1.8vh 4.5vh;
+}

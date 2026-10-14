@@ -1,0 +1,13 @@
+.root {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 49vh;
+	min-height: 29.7vh;
+	background: rgba(12, 12, 12, 0.6);
+	border-radius: 1vh;
+	filter: drop-shadow(0 0.5vh 0.5vh rgba(0, 0, 0, 0.25));
+	font-family: Ubuntu, sans-serif;
+	color: white;
+}

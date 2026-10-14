@@ -1,0 +1,26 @@
+.infoB {
+	line-height: 3vh;
+	margin-top: 6vh;
+	text-align: right;
+	width: 15vh;
+}
+
+.infoB img {
+	height: 2.5vh;
+	margin-left: 1vh;
+}
+
+.category {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.active {
+	color: #008b1a;
+}
+
+.label {
+	align-items: center;
+	display: flex;
+	text-transform: uppercase;
+}

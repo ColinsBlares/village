@@ -1,0 +1,55 @@
+.row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 3.5vh;
+	font-size: 0.95vh;
+	font-style: italic;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.icon {
+	position: relative;
+	width: 0.95vh;
+	height: 1.15vh;
+}
+
+.shackle {
+	position: absolute;
+	top: 0;
+	left: 0.18vh;
+	width: 0.42vh;
+	height: 0.48vh;
+	border: 0.08vh solid currentColor;
+	border-bottom: 0;
+	border-radius: 0.28vh 0.28vh 0 0;
+}
+
+.body {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	display: flex;
+	justify-content: center;
+	height: 0.62vh;
+	border-radius: 0.12vh;
+	background: currentColor;
+}
+
+.hole {
+	width: 0.08vh;
+	height: 0.22vh;
+	margin-top: 0.16vh;
+	border-radius: 0.04vh;
+	background: #111;
+}
+
+.open {
+	color: #51ff25;
+}
+
+.closed {
+	color: #ff3b30;
+}

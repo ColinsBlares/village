@@ -1,0 +1,34 @@
+.line {
+	background: rgba(12, 12, 12, 0.6);
+	height: 11%;
+	width: 60%;
+	margin-left: 20%;
+	position: relative;
+	border-radius: 10px;
+	animation: fishing-show 0.1s ease-in-out;
+}
+
+.zone {
+	background: #ffdf29;
+	border-radius: 10px;
+	height: 90%;
+	top: 5%;
+	position: absolute;
+}
+
+.cursor {
+	width: 6%;
+	margin-top: -1%;
+	height: 100%;
+	position: absolute;
+	border-radius: 20px;
+}
+
+@keyframes fishing-show {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}

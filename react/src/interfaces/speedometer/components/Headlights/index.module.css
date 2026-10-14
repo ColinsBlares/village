@@ -1,0 +1,58 @@
+.row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 3.5vh;
+	font-size: 0.95vh;
+	font-style: italic;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.icon {
+	display: flex;
+	align-items: center;
+	gap: 0.18vh;
+}
+
+.body {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 0.42vh;
+	height: 0.5vh;
+	border: 0.07vh solid currentColor;
+	border-radius: 0.22vh;
+}
+
+.core {
+	width: 0.16vh;
+	height: 0.12vh;
+	border-radius: 0.06vh;
+	background: currentColor;
+}
+
+.beam,
+.beamShort {
+	width: 0.38vh;
+	height: 0.07vh;
+	border-radius: 0.04vh;
+	background: currentColor;
+}
+
+.beamShort {
+	width: 0.22vh;
+}
+
+.off {
+	color: #fff;
+	opacity: 0.4;
+}
+
+.on {
+	color: #fff;
+}
+
+.high {
+	color: #ffdf29;
+}

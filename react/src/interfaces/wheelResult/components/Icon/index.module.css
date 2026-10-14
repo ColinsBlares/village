@@ -1,0 +1,31 @@
+.icon {
+	margin: 2.5vh auto 1.5vh;
+	width: 9vh;
+	height: 9vh;
+	line-height: 9vh;
+	border-radius: 50%;
+	background: rgba(255, 214, 0, 0.15);
+	border: 0.15vh solid #ffd600;
+	color: #ffd600;
+	font-size: 5vh;
+	font-weight: 700;
+}
+
+.item {
+	background: rgba(192, 192, 192, 0.15);
+	border-color: #c0c0c0;
+	color: #c0c0c0;
+}
+
+.vehicle {
+	background: rgba(255, 107, 53, 0.15);
+	border-color: #ff6b35;
+	color: #ff6b35;
+	font-size: 4vh;
+}
+
+.empty {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.3);
+	color: rgba(255, 255, 255, 0.5);
+}

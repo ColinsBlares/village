@@ -1,0 +1,14 @@
+.identifier {
+	font-weight: 500;
+	font-size: 1.5vh;
+	position: absolute;
+	bottom: 2.2vh;
+	left: 4vh;
+	color: transparent;
+	background: #bfbfbf;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: #f8f8f8aa;
+	-webkit-text-stroke-width: 0.4vh;
+	text-shadow: 0.1vh 0.1vh 0.2vh #000;
+	letter-spacing: 0.5vh;
+}

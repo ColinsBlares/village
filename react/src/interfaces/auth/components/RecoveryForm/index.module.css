@@ -1,0 +1,75 @@
+.form {
+	left: 12%;
+	position: relative;
+	width: 74%;
+}
+
+.label {
+	color: #fffd;
+	display: block;
+	font-size: 1.2vh;
+	margin-bottom: 0.2vh;
+}
+
+.input {
+	background: none;
+	border: none;
+	border-bottom: 2px solid #aaa;
+	color: #ddd;
+	font-family: 'Chalet-LondonNineteenSixty';
+	font-size: 1.6vh;
+	margin-bottom: 1.5vh;
+	outline: none;
+	width: 100%;
+}
+
+.input:focus {
+	border-color: #fff;
+}
+
+.button {
+	background: #f1d941;
+	border: none;
+	border-radius: 2px;
+	color: #444;
+	font-family: 'Chalet-LondonNineteenSixty';
+	font-size: 1.5vh;
+	outline: none;
+	padding: 0.5vh 1vh;
+	position: relative;
+	right: -18.7vh;
+}
+
+.button:hover {
+	background: #f1d941dd;
+	color: #111;
+}
+
+.button:active {
+	background: #f1d941dd;
+	color: #fff;
+}
+
+.icon {
+	height: 1.7vh;
+	position: absolute;
+}
+
+.iconLogin {
+	right: 0;
+	top: 19%;
+}
+
+.iconPassword {
+	right: 0;
+	top: 13%;
+}
+
+.switchLink {
+	color: #fff;
+	font-weight: bold;
+}
+
+.switchLink:hover {
+	color: #fffd;
+}

@@ -1,0 +1,12 @@
+.changelist {
+	background: #000a;
+	border-radius: 1vh;
+	color: #fff;
+	font-family: Ubuntu;
+	font-size: 1.5vh;
+	left: 50%;
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 85vh;
+}

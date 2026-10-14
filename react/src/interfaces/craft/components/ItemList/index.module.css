@@ -1,0 +1,54 @@
+.list {
+	height: 88%;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.list::-webkit-scrollbar {
+	width: 0.5vh;
+}
+
+.list::-webkit-scrollbar-thumb {
+	border-radius: 2vh;
+	background-color: #ffdf29;
+}
+
+.item {
+	background: #0000005e;
+	border: 1px solid #464646;
+	display: flex;
+	height: 5vh;
+	margin-bottom: 1vh;
+	margin-right: 1vh;
+	padding: 1vh;
+	cursor: pointer;
+}
+
+.item:hover {
+	border-color: #666;
+}
+
+.active {
+	border-color: #ccad25;
+}
+
+.icon {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	width: 30%;
+}
+
+.info {
+	width: 70%;
+}
+
+.materials {
+	display: flex;
+	font-size: 1.3vh;
+	overflow: hidden;
+}
+
+.deficit {
+	color: #bb4444;
+}

@@ -1,0 +1,37 @@
+.environment {
+	grid-row-end: span 3;
+	overflow-x: hidden;
+	overflow-y: auto;
+	background-color: rgba(12, 12, 12, 0.8);
+	padding: 1.8vh 2.1vh;
+	border-radius: 1.2vh;
+}
+
+.container {
+	width: 100%;
+}
+
+.header,
+.headerHidden {
+	color: #fff;
+	display: flex;
+	font-size: 1.5vh;
+	justify-content: flex-end;
+	margin-top: 1vh;
+	margin-bottom: 1.3vh;
+	cursor: pointer;
+}
+
+.header div,
+.headerHidden div {
+	margin-right: 1.7vh;
+}
+
+.title {
+	font-size: 1.8vh;
+	font-weight: 700;
+	margin-right: auto;
+	text-transform: uppercase;
+	color: #ffdf29;
+	margin-left: 1.5vh;
+}

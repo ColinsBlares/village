@@ -1,0 +1,16 @@
+.description {
+	font-family: Ubuntu, sans-serif;
+	position: absolute;
+	top: 48.4%;
+	left: 50%;
+	transform: translate(-50%);
+	font-weight: 500;
+	font-size: 2.1vh;
+	text-align: center;
+}
+
+.amount {
+	margin-top: 1.4vh;
+	font-weight: 400;
+	font-size: 1.5vh;
+}

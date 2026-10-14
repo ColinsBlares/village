@@ -53,7 +53,7 @@ mp.police = {
         this.wanted = val;
         mp.playerMenu.setWanted(val);
         mp.timer.remove(this.wantedTimer);
-        mp.callCEFV(`hud.wanted = ${val}`);
+        mp.events.call('hud.setData', { wanted: val });
         if (!val) return;
         this.wantedTimer = mp.timer.add(() => {
             mp.events.callRemote(`police.wanted.lower`);

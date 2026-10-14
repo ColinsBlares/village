@@ -1,0 +1,15 @@
+.content {
+	font-size: 1.1vh;
+	height: 84%;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding: 0 1vh;
+}
+
+.content::-webkit-scrollbar {
+	width: 0.5vh;
+}
+
+.content::-webkit-scrollbar-thumb {
+	background-color: #555;
+}

@@ -1,0 +1,41 @@
+.body {
+	padding: 2vh;
+	text-align: center;
+}
+
+.description {
+	font-weight: 400;
+	font-size: 1.66vh;
+}
+
+.description span {
+	font-weight: 500;
+}
+
+.description :global(.money) {
+	color: #6ee425;
+}
+
+.hint {
+	text-align: left;
+	margin: 2.7vh 0 0 4.8vh;
+	font-size: 1.33vh;
+}
+
+.field {
+	width: 32vh;
+	height: 4.5vh;
+	margin: 0.9vh 0 2vh 50%;
+	transform: translate(-50%);
+	border-radius: 1vh;
+	border: none;
+	outline: none;
+	font-size: 1.54vh;
+	padding: 0 1.5vh;
+	color: #fff;
+	background-color: #0c0c0c;
+}
+
+.field::placeholder {
+	color: #a8a8a8;
+}

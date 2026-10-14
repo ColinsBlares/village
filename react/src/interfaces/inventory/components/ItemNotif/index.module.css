@@ -1,0 +1,12 @@
+.notif {
+	background: rgba(12, 12, 12, 0.8);
+	box-shadow: none;
+	font-size: 1.34vh;
+	line-height: 3.2vh;
+	height: fit-content;
+	padding: 0 2vh;
+	position: absolute;
+	width: fit-content;
+	z-index: 2;
+	border-radius: 1vh;
+}

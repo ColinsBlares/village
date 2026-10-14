@@ -1,0 +1,9 @@
+.close {
+	font-size: 2vh;
+	position: absolute;
+	right: 1vh;
+}
+
+.close:hover {
+	color: red;
+}

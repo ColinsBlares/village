@@ -1,0 +1,18 @@
+.infoA {
+	width: fit-content;
+}
+
+.title {
+	font-size: 2vh;
+	margin-top: 6vh;
+	text-transform: uppercase;
+}
+
+.label {
+	text-transform: uppercase;
+}
+
+.value {
+	font-weight: bold;
+	margin-bottom: 1vh;
+}

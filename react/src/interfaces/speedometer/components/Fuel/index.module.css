@@ -1,0 +1,67 @@
+.fuel {
+	position: absolute;
+	top: 0.55vh;
+	left: 3.5vh;
+	display: flex;
+	align-items: center;
+	gap: 0.35vh;
+	font-size: 0.85vh;
+	font-style: italic;
+	font-weight: 600;
+	line-height: 1;
+}
+
+.pump {
+	position: relative;
+	width: 1.05vh;
+	height: 1.05vh;
+	flex-shrink: 0;
+}
+
+.pumpBody {
+	position: absolute;
+	bottom: 0;
+	left: 0.12vh;
+	width: 0.42vh;
+	height: 0.72vh;
+	border-radius: 0.06vh;
+	background: #fff;
+}
+
+.pumpNeck {
+	position: absolute;
+	top: 0.18vh;
+	left: 0.22vh;
+	width: 0.22vh;
+	height: 0.16vh;
+	background: #fff;
+}
+
+.pumpHose {
+	position: absolute;
+	top: 0.28vh;
+	left: 0.48vh;
+	width: 0.38vh;
+	height: 0.42vh;
+	border: 0.08vh solid #fff;
+	border-left: 0;
+	border-bottom: 0;
+	border-radius: 0 0.2vh 0 0;
+}
+
+.pumpNozzle {
+	position: absolute;
+	top: 0.12vh;
+	right: 0;
+	width: 0.16vh;
+	height: 0.22vh;
+	border-radius: 0.04vh;
+	background: #fff;
+}
+
+.bolt {
+	width: 0.55vh;
+	height: 0.9vh;
+	background: #fff;
+	clip-path: polygon(55% 0, 0 58%, 42% 58%, 28% 100%, 100% 38%, 52% 38%);
+}

@@ -1,0 +1,9 @@
+.starvation__container {
+	display: flex;
+	align-items: center;
+	gap: 0.625vw;
+}
+
+.starvation__icon {
+	width: 50%;
+}

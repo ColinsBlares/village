@@ -1,0 +1,44 @@
+.box {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: #fff;
+	border-radius: 2vh;
+	width: 35%;
+	text-align: center;
+	font-size: 1.8vh;
+	padding: 2vh;
+	display: grid;
+	grid-template-rows: 1fr min-content;
+	z-index: 2;
+}
+
+.message {
+	margin: 0 4vh 2vh 4vh;
+}
+
+.message span {
+	font-weight: bold;
+}
+
+.btns {
+	margin: auto;
+	display: flex;
+}
+
+.btn {
+	height: 3.2vh;
+	width: 7.8vh;
+	background-color: #c0c0c0;
+	border-radius: 0.8vh;
+	margin: 0 2.6vh;
+	color: #fff;
+	font-size: 1.6vh;
+	line-height: 3.3vh;
+}
+
+.btn:hover {
+	background-color: var(--mc);
+	box-shadow: 0 0 10px var(--mc-shadow);
+}

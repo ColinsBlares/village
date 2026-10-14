@@ -1,0 +1,22 @@
+.speedometer {
+	position: absolute;
+	right: 1.8vh;
+	bottom: 2.2vh;
+	width: 20.09vh;
+	height: 19.35vh;
+	color: #fff;
+	font-family: Montserrat, sans-serif;
+}
+
+.side {
+	position: absolute;
+	top: 7.3vh;
+	right: 0.9vh;
+	display: flex;
+	flex-direction: column;
+	gap: 1.45vh;
+}
+
+.noActive {
+	opacity: 0.35;
+}

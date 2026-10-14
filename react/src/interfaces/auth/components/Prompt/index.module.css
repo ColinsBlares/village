@@ -1,0 +1,11 @@
+.prompt {
+	background: #0007;
+	border-radius: 4px;
+	color: #fff;
+	left: -23vh;
+	padding: 1vh;
+	position: absolute;
+	text-align: center;
+	top: 8vh;
+	width: 20vh;
+}

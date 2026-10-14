@@ -1,0 +1,37 @@
+.pockets {
+	display: flex;
+	flex-flow: wrap;
+	padding: 0 1.2vh;
+}
+
+.items {
+	display: grid;
+	height: fit-content;
+	margin: 0.49vh;
+	width: fit-content;
+	grid-gap: 1px;
+}
+
+.column {
+	background: rgba(255, 255, 255, 0.2);
+	height: 2.45vh;
+	width: 2.45vh;
+	border-radius: 0.4vh;
+}
+
+.access {
+	background-color: rgba(106, 201, 61, 0.3);
+}
+
+.deny {
+	background-color: rgba(201, 61, 61, 0.3);
+}
+
+.merge {
+	background-color: #0f01;
+}
+
+.items :global(.inv-item) {
+	background-color: rgba(255, 255, 255, 0.3);
+	border-radius: 0.4vh;
+}

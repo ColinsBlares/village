@@ -1,0 +1,75 @@
+.reference {
+	height: 40vh;
+	display: grid;
+	grid-template-columns: 3fr 2fr;
+}
+
+.left {
+	display: grid;
+	position: relative;
+	padding: 4.5vh 0;
+	grid-gap: 4.5vh;
+}
+
+.line {
+	position: absolute;
+	background: rgba(255, 255, 255, 0.3);
+	width: 1px;
+	left: 2vh;
+	top: 0;
+	bottom: 0;
+}
+
+.record {
+	display: flex;
+	z-index: 1;
+	font-size: 1.7vh;
+}
+
+.circle {
+	border-radius: 100%;
+	background-color: #ffdf29;
+	height: 4vh;
+	width: 4vh;
+	text-align: center;
+	margin-right: 2vh;
+	flex: 0 0 4vh;
+}
+
+.circle img {
+	height: 2.5vh;
+	margin-top: 0.75vh;
+}
+
+.text {
+	line-height: 4vh;
+}
+
+.right {
+	text-align: center;
+	padding-top: 3vh;
+}
+
+.head {
+	font-size: 1.8vh;
+	margin-top: 4vh;
+}
+
+.num {
+	font-size: 2.7vh;
+	font-weight: bold;
+	color: #ffdf29;
+	margin-top: 0.5vh;
+}
+
+.cp {
+	user-select: all;
+}
+
+.cp::selection {
+	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.gr {
+	color: #34de3b;
+}

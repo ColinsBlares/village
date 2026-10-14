@@ -1,0 +1,31 @@
+.cell {
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.accept {
+	pointer-events: none;
+}
+
+.hint {
+	position: absolute;
+	width: 20vh;
+	background: rgba(240, 240, 240, 0.8);
+	padding: 1vh;
+	border-radius: 1vh;
+	pointer-events: none;
+	font-family: Montserrat, sans-serif;
+	font-weight: 500;
+	font-size: 1.4vh;
+	z-index: 2;
+}
+
+.hintHead {
+	font-weight: 600;
+	font-size: 1.5vh;
+	margin-bottom: 0.7vh;
+}
+
+.hint img {
+	height: 1.1vh;
+}

@@ -1,0 +1,21 @@
+.bottomPanel {
+	grid-row: 3 / 4;
+	grid-column: 3 / 4;
+	grid-template-columns: 20% 5fr;
+	display: grid;
+	white-space: nowrap;
+	text-align: center;
+	font-weight: 400;
+	font-size: 1.3vh;
+	margin-top: 1%;
+}
+
+.road {
+	margin-left: -85%;
+	height: 41%;
+}
+
+.white {
+	fill: white !important;
+	filter: drop-shadow(0 0 0.5vh white);
+}

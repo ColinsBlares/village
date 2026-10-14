@@ -1,0 +1,35 @@
+.selector {
+	align-items: center;
+	background: rgba(0, 0, 0, 0.6);
+	border-radius: 1vh;
+	display: flex;
+	justify-content: center;
+	margin-top: 0.5vh;
+	padding: 1vh;
+}
+
+.inactive {
+	filter: blur(2px);
+}
+
+.label {
+	color: #fff;
+	text-align: center;
+	width: 33%;
+}
+
+.progress {
+	align-items: center;
+	background: #fff;
+	display: flex;
+	height: 0.3vh;
+	width: 65%;
+}
+
+.fill {
+	background: #f1d941;
+	border-radius: 1vh;
+	height: 1.3vh;
+	position: relative;
+	width: 7%;
+}

@@ -1,0 +1,23 @@
+.btn {
+	background-color: #ffdf29;
+	color: #000;
+	font-weight: bold;
+	font-size: 1.7vh;
+	border-radius: 1.8vh;
+	padding: 0.7vh 2vh;
+	padding-top: 1vh;
+	height: fit-content;
+	width: fit-content;
+	display: flex;
+	margin-left: auto;
+	margin-top: 1vh;
+}
+
+.btn img {
+	margin-left: 1vh;
+	height: 2vh;
+}
+
+.btn:hover {
+	box-shadow: 0 0 1vh rgba(255, 223, 41, 0.5);
+}

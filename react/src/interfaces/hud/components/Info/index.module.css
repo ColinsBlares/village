@@ -1,0 +1,253 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	align-items: end;
+	justify-content: end;
+	width: max-content;
+	color: #fff;
+	line-height: 1;
+	text-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.3);
+}
+
+.clock {
+	padding-top: 0.88vh;
+	text-align: right;
+}
+
+.date {
+	margin-bottom: 0.28vh;
+	color: rgba(255, 255, 255, 0.5);
+	font-size: 0.83vh;
+	font-weight: 500;
+}
+
+.time {
+	font-size: 1.48vh;
+	font-weight: 700;
+}
+
+.brand {
+	grid-column: 2;
+	grid-row: 1;
+	padding-top: 0.83vh;
+	text-align: center;
+}
+
+.title {
+	font-size: 1.67vh;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+}
+
+.server {
+	margin-top: 0.28vh;
+	color: #34c759;
+	font-size: 0.93vh;
+	font-weight: 600;
+	text-shadow: 0 0.09vh 0.46vh rgba(0, 0, 0, 0.3);
+}
+
+.logoWrap {
+	width: 3.89vh;
+	height: 3.89vh;
+	overflow: hidden;
+	background: #c4c4c4;
+	box-shadow: 0 0.09vh 0.74vh rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.status {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.46vh;
+	margin-top: 0.5556vh;
+	font-size: 1.02vh;
+	font-weight: 600;
+}
+
+.dot {
+	width: 0.93vh;
+	height: 0.93vh;
+	flex-shrink: 0;
+	border-radius: 50%;
+	background: linear-gradient(180deg, #23d335 0%, #34c759 100%);
+	box-shadow: 0 0 0.74vh rgba(111, 109, 228, 0.5);
+}
+
+.online {
+	margin-right: 0.28vh;
+}
+
+.idLabel {
+	background: linear-gradient(180deg, #23d335 0%, #34c759 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	font-weight: 700;
+}
+
+.nick {
+	color: #c7c7c7;
+	font-weight: 500;
+}
+
+.funds {
+	grid-column: 2 / 4;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-rows: auto auto;
+	column-gap: 0.65vh;
+	align-items: center;
+	justify-items: end;
+}
+
+.cash {
+	margin-top: 1.7593vh;
+}
+
+.bank {
+	margin-top: 2vh;
+}
+
+.fundsMain {
+	grid-column: 1;
+	grid-row: 1;
+	display: flex;
+	align-items: center;
+	gap: 0.55vh;
+}
+
+.sign {
+	background: linear-gradient(180deg, #23d335 0%, #34c759 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	font-size: 1.85vh;
+	font-weight: 700;
+	filter: drop-shadow(0 0 0.46vh rgba(111, 109, 228, 0.45));
+}
+
+.amount {
+	font-size: 1.39vh;
+	font-weight: 700;
+}
+
+.fundsLabel {
+	grid-column: 1;
+	grid-row: 2;
+	display: flex;
+	align-items: center;
+	gap: 0.37vh;
+	margin-top: 0.46vh;
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.93vh;
+	font-weight: 500;
+}
+
+.bar {
+	grid-column: 2;
+	grid-row: 1 / 3;
+	width: 0.185vh;
+	height: 3.2407vh;
+	align-self: center;
+	background: #34c759;
+	box-shadow: 0 0.09vh 0.19vh rgba(0, 0, 0, 0.1);
+}
+
+.wallet {
+	position: relative;
+	width: 1.2vh;
+	height: 0.95vh;
+	flex-shrink: 0;
+}
+
+.walletFlap {
+	position: absolute;
+	top: 0;
+	right: 0.12vh;
+	left: 0.28vh;
+	height: 0.28vh;
+	border: 0.09vh solid rgba(255, 255, 255, 0.7);
+	border-bottom: 0;
+	border-radius: 0.18vh 0.18vh 0 0;
+}
+
+.walletBody {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: 0.7vh;
+	border-radius: 0.16vh;
+	background: rgba(255, 255, 255, 0.7);
+}
+
+.walletClasp {
+	position: absolute;
+	bottom: 0.2vh;
+	left: 0.08vh;
+	width: 0.28vh;
+	height: 0.28vh;
+	border-radius: 0.06vh;
+	background: rgba(255, 255, 255, 0.7);
+}
+
+.card {
+	position: relative;
+	width: 1.2vh;
+	height: 0.95vh;
+	flex-shrink: 0;
+}
+
+.cardTop {
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	height: 0.32vh;
+	border-radius: 0.12vh 0.12vh 0.04vh 0.04vh;
+	background: rgba(255, 255, 255, 0.7);
+}
+
+.cardMark {
+	position: absolute;
+	top: 0.08vh;
+	left: 0.22vh;
+	width: 0.42vh;
+	height: 0.14vh;
+	border-radius: 0.07vh;
+	background: rgba(20, 20, 20, 0.55);
+}
+
+.cardBottom {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: 0.52vh;
+	border-radius: 0.04vh 0.04vh 0.12vh 0.12vh;
+	background: rgba(255, 255, 255, 0.7);
+}
+
+.cardStripe {
+	position: absolute;
+	top: 0.16vh;
+	left: 0.18vh;
+	width: 0.46vh;
+	height: 0.1vh;
+	border-radius: 0.05vh;
+	background: rgba(20, 20, 20, 0.45);
+}
+
+.clockWrapper {
+	display: flex;
+	align-items: center;
+	gap: 0.625vw;
+}

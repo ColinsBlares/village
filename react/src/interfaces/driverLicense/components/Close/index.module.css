@@ -1,0 +1,10 @@
+.close {
+	font-family: monospace;
+	font-size: 3vh;
+	position: absolute;
+	right: 1vh;
+}
+
+.close:hover {
+	color: red;
+}

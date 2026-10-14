@@ -1,0 +1,49 @@
+.arrest {
+	position: relative;
+	margin-top: 1vh;
+}
+
+.wrap {
+	height: 5vh;
+	width: 5vh;
+	background-color: rgba(0, 0, 0, 0.6);
+	margin-left: auto;
+	border-radius: 100%;
+	overflow: hidden;
+}
+
+.arrest svg {
+	transform: rotate(-90deg);
+	position: relative;
+	top: -1%;
+	left: -1%;
+	height: calc(100% + 2%);
+	width: calc(100% + 2%);
+	border-radius: 100%;
+}
+
+.arrest circle {
+	fill: rgba(0, 0, 0, 0);
+	stroke: #1a5aff;
+	stroke-width: 50%;
+	stroke-dasharray: 78.5% 157%;
+	cy: 50%;
+	cx: 50%;
+	r: 25%;
+}
+
+.arrest img {
+	height: 50%;
+	position: absolute;
+	top: 25%;
+	right: 6%;
+}
+
+.description {
+	width: max-content;
+	position: absolute;
+	right: 7vh;
+	top: 1.5vh;
+	font-size: 1.6vh;
+	font-weight: 700;
+}

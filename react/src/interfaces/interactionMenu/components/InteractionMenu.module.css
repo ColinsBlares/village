@@ -1,0 +1,10 @@
+.root {
+	color: #fff;
+	position: absolute;
+	text-transform: uppercase;
+	font-family: Montserrat, sans-serif;
+	left: 80vw;
+	top: 50vh;
+	transform: rotateY(-10deg) rotateX(0) translateZ(0);
+	z-index: 100;
+}

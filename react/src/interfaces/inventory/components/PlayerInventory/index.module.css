@@ -1,0 +1,97 @@
+.player {
+	padding: 1.8vh 2.1vh;
+	padding-right: 0;
+	border-radius: 1.2vh;
+	background-color: rgba(12, 12, 12, 0.8);
+}
+
+.top {
+	color: #fff;
+	display: flex;
+	font-size: 1.5vh;
+	justify-content: flex-end;
+	margin-top: 1vh;
+	margin-bottom: 0.5vh;
+}
+
+.top div {
+	padding-right: 2vh;
+}
+
+.topTitle {
+	font-size: 1.8vh;
+	font-weight: 700;
+	margin-right: auto;
+	text-transform: uppercase;
+	color: #ffdf29;
+	margin-left: 1.5vh;
+	padding-right: 0;
+}
+
+.block {
+	margin-bottom: 1.9vh;
+	padding-right: 2.1vh;
+	overflow-x: hidden;
+	overflow-y: auto;
+	height: 93%;
+}
+
+.container {
+	width: 42vh;
+	display: flow-root;
+}
+
+.drag {
+	opacity: 0.6;
+}
+
+.header,
+.headerHidden {
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 0.9vh;
+	height: 3.5vh;
+	margin: 1.3vh 0;
+	color: #fff;
+	display: flex;
+	font-size: 1.5vh;
+	justify-content: flex-end;
+	cursor: pointer;
+}
+
+.header div,
+.headerHidden div {
+	line-height: 3.5vh;
+	margin-right: 1.7vh;
+}
+
+.title {
+	color: #aaa;
+	font-size: 1.5vh;
+	text-transform: none;
+	font-weight: 500;
+	margin-left: 0.9vh;
+	margin-right: auto;
+	line-height: 3.5vh;
+}
+
+.header:hover .title,
+.headerHidden:hover .title {
+	color: #fff;
+}
+
+.weight {
+	line-height: 3.5vh;
+}
+
+.arrow,
+.arrowHidden {
+	height: 1.2vh;
+	opacity: 0.8;
+	padding-left: 1.6vh;
+	margin-top: 1vh;
+	transform-origin: 75% 50%;
+}
+
+.arrowHidden {
+	transform: rotate(-90deg);
+}

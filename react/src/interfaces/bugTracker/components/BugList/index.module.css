@@ -1,0 +1,43 @@
+.left {
+	width: 30%;
+	padding: 1vh;
+}
+
+.title {
+	font-size: 1.7vh;
+	margin-bottom: 1vh;
+}
+
+.list {
+	height: 94%;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.list::-webkit-scrollbar {
+	background-color: transparent;
+	width: 0.5vh;
+}
+
+.list::-webkit-scrollbar-thumb {
+	border-radius: 2vh;
+	background-color: #ffdf29;
+}
+
+.item {
+	background: #0000005e;
+	border: 1px solid #464646;
+	display: flex;
+	margin-bottom: 1vh;
+	margin-right: 1vh;
+	padding: 1vh;
+	word-break: break-word;
+}
+
+.item:hover {
+	border-color: #666;
+}
+
+.active {
+	border-color: #ccad25;
+}

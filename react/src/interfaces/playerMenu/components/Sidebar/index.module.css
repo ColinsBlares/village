@@ -1,0 +1,75 @@
+.sidebar {
+	display: grid;
+	grid-template-columns: 3fr 1px 9fr;
+	height: 100%;
+	grid-gap: 2vh;
+}
+
+.left .head {
+	font-size: 2.2vh;
+	margin: 0 auto 1.5vh auto;
+	font-weight: bold;
+	width: fit-content;
+}
+
+.head img {
+	height: 3vh;
+	margin-right: 1vh;
+}
+
+.head span {
+	position: relative;
+	top: -0.8vh;
+}
+
+.menu {
+	position: relative;
+	height: 39.6vh;
+}
+
+.item {
+	font-size: 1.9vh;
+	margin-bottom: 1vh;
+	padding: 1vh 2.7vh 0.6vh 3vh;
+	display: grid;
+	grid-template-columns: 1fr min-content;
+	border-radius: 1.8vh;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	font-weight: 500;
+}
+
+.item:hover {
+	background-color: rgba(255, 255, 255, 0.3);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.focus {
+	border: 1px solid rgba(255, 223, 41, 0.1);
+	background-color: #ffdf29;
+	color: #151515;
+}
+
+.item svg {
+	height: 2.2vh;
+	fill: #fff;
+}
+
+.focus svg {
+	fill: #000;
+}
+
+.bottom {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+.line {
+	background: rgba(255, 255, 255, 0.3);
+}
+
+.main {
+	height: 100%;
+	min-height: 0;
+}

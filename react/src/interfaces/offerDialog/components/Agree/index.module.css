@@ -1,0 +1,14 @@
+.fill {
+	fill: none;
+	stroke: none;
+}
+
+.agree:hover svg circle,
+.green circle {
+	stroke: #00ff19;
+}
+
+.agree:hover svg .fill,
+.green .fill {
+	fill: #00ff19;
+}

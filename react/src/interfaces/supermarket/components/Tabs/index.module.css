@@ -1,0 +1,25 @@
+.tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.8vh;
+	margin: 2.4vh 0 1.6vh;
+}
+
+.tabs button {
+	background: transparent;
+	border: 1px solid #3a3a3a;
+	color: #bdbdbd;
+	cursor: pointer;
+	font-family: Montserrat, sans-serif;
+	font-size: 1.25vh;
+	letter-spacing: 0.04vh;
+	padding: 0.7vh 1.3vh;
+	text-transform: uppercase;
+}
+
+.tabs button.on,
+.tabs button:hover {
+	background: #f5c400;
+	border-color: #f5c400;
+	color: #1a1a1a;
+}

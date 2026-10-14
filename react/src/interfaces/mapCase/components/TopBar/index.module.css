@@ -1,0 +1,13 @@
+.bar {
+	display: grid;
+	grid-template-columns: 1fr min-content;
+	text-align: right;
+	font-weight: 500;
+	font-size: 1.5vh;
+	line-height: 3.3vh;
+}
+
+.bar img {
+	height: 2vh;
+	margin: 0.5vh 2vh 0 1vh;
+}

@@ -1,0 +1,90 @@
+.queue {
+	height: 100%;
+}
+
+.header {
+	display: flex;
+	font-size: 2vh;
+	justify-content: space-between;
+	margin-bottom: 2.6vh;
+}
+
+.help {
+	cursor: pointer;
+}
+
+.help:hover,
+.helpActive {
+	color: #ffc000;
+}
+
+.column {
+	border: 1px solid #ffffff14;
+	height: 5vh;
+	margin-bottom: 1vh;
+	cursor: pointer;
+}
+
+.column:not(.process):not(.disabled):hover {
+	color: #fff;
+}
+
+.filled {
+	border-color: #808080;
+}
+
+.empty {
+	border-color: #ffffff14;
+}
+
+.process {
+	border-color: #808080;
+}
+
+.completed {
+	border-color: #009200;
+}
+
+.disabled {
+	opacity: 0.5;
+}
+
+.unsuccessfully {
+	border-color: #bb4444;
+}
+
+.fill {
+	background: linear-gradient(to right, #ffffff00, #32dc1b3b);
+	height: 100%;
+	transform: translate(0, -100%);
+}
+
+.item {
+	align-items: center;
+	display: flex;
+	height: 100%;
+	margin: auto;
+	width: 80%;
+}
+
+.icon {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	height: 80%;
+	width: 100%;
+}
+
+.info {
+	display: grid;
+	text-align: right;
+	width: 70%;
+}
+
+.time {
+	color: #ffc000;
+}
+
+.state {
+	font-size: 1.1vh;
+}

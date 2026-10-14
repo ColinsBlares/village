@@ -1,0 +1,14 @@
+.fill {
+	fill: none;
+	stroke: none;
+}
+
+.cancel:hover svg circle,
+.red circle {
+	stroke: #ff2525;
+}
+
+.cancel:hover svg .fill,
+.red .fill {
+	fill: #ff2525;
+}

@@ -1,0 +1,47 @@
+.coins {
+	position: absolute;
+	right: 2.7vh;
+	top: 2.7vh;
+	display: flex;
+}
+
+.panel {
+	display: flex;
+	font-family: Ubuntu;
+	background-color: rgba(12, 12, 12, 0.6);
+	border-radius: 1vh;
+	color: white;
+	padding: 1.2vh;
+	font-weight: 500;
+	font-size: 1.3vh;
+	line-height: 2vh;
+}
+
+.coins span {
+	font-size: 1.4vh;
+	color: #ffdf29;
+	margin: 0 1vh 0 3vh;
+}
+
+.coins img {
+	height: 1.7vh;
+	width: 1.7vh;
+}
+
+.addCoins {
+	font-family: Ubuntu;
+	background-color: #ffdf29;
+	border-radius: 1vh;
+	padding: 1.2vh;
+	font-weight: 500;
+	font-size: 1.3vh;
+	text-align: center;
+	width: 12.5vh;
+	line-height: 1vh;
+	height: 1vh;
+	margin: 0.5vh 1.1vh;
+}
+
+.addCoins:hover {
+	box-shadow: 0px 0px 0.3vh #ffdf29;
+}

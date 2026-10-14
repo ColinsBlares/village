@@ -1,0 +1,13 @@
+.root {
+	color: #fff;
+	display: flex;
+	flex-direction: column;
+	font-family: Ubuntu, sans-serif;
+	justify-content: flex-end;
+	left: 2.7vh;
+	width: 60vh;
+	min-width: 15vh;
+	position: absolute;
+	bottom: 21.5%;
+	word-wrap: break-word;
+}

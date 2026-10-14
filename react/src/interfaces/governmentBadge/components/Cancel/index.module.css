@@ -1,0 +1,17 @@
+.cancel {
+	position: absolute;
+	top: 1vh;
+	right: 1.1vh;
+	height: 1vh;
+	width: 1vh;
+}
+
+.cancel svg {
+	display: block;
+	height: 100%;
+	width: 100%;
+}
+
+.cancel:hover path {
+	fill: #e8e8e8;
+}

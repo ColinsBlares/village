@@ -1,0 +1,8 @@
+.number {
+	bottom: 6vh;
+	font-family: monospace;
+	font-size: 3vh;
+	opacity: 0.6;
+	position: absolute;
+	right: 6vh;
+}

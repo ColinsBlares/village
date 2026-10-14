@@ -1,0 +1,12 @@
+.root {
+	background: rgb(0, 0, 0, 0.6);
+	border-radius: 1vh;
+	color: white;
+	font-family: Ubuntu, sans-serif;
+	font-size: 1.3vh;
+	position: absolute;
+	right: 2vh;
+	top: 3vh;
+	max-width: 32vh;
+	word-break: break-word;
+}

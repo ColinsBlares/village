@@ -1,0 +1,40 @@
+.content {
+	color: #fff;
+	padding: 3vh;
+}
+
+.param {
+	display: flex;
+	justify-content: space-between;
+}
+
+.empty {
+	color: #aaa;
+}
+
+.fullValue {
+	color: #f1d941;
+}
+
+.progress {
+	background: #fff;
+	border-radius: 15px;
+	height: 1vh;
+	margin-top: 0.5vh;
+	width: 100%;
+}
+
+.fill {
+	background: #f1d941;
+	border-radius: 10px;
+	height: 100%;
+	transition: width 1s;
+}
+
+.full {
+	box-shadow: 0 0 10px #f1d94188;
+}
+
+.row {
+	margin-bottom: 2vh;
+}

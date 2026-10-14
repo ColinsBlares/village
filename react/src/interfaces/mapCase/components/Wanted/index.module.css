@@ -1,0 +1,18 @@
+.star {
+	width: 1.8vh;
+	fill: none;
+	stroke: var(--mc);
+	margin-right: 0.2vh;
+}
+
+.fill {
+	fill: var(--mc);
+}
+
+.row:hover .star {
+	stroke: #fff;
+}
+
+.row:hover .fill {
+	fill: #fff;
+}

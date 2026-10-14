@@ -1,0 +1,8 @@
+.root {
+	display: flex;
+	justify-content: space-around;
+	height: 1px;
+	position: absolute;
+	width: 100%;
+	z-index: -1;
+}

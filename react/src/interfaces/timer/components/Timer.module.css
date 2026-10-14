@@ -1,0 +1,12 @@
+.root {
+	color: #fff;
+	font-family: Ubuntu, sans-serif;
+	font-size: 1.6vh;
+	font-weight: bold;
+	left: 50%;
+	position: absolute;
+	text-align: center;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 40vh;
+}

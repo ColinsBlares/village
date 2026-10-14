@@ -1,0 +1,121 @@
+.root {
+	height: 100%;
+	margin-top: 2vh;
+}
+
+.icon {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	height: 7vh;
+}
+
+.title {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	margin: 1vh 0;
+}
+
+.details,
+.make {
+	background: #0000008c;
+	border: 1px solid #444;
+	display: flex;
+	font-size: 1.3vh;
+	justify-content: center;
+	padding: 0.5vh;
+	width: fit-content;
+	cursor: pointer;
+}
+
+.details:hover,
+.make:hover {
+	border-color: #555;
+	color: #ddd;
+}
+
+.detailsActive {
+	border-color: #777;
+	color: #eee;
+}
+
+.description {
+	height: 56%;
+	overflow-x: hidden;
+	overflow-y: auto;
+	margin-bottom: 1vh;
+	padding-right: 1vh;
+}
+
+.description::-webkit-scrollbar,
+.params::-webkit-scrollbar {
+	width: 0.5vh;
+}
+
+.description::-webkit-scrollbar-thumb,
+.params::-webkit-scrollbar-thumb {
+	border-radius: 2vh;
+	background-color: #ffdf29;
+}
+
+.params {
+	font-size: 1.3vh;
+	height: 7vh;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding-right: 1vh;
+}
+
+.materials {
+	font-size: 1.3vh;
+	margin: 1vh 0;
+}
+
+.material,
+.param {
+	border-bottom: 1px solid #5f5f5f;
+	display: flex;
+	justify-content: space-between;
+	padding: 0.3vh 0;
+}
+
+.skill {
+	font-size: 1.3vh;
+	margin-bottom: 1vh;
+}
+
+.skillTitle {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 0.2vh;
+}
+
+.progress {
+	background: #4c4c4c;
+	height: 1vh;
+	width: 100%;
+}
+
+.fill {
+	background: #b5b5b5;
+	height: 100%;
+}
+
+.deficit {
+	color: #bb4444;
+}
+
+.time {
+	margin: auto;
+	width: fit-content;
+}
+
+.make {
+	margin: auto;
+	padding: 1vh;
+}
+
+.disabled {
+	color: #7b3131;
+}

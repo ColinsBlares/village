@@ -1,0 +1,36 @@
+.create {
+	background: #f1d941;
+	border-radius: 10vh;
+	bottom: 37%;
+	height: 19vh;
+	left: 44.3%;
+	position: absolute;
+	width: 19vh;
+}
+
+.inner {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	height: 100%;
+}
+
+.create:active {
+	color: #fff;
+}
+
+.create:hover {
+	background: #e0c830;
+}
+
+.plus {
+	font-size: 7vh;
+	text-align: center;
+	font-family: none;
+}
+
+.text {
+	text-align: center;
+	font-size: 1.5vh;
+	font-weight: bold;
+}

@@ -1,0 +1,38 @@
+.rolling {
+	position: absolute;
+	height: 9vh !important;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%) scale(1);
+	width: 9vh !important;
+}
+
+.rolling div,
+.rolling div:after {
+	position: absolute;
+	width: 9vh;
+	height: 9vh;
+	border: 20px solid #ffdf29;
+	border-top-color: transparent;
+	border-radius: 50%;
+}
+
+.rolling div {
+	animation: lds-rolling 1.2s linear infinite;
+	top: 45%;
+	left: 45%;
+}
+
+.rolling div:after {
+	transform: rotate(90deg);
+}
+
+@keyframes lds-rolling {
+	0% {
+		transform: translate(-50%, -50%) rotate(0deg);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) rotate(360deg);
+	}
+}

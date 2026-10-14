@@ -1,0 +1,59 @@
+.stage {
+	align-items: center;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	justify-content: center;
+	min-width: 0;
+	position: relative;
+}
+
+.logo {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	height: 22vh;
+	width: 46vh;
+	z-index: 1;
+}
+
+.title {
+	color: #fff;
+	font-size: 2vh;
+	font-weight: 700;
+	letter-spacing: 0.12vh;
+	margin-top: 2vh;
+	text-transform: uppercase;
+	z-index: 1;
+}
+
+.d1,
+.d2,
+.d3 {
+	background: #f5c400;
+	position: absolute;
+	transform: rotate(45deg);
+}
+
+.d1 {
+	height: 16vh;
+	opacity: 0.9;
+	right: 6vh;
+	top: 8vh;
+	width: 16vh;
+}
+
+.d2 {
+	height: 4vh;
+	right: 2vh;
+	top: 6vh;
+	width: 4vh;
+}
+
+.d3 {
+	background: #fff;
+	height: 1.4vh;
+	right: 18vh;
+	top: 14vh;
+	width: 1.4vh;
+}

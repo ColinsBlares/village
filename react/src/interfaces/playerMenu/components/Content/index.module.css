@@ -1,0 +1,15 @@
+.content {
+	position: absolute;
+	color: #fff;
+	width: 120vh;
+	height: 60vh;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	display: grid;
+	grid-template-rows: min-content 1fr;
+}
+
+.blur {
+	filter: blur(0.6vh);
+}

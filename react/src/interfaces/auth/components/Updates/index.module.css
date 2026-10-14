@@ -1,0 +1,56 @@
+.updates {
+	background: #0005;
+	border-radius: 1vh;
+	color: #fff;
+	line-height: 3vh;
+	position: absolute;
+	right: 10vh;
+	top: 50%;
+	transform: translate(0%, -50%);
+	width: 37vh;
+}
+
+.header {
+	text-align: center;
+}
+
+.list {
+	height: 20vh;
+	margin-bottom: 2vh;
+	overflow-y: auto;
+}
+
+.list > div {
+	display: flex;
+	justify-content: space-around;
+}
+
+.list > div:hover {
+	color: #ccc;
+}
+
+.list > div:first-child {
+	color: #f1d941;
+}
+
+.date {
+	margin-right: 2vh;
+	text-align: right;
+	width: 12vh;
+}
+
+.title {
+	font-weight: bold;
+}
+
+.list::-webkit-scrollbar {
+	width: 0.5vh;
+}
+
+.list::-webkit-scrollbar-thumb {
+	background-color: #f1d941;
+}
+
+.list::-webkit-scrollbar-track {
+	background-color: #000;
+}

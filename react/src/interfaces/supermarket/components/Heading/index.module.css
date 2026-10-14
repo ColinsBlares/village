@@ -1,0 +1,50 @@
+.heading {
+	align-items: center;
+	display: flex;
+	gap: 1.4vh;
+}
+
+.mark {
+	background: #f5c400;
+	flex: 0 0 auto;
+	height: 3.6vh;
+	position: relative;
+	width: 3.6vh;
+}
+
+.mark:after {
+	border: 2px solid #1a1a1a;
+	border-bottom: none;
+	border-radius: 1vh 1vh 0 0;
+	content: '';
+	height: 1.1vh;
+	left: 0.9vh;
+	position: absolute;
+	top: 0.8vh;
+	width: 1.6vh;
+}
+
+.mark:before {
+	background: #1a1a1a;
+	bottom: 0.7vh;
+	content: '';
+	height: 1.3vh;
+	left: 0.7vh;
+	position: absolute;
+	width: 2.2vh;
+}
+
+.heading h1 {
+	font-size: 3.2vh;
+	font-weight: 700;
+	letter-spacing: 0.08vh;
+	line-height: 1;
+	margin: 0;
+	text-transform: uppercase;
+}
+
+.heading p {
+	color: #8d8d8d;
+	font-size: 1.35vh;
+	margin: 0.7vh 0 0;
+}

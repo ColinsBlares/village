@@ -1,0 +1,35 @@
+.body {
+	display: grid;
+	grid-template-rows: 3vh 1fr;
+	min-width: 0;
+}
+
+.window {
+	position: relative;
+	min-height: 0;
+}
+
+.back {
+	position: absolute;
+	width: 6.5vh;
+	height: 4.5vh;
+	right: 1%;
+	bottom: 1%;
+	border-radius: 1.5vh;
+	background-color: var(--mc);
+	border: none;
+	padding: 0;
+	cursor: pointer;
+}
+
+.back:hover {
+	box-shadow: 0 0 10px var(--mc-shadow);
+}
+
+.back img {
+	position: relative;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	height: 60%;
+}

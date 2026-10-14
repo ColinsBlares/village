@@ -17,7 +17,7 @@ mp.keys.bind(0x45, true, () => { /// E
 
     let player = mp.players.local;
     let vehicle = player.vehicle;
-    if (!vehicle && vehicle.getPedInSeat(-1) != player.handle) return mp.prompt.showByName('fuelstation_control');
+    if (!vehicle || vehicle.getPedInSeat(-1) != player.handle) return mp.prompt.showByName('fuelstation_control');
     
     mp.events.call('fuelstations.menu.show');
 });

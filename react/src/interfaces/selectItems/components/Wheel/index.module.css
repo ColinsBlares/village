@@ -1,0 +1,55 @@
+.center {
+	r: 24%;
+	cx: 50%;
+	cy: 50%;
+	fill: rgba(12, 12, 12, 0.6);
+}
+
+.container {
+	transform-origin: 50% 50%;
+}
+
+.container circle {
+	stroke: rgba(12, 12, 12, 0.6);
+	cx: 50%;
+	cy: 50%;
+	fill: none;
+}
+
+.node {
+	r: 33.6%;
+	stroke-width: 12.8%;
+	stroke-dasharray: calc(6.28 * 34% / 10 - 2%) calc(6.28 * 34%);
+}
+
+.stroke {
+	r: 39.6%;
+	stroke-width: 1.2%;
+	stroke-dasharray: calc(6.28 * 39.6% / 10 - 2%) calc(6.28 * 39.6%);
+}
+
+.container.select .node {
+	stroke: url('#select-items-gradient') !important;
+}
+
+.container.select .stroke {
+	stroke: #ffdf29 !important;
+}
+
+.icon {
+	transform-origin: 81% 59%;
+	height: 13%;
+	width: 26%;
+	x: 68%;
+	y: 52.5%;
+	pointer-events: none;
+}
+
+.hand {
+	height: 7%;
+	y: 56.5%;
+}
+
+.container.focus .stroke {
+	stroke: #ffdf29;
+}

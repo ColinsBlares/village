@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"build": "set NODE_OPTIONS=--openssl-legacy-provider && npm run build:react && node scripts/build.js",
+		"build": "npm run build:react && set NODE_OPTIONS=--openssl-legacy-provider && node scripts/build.js",
 		"dev": "set NODE_OPTIONS=--openssl-legacy-provider && node scripts/dev.js",
 		"build:react": "cd react && npm run build",
 		"prod": "webpack --mode production"

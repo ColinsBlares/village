@@ -1,0 +1,8 @@
+.build {
+	color: #fff5;
+	font-size: 1.5vh;
+}
+
+.build:hover {
+	color: #fff;
+}

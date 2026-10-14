@@ -1,0 +1,15 @@
+.rightArrow {
+	grid-row: 3 / 4;
+	grid-column: 4 / 6;
+	left: 60% !important;
+}
+
+.rightArrow svg {
+	height: 55%;
+	left: 40% !important;
+}
+
+.green {
+	fill: #51ff25 !important;
+	filter: drop-shadow(0 0 0.5vh #51ff25);
+}

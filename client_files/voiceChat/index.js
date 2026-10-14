@@ -26,7 +26,7 @@ mp.events.add('characterInit.done', function () {
 			}
 		}
 		mp.voiceChat.muted = false;
-		mp.callCEFV('hud.voice = true');
+		mp.events.call('hud.setData', { voice: true });
 		playVoiceAnimation(mp.players.local);
 	});
 
@@ -34,7 +34,7 @@ mp.events.add('characterInit.done', function () {
 		// N
 		if (mp.game.ui.isPauseMenuActive()) return;
 		mp.voiceChat.muted = true;
-		mp.callCEFV('hud.voice = false');
+		mp.events.call('hud.setData', { voice: false });
 		mp.busy.remove('voicechat');
 		stopVoiceAnimation(mp.players.local);
 	});

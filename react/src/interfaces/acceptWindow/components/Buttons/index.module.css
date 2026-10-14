@@ -1,0 +1,43 @@
+.btns {
+	display: flex;
+	position: relative;
+	left: 50%;
+	transform: translate(-50%);
+	width: min-content;
+}
+
+.btns > div {
+	height: 3.9vh;
+	width: 14.8vh;
+	margin: 0 2.3vh;
+	border-radius: 1.3vh;
+	line-height: 3.9vh;
+}
+
+.agree {
+	border: 0.1vh solid #51ff25;
+}
+
+.agree:hover {
+	background-color: #51ff25;
+	color: #000;
+}
+
+.agree:active {
+	border: 0.1vh solid #3aba1a;
+	background-color: #3aba1a;
+}
+
+.cancel {
+	border: 0.1vh solid rgba(255, 255, 255, 0.6);
+}
+
+.cancel:hover {
+	border: 0.1vh solid rgba(255, 255, 255, 0.1);
+	background-color: rgba(255, 255, 255, 0.6);
+	color: #000;
+}
+
+.cancel:active {
+	background-color: rgba(255, 255, 255, 0.4);
+}

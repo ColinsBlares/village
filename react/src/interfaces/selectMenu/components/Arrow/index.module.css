@@ -1,0 +1,30 @@
+.arrow {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	height: 1.5vh;
+	width: 1.5vh;
+}
+
+.up {
+	margin: auto;
+	transform: rotate(180deg);
+}
+
+.down {
+	margin: auto;
+}
+
+.left {
+	transform: rotate(90deg);
+}
+
+.right {
+	transform: rotate(-90deg);
+}
+
+.color {
+	height: 2vh;
+	margin: 0 0.4vh;
+	width: 2vh;
+}

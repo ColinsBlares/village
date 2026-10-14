@@ -1,0 +1,9 @@
+.playerState {
+	margin-top: 1vh;
+	margin-left: auto;
+	width: fit-content;
+}
+
+.playerState img {
+	width: 4vh;
+}

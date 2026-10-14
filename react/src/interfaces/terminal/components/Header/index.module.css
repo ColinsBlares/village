@@ -1,0 +1,14 @@
+.header {
+	border-radius: 1vh 0 0 0;
+	background: #ffdf29;
+	border-bottom: 0.1vh solid #000;
+	color: #000;
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 0.5vh;
+	padding: 0 1vh 1vh;
+}
+
+.close:hover {
+	color: red;
+}

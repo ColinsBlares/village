@@ -1,0 +1,74 @@
+.help {
+	display: grid;
+	height: 100%;
+	grid-template-rows: min-content min-content min-content minmax(0, 1fr);
+}
+
+.head {
+	text-align: center;
+	font-size: 1.6vh;
+}
+
+.help input {
+	width: 115.5vh;
+	height: 4.5vh;
+	background: #fff0;
+	color: #fff;
+	outline: none;
+	border: 1px solid #fff;
+	border-radius: 0.8vh;
+	padding: 0 2vh;
+	font-size: 1.7vh;
+	margin: 1vh 0 0.5vh 0;
+}
+
+.messages {
+	overflow-y: scroll;
+	min-height: 0;
+}
+
+.message {
+	display: grid;
+	grid-template-columns: min-content 1fr min-content;
+	grid-template-rows: 5vh min-content;
+	margin: 0 1vh 1.8vh 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	border-radius: 1.5vh;
+	font-size: 2vh;
+	line-height: 4.8vh;
+}
+
+.qw {
+	overflow: hidden;
+}
+
+.message:hover {
+	background-color: rgba(255, 255, 255, 0.3);
+}
+
+.focus {
+	background-color: rgba(147, 147, 147, 0.3);
+}
+
+.img img {
+	height: 2vh;
+	margin: 1.5vh 2vh;
+}
+
+.arrow img {
+	height: 1vh;
+	margin: 2vh 2vh;
+}
+
+.focus .arrow img {
+	transform: scale(-1);
+}
+
+.answer {
+	overflow: hidden;
+	grid-column: 1 / 4;
+	padding: 0 2vh;
+	padding-bottom: 1vh;
+	font-size: 1.7vh;
+	line-height: 2.6vh;
+}

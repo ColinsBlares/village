@@ -1,0 +1,14 @@
+.root {
+	color: #fff;
+	height: 70vh;
+	left: 50%;
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 70vh;
+}
+
+.root svg {
+	height: 100%;
+	width: 100%;
+}

@@ -1,0 +1,40 @@
+.head {
+	text-align: center;
+	font-size: 1.6vh;
+}
+
+.report input {
+	width: 115.5vh;
+	height: 4.5vh;
+	background: #fff0;
+	color: #fff;
+	outline: none;
+	border: 1px solid #fff;
+	border-radius: 0.8vh;
+	padding: 0 2vh;
+	font-size: 1.7vh;
+	margin: 1vh 0 0.5vh 0;
+}
+
+.send {
+	border-radius: 1.8vh;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	font-size: 1.8vh;
+	padding: 1vh 5vh;
+	padding-bottom: 1.3vh;
+	margin: 1vh auto 0 auto;
+	width: min-content;
+}
+
+.send:hover {
+	background-color: rgba(255, 255, 255, 0.3);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hint {
+	margin-top: 6vh;
+	line-height: 4vh;
+	font-size: 2.5vh;
+	text-align: center;
+	color: #34de3b;
+}

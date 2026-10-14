@@ -1,0 +1,14 @@
+.root {
+	color: #fff;
+	font-family: Chalet-LondonNineteenSixty;
+	font-size: 1.6vh;
+	min-width: 40vh;
+	position: absolute;
+	right: 2vh;
+	top: 30%;
+	width: 40vh;
+}
+
+.inactive {
+	color: #aaa;
+}

@@ -1,0 +1,56 @@
+.root {
+	text-align: center;
+}
+
+.hidden {
+	display: none;
+}
+
+.head {
+	color: #ffdf29;
+	font-size: 2.2vh;
+	font-weight: bold;
+}
+
+.hint {
+	margin-top: 0.5vh;
+	font-size: 1.7vh;
+}
+
+.info {
+	font-size: 2.2vh;
+	margin: 3vh 0 2.5vh 0;
+	font-weight: bold;
+}
+
+.price {
+	margin-top: 1vh;
+	font-size: 1.6vh;
+}
+
+.price span {
+	color: #ffdf29;
+}
+
+.btn {
+	background-color: #ffdf29;
+	color: #151515;
+	font-weight: bold;
+	font-size: 1.6vh;
+	border-radius: 1.8vh;
+	padding: 1vh 5vh 1.3vh 5vh;
+	margin: 2vh auto 0 auto;
+	width: fit-content;
+}
+
+.btn:hover {
+	box-shadow: 0 0 1vh rgba(255, 223, 41, 0.5);
+}
+
+.disable {
+	opacity: 0.5;
+}
+
+.disable:hover {
+	box-shadow: none;
+}

@@ -1,0 +1,29 @@
+.item {
+	background: #0007;
+	border-radius: 5px;
+	display: flex;
+	margin-bottom: 0.5vh;
+	width: 20vh;
+}
+
+.item:hover {
+	background: linear-gradient(to right, #0007 -40%, #f1d941aa);
+	box-shadow: 0 0 10px #0007;
+}
+
+.icon {
+	align-items: center;
+	display: flex;
+	pointer-events: none;
+	padding: 0.5vh;
+}
+
+.icon img {
+	height: 1.8vh;
+	width: 1.8vh;
+}
+
+.text {
+	padding: 0.7vh 1vh;
+	pointer-events: none;
+}

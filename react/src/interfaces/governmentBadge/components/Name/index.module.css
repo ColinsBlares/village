@@ -1,0 +1,12 @@
+.name {
+	position: absolute;
+	font-weight: 500;
+	font-size: 1.7vh;
+	top: 10.4vh;
+	left: 4.9vh;
+}
+
+.fib {
+	top: 16.7vh;
+	left: 5vh;
+}

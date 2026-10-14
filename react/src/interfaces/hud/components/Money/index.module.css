@@ -1,0 +1,42 @@
+.block {
+	background-color: rgba(12, 12, 12, 0.6);
+	border-radius: 1vh;
+}
+
+.money {
+	bottom: 2vh;
+	display: grid;
+	grid-template-columns: 2fr min-content;
+	grid-template-rows: 1fr 1fr;
+	grid-gap: 0.5vh;
+	grid-column-gap: 3vh;
+	padding: 1.2vh;
+	right: 2vh;
+	min-width: 22.6vh;
+	font-size: 1.5vh;
+	font-weight: 400;
+}
+
+.money img {
+	margin-bottom: -0.3vh;
+	margin-right: 0.8vh;
+	width: 1.6vh;
+}
+
+.cash {
+	color: #78ff25;
+	font-weight: 500;
+}
+
+.bank {
+	font-weight: 400;
+}
+
+.time {
+	text-align: right;
+	font-weight: 500;
+}
+
+.date {
+	font-weight: 400;
+}

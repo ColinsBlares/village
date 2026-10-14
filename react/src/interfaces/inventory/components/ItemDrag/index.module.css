@@ -1,0 +1,17 @@
+.drag {
+	background: none;
+	box-shadow: none;
+	pointer-events: none;
+	padding: 0;
+	position: absolute;
+	transform: translate(-50%, -50%);
+	z-index: 1;
+}
+
+.item {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	margin: auto;
+	position: relative;
+}

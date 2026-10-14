@@ -1,0 +1,92 @@
+.item {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	margin: auto;
+	position: relative;
+}
+
+.dragging {
+	opacity: 0.5;
+}
+
+.found {
+	background-color: rgba(0, 87, 255, 0.3) !important;
+}
+
+.found .eye img {
+	margin: 1vh 0.5vh;
+	height: 1.1vh;
+}
+
+.count,
+.hotkeyCount {
+	background: rgba(12, 12, 12, 0.5);
+	color: #ffdf29;
+	font-size: 1.3vh;
+	font-weight: bold;
+	padding: 0 0.3vh;
+	position: absolute;
+	border-radius: 0.5vh;
+	left: 0.2vh;
+	top: 0.2vh;
+	height: 1.6vh;
+	line-height: 1.6vh;
+}
+
+.hotkeyCount {
+	top: -0.2vh;
+	left: -0.2vh;
+}
+
+.sqlid {
+	background: #222c;
+	color: #fff;
+	font-size: 1.7vh;
+	font-weight: bold;
+	padding: 0.25vh 0.5vh;
+	position: absolute;
+	top: 0;
+}
+
+.loader {
+	left: 50%;
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.rolling {
+	position: absolute;
+	width: 2vh !important;
+	height: 2vh !important;
+}
+
+.rolling div,
+.rolling div:after {
+	position: absolute;
+	width: 2.3vh;
+	height: 2.3vh;
+	border: 0.5vh solid #ffdf29;
+	border-top-color: transparent;
+	border-radius: 50%;
+}
+
+.rolling div {
+	animation: inv-lds-rolling 1.2s linear infinite;
+}
+
+.rolling div:after {
+	content: "";
+	transform: rotate(90deg);
+}
+
+@keyframes inv-lds-rolling {
+	0% {
+		transform: translate(-50%, -50%) rotate(0deg);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) rotate(360deg);
+	}
+}

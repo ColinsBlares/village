@@ -1,0 +1,14 @@
+.stars {
+	margin: 1vh 0;
+}
+
+.stars svg {
+	height: 3vh;
+	fill: none;
+	stroke: var(--mc);
+	margin: 0 0.2vh;
+}
+
+.stars svg.on {
+	fill: var(--mc);
+}

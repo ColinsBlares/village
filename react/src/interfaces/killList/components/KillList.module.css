@@ -1,0 +1,12 @@
+.root {
+	align-items: flex-end;
+	color: #fff;
+	display: flex;
+	flex-direction: column;
+	font-family: Ubuntu;
+	font-size: 1.5vh;
+	opacity: 1;
+	position: absolute;
+	right: 2vh;
+	top: 30vh;
+}

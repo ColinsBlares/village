@@ -1,0 +1,22 @@
+.button {
+	display: inline-block;
+	margin-top: 1vh;
+	padding: 1.1vh 4vh;
+	font-size: 1.6vh;
+	font-weight: 500;
+	border-radius: 1vh;
+	border: 0.1vh solid #51ff25;
+	color: #fff;
+	cursor: pointer;
+	transition: background-color 0.15s, color 0.15s;
+}
+
+.button:hover {
+	background-color: #51ff25;
+	color: #000;
+}
+
+.button:active {
+	background-color: #3aba1a;
+	border-color: #3aba1a;
+}

@@ -1,0 +1,7 @@
+.character {
+	display: grid;
+	grid-template-columns: 18fr 12fr 15fr;
+	grid-template-rows: 7fr 8fr;
+	grid-gap: 1.7vh;
+	height: 100%;
+}

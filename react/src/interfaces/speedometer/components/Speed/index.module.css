@@ -1,0 +1,22 @@
+.speed {
+	position: absolute;
+	top: 48%;
+	left: 46%;
+	transform: translate(-50%, -50%);
+	font-style: italic;
+	line-height: 1;
+	text-align: center;
+}
+
+.value {
+	font-size: 3.15vh;
+	font-weight: 700;
+	letter-spacing: -0.03em;
+}
+
+.unit {
+	margin-top: 0.15vh;
+	color: rgba(255, 255, 255, 0.5);
+	font-size: 1.2vh;
+	font-weight: 500;
+}

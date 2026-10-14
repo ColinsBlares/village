@@ -1,0 +1,18 @@
+.wanted {
+	display: flex;
+	margin-left: auto;
+	width: fit-content;
+	margin-top: 1vh;
+}
+
+.wanted svg {
+	height: 3vh;
+	width: 3vh;
+	fill: white;
+	opacity: 0.4;
+}
+
+.wanted svg.paint {
+	opacity: 1;
+	fill: #ffdf29;
+}

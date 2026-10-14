@@ -1,0 +1,53 @@
+.bonfire {
+	margin: auto;
+	margin-top: 7vh;
+	width: fit-content;
+}
+
+.title {
+	text-align: center;
+}
+
+.title span {
+	color: #caa41c;
+}
+
+.deficit {
+	color: #bb4444;
+}
+
+.selector {
+	align-items: center;
+	display: flex;
+	justify-content: center;
+}
+
+.count {
+	padding: 1vh;
+}
+
+.button,
+.accept {
+	background: #0000008c;
+	border: 1px solid #444;
+	display: flex;
+	font-size: 1.3vh;
+	justify-content: center;
+	padding: 0.5vh;
+	width: fit-content;
+	cursor: pointer;
+}
+
+.button {
+	width: 1vh;
+}
+
+.accept {
+	margin: auto;
+}
+
+.button:hover,
+.accept:hover {
+	border-color: #555;
+	color: #ddd;
+}

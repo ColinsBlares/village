@@ -1,0 +1,17 @@
+.voice {
+	position: relative;
+	width: 4.5vw;
+}
+
+.symb {
+	position: absolute;
+	font-size: 1vw;
+	font-weight: 700;
+	top: 50%;
+	left: 50%;
+	transform: translate(-100%, 20%);
+}
+
+.mute {
+	opacity: 0.4;
+}

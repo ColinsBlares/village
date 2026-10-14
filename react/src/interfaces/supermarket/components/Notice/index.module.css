@@ -1,0 +1,8 @@
+.notice {
+	background: #1b1b1b;
+	border-left: 0.4vh solid #f5c400;
+	color: #fff;
+	font-size: 1.4vh;
+	margin-top: 1.4vh;
+	padding: 1.2vh 1.4vh;
+}

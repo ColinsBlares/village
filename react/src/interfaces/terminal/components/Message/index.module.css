@@ -1,0 +1,34 @@
+.row {
+	margin-bottom: 0.5vh;
+}
+
+.row p {
+	margin: 0;
+	padding-left: 1vh;
+	word-break: break-word;
+}
+
+.row p:hover {
+	opacity: 0.9;
+}
+
+.log {
+	border-left: 0.2vh solid #fff;
+}
+
+.info {
+	border-left: 0.2vh solid #0bf;
+}
+
+.warning {
+	border-left: 0.2vh solid #fb0;
+}
+
+.error {
+	border-left: 0.2vh solid #b44;
+	font-style: italic;
+}
+
+.debug {
+	border-left: 0.2vh solid #bf0;
+}

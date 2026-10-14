@@ -1,0 +1,13 @@
+.infoB {
+	text-align: right;
+	width: 15vh;
+}
+
+.label {
+	text-transform: uppercase;
+}
+
+.value {
+	font-weight: bold;
+	margin-bottom: 1vh;
+}

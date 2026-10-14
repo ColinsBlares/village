@@ -1,0 +1,17 @@
+.root {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	font-family: Ubuntu, sans-serif;
+	z-index: 100;
+}
+
+.logo {
+	height: 4vh;
+	position: absolute;
+	right: 4vh;
+	top: 4vh;
+}

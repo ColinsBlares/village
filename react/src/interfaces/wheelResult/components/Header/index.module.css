@@ -1,0 +1,19 @@
+.header {
+	color: #ffd600;
+	font-weight: 700;
+	font-size: 2.4vh;
+	letter-spacing: 0.1vh;
+	text-transform: uppercase;
+}
+
+.item {
+	color: #c0c0c0;
+}
+
+.vehicle {
+	color: #ff6b35;
+}
+
+.empty {
+	color: rgba(255, 255, 255, 0.7);
+}

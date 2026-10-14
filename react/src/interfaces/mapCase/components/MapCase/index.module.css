@@ -1,0 +1,82 @@
+.root {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 80vh;
+	height: 55vh;
+	background: linear-gradient(150deg, #f4f4f4 0%, #666666 100%);
+	border-radius: 3vh;
+	font-family: Montserrat, sans-serif;
+	z-index: 100;
+	--mc: #1861f3;
+	--mc-shadow: rgba(24, 97, 243, 0.5);
+	--mc-soft: rgba(24, 97, 243, 0.15);
+}
+
+.root[data-faction='fib'] {
+	--mc: #002c83;
+	--mc-shadow: rgba(0, 44, 131, 0.5);
+	--mc-soft: rgba(0, 44, 131, 0.15);
+}
+
+.root[data-faction='ems'] {
+	--mc: #de2b2b;
+	--mc-shadow: rgba(222, 43, 43, 0.5);
+	--mc-soft: rgba(222, 43, 43, 0.15);
+}
+
+.root[data-faction='ng'] {
+	--mc: #ddb27f;
+	--mc-shadow: rgba(221, 178, 127, 0.5);
+	--mc-soft: rgba(221, 178, 127, 0.15);
+}
+
+.root[data-faction='gover'] {
+	--mc: #65a7cc;
+	--mc-shadow: rgba(101, 167, 204, 0.5);
+	--mc-soft: rgba(101, 167, 204, 0.15);
+}
+
+.root[data-faction='wnews'] {
+	--mc: #bc0c0c;
+	--mc-shadow: rgba(188, 12, 12, 0.5);
+	--mc-soft: rgba(188, 12, 12, 0.15);
+}
+
+.bg {
+	background: black;
+	margin: 1px 0 0 1px;
+	width: calc(100% - 2px);
+	height: calc(100% - 2px);
+	border-radius: 3vh;
+}
+
+.screen {
+	position: absolute;
+	background: #e9e9e9;
+	width: calc(100% - 4vh);
+	height: calc(100% - 4vh);
+	top: 2vh;
+	left: 2vh;
+	border-radius: 2vh;
+	overflow: hidden;
+	display: grid;
+	grid-template-columns: 10fr 20fr;
+}
+
+.blur {
+	filter: blur(0.2vh);
+}
+
+.shadow {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	grid-column: 1 / -1;
+	grid-row: 1;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 1;
+}

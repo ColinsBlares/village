@@ -59,23 +59,21 @@ function obfuscateFile(filePath) {
 }
 
 function obfuscateBrowserScripts() {
-    fs.readdirSync(path.resolve(__dirname, PATHS.basePath, 'browser', 'js')).forEach(file => {
-        if (fs.statSync(path.resolve(__dirname, PATHS.basePath, 'browser', 'js', file)).mtime > DATE_CHANGE) {
-            changedFiles.push('browser/js/' + file);
-            obfuscateFile(path.resolve(__dirname, PATHS.basePath, 'browser', 'js', file));
-        }
-    });
-
-    if (fs.statSync(path.resolve(__dirname, PATHS.basePath, 'browser', 'index.js')).mtime > DATE_CHANGE) {
-        changedFiles.push('browser/js/index.js');
-        obfuscateFile(path.resolve(__dirname, PATHS.basePath, 'browser', 'index.js'));
+    const indexPath = path.resolve(__dirname, PATHS.basePath, 'browser', 'index.js');
+    if (fs.existsSync(indexPath) && fs.statSync(indexPath).mtime > DATE_CHANGE) {
+        changedFiles.push('browser/index.js');
+        obfuscateFile(indexPath);
     }
 }
 
 
 function copyChangedBrowserFiles(currentPath) {
+    const browserRoot = path.resolve(__dirname, PATHS.basePath, 'browser');
     fs.readdirSync(currentPath).forEach(item => {
-        if (currentPath !== path.resolve(__dirname, PATHS.basePath, 'browser', 'js') && item != 'index.js') {
+        if (currentPath === browserRoot && item === 'index.js') {
+            return;
+        }
+        if (item != 'index.js' || currentPath !== browserRoot) {
             let updatedPath = path.resolve(currentPath, item);
             if (fs.lstatSync(updatedPath).isDirectory()) {
                 let finalPathDir = updatedPath.replace('client_files', 'client_packages');
@@ -144,8 +142,8 @@ function copyOnlyChangedFiles() {
 
     copyIgnoreModules();
 
-    obfuscateBrowserScripts();
     copyChangedBrowserFiles(path.resolve(__dirname, PATHS.basePath, 'browser'));
+    obfuscateBrowserScripts();
 
     if (fs.statSync(path.resolve(__dirname, PATHS.basePath, 'index.js')).mtime > DATE_CHANGE) {
         obfuscateFile(path.resolve(__dirname, PATHS.basePath, 'index.js'));

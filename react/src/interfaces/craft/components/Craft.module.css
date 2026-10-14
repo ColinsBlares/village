@@ -1,0 +1,26 @@
+.root {
+	background: #171717dd;
+	color: #b9b9b9;
+	display: flex;
+	font-family: Ubuntu;
+	font-size: 1.5vh;
+	height: 46vh;
+	margin-right: 2vh;
+	opacity: 1;
+	padding: 1vh;
+	position: absolute;
+	right: 0%;
+	top: 50%;
+	transform: translate(0%, -50%);
+	width: 70vh;
+}
+
+.left {
+	width: 55%;
+	padding: 1vh;
+}
+
+.right {
+	width: 45%;
+	padding: 1vh;
+}
