@@ -1,4 +1,5 @@
 let dmv = require('./index');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/dmv": {
@@ -7,6 +8,7 @@ module.exports = {
         args: "",
         handler: (player, args) => {
             let data = dmv.getDMVdata();
+            anticheat.allowMove(player);
             player.position = new mp.Vector3(data.exit.toX, data.exit.toY, data.exit.toZ);
         }
     },

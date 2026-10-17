@@ -5,6 +5,7 @@ let jobs = call('jobs');
 let money = call('money');
 let notifs = call('notifications');
 let vehicles = call('vehicles');
+let anticheat = call('anticheat');
 
 module.exports = {
     "init": () => {
@@ -35,6 +36,10 @@ module.exports = {
         if (player.character.job != 4) return out(`Не на работе`);
         if (veh.products && veh.products.bizOrder) return out(`Вы уже взяли заказ для бизнеса`);
         // if (veh.products && veh.products.count) return out(`Товар уже загружен`);
+        // Отрицательный count давал отрицательную цену и начисление вместо списания
+        data.count = parseInt(data.count);
+        data.product = parseInt(data.product);
+        if (!Number.isInteger(data.count) || data.count <= 0 || ![0, 1].includes(data.product)) return anticheat.trigger(player, 'money', `carrier: count ${data.count}`);
         var max = carrier.getProductsMax(player);
         if (data.count > max || (veh.products && data.count + veh.products.count > max)) return out(`Ваш навык не позволяет загрузить более ${max} ед.`);
 

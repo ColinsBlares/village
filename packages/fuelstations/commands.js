@@ -1,8 +1,10 @@
 let fuelstations = require('./index.js')
+let anticheat = call('anticheat');
 module.exports = {
     "/fu": {
         access: 6,
         handler: (player, args) => {
+            anticheat.allowSpawn(player);
             player.spawn(new mp.Vector3(265.92852783203125, -1245.748291015625, 29.14651107788086));
         }
     },

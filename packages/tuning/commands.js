@@ -1,4 +1,5 @@
 var tuning = require('./index.js');
+let anticheat = call('anticheat');
 module.exports = {
     "/mod": {
         access: 4,
@@ -12,6 +13,7 @@ module.exports = {
     "/lsc": {
         access: 6,
         handler: (player, args) => {
+            anticheat.allowSpawn(player);
             player.spawn(new mp.Vector3(-368.9290466308594, -126.58971405029297, 38.69566345214844));
         }
     },

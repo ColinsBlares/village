@@ -1,4 +1,5 @@
 "use strict";
+let anticheat = call('anticheat');
 
 let bizes;
 let factions;
@@ -361,6 +362,7 @@ module.exports = {
                 }]);
             }
 
+            anticheat.allowMove(player);
             player.dimension = club.biz.info.factionId;
             player.position = new mp.Vector3(club.db.exitX, club.db.exitY + 2, club.db.exitZ);
             player.heading = club.db.exitH;
@@ -389,6 +391,7 @@ module.exports = {
             }
 
             player.heading = club.db.enterH;
+            anticheat.allowMove(player);
             player.dimension = 0;
             player.position = new mp.Vector3(club.db.enterX, club.db.enterY - 2, club.db.enterZ);
         };

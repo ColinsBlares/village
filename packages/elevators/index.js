@@ -1,5 +1,6 @@
 const factions = require('../factions');
 const notifs = require('../notifications');
+let anticheat = call('anticheat');
 
 const elevatorsCoords = [
     {
@@ -66,6 +67,7 @@ module.exports = {
 
         let coordsToElevate = player.isElevatorPos == 'lower' ? elevate['upper'] : elevate['lower'];
 
+        anticheat.allowMove(player);
         player.position = new mp.Vector3(coordsToElevate.x, coordsToElevate.y, coordsToElevate.z);
         player.heading = coordsToElevate.h;
         player.call('elevators.resetCam', []);

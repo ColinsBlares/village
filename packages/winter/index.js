@@ -545,10 +545,11 @@ module.exports = {
     },
     setXmasTrees() {
         this.treePositions.forEach((current) => {
-            mp.objects.new(mp.joaat('prop_xmas_ext'), new mp.Vector3(current[0], current[1], current[2]), {
+            var tree = mp.objects.new(mp.joaat('prop_xmas_ext'), new mp.Vector3(current[0], current[1], current[2]), {
                 rotation: new mp.Vector3(0, 0, current[3]),
                 dimension: 0
             });
+            tree.setVariable('sgr', 0);
         });
     }
 };

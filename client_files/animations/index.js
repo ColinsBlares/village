@@ -15,6 +15,7 @@ mp.animations = {
     animationData: require('animations/data.js'),
 
     playAnimation(player, a, time = null) {
+        if (!player || !mp.players.exists(player) || !player.handle) return;
         var localId = mp.players.local.remoteId;
         mp.timer.remove(this.animationTimers[player.remoteId]);
         var oldAnim = player.anim;
@@ -157,18 +158,15 @@ mp.events.add({
             mp.events.callRemote("animations.stop");
         }
     },
-    // "time.main.tick": () => {
-    //     mp.players.forEachInStreamRange(rec => {
-    //         if (!mp.players.exists(rec)) return;
-    //         var a = rec.getVariable("anim");
-    //         if (!a) return;
-    //
-    //         if (rec.isPlayingAnim(a.dict, a.name, 3)) return;
-    //         mp.utils.requestAnimDict(a.dict, () => {
-    //             rec.taskPlayAnim(a.dict, a.name, a.speed, 0, -1, a.flag, 0, false, false, false);
-    //         });
-    //     });
-    // },
+    "time.main.tick": () => {
+        mp.players.forEachInStreamRange(rec => {
+            if (!rec || !rec.handle || rec.vehicle) return;
+            var a = rec.getVariable("anim");
+            if (!a || !a.flag || a.flag % 2 === 0) return;
+            if (rec.isPlayingAnim(a.dict, a.name, 3)) return;
+            mp.animations.playAnimation(rec, a);
+        });
+    },
 });
 
 mp.events.addDataHandler("anim", (player, a) => {

@@ -5,6 +5,7 @@ let jobs = call('jobs');
 let timer = call('timer');
 let utils = call('utils');
 let notify = call('notifications');
+let anticheat = call('anticheat');
 
 module.exports = {
     "init": () => {
@@ -82,8 +83,9 @@ module.exports = {
     },
     "taxi.driver.route.arrive": (player) => {
         let order = player.currentTaxiDriverOrder;
+        if (!order) return;
         let client = mp.players.at(order.clientId);
-        if (!client) return;
+        if (!client || !client.currentTaxiClientOrder) return;
         if (!player.vehicle || player.vehicle.plate != client.currentTaxiClientOrder.plate) {
             mp.events.call('taxi.driver.order.cancel', player);
             player.call('notifications.push.error', ['Заказ был принят из другого т/с, заказ отменен', 'Такси']);
@@ -119,7 +121,10 @@ module.exports = {
         }
     },
     "taxi.client.app.confirm": (player, destination) => {
+        if (!anticheat.guard(player, 'taxi.client.app.confirm')) return;
+        if (!player.character || !player.currentTaxiClientOrder) return;
         destination = JSON.parse(destination);
+        if (!destination || !Number.isFinite(destination.x) || !Number.isFinite(destination.y)) return;
         let price = taxi.calculatePrice(player, destination)
         if (player.character.cash < price) return player.call('taxi.client.app.confirm.ans', [1]);
 
@@ -147,9 +152,16 @@ module.exports = {
         }
     },
     "taxi.driver.destination.reach": (player) => {
+        if (!anticheat.guard(player, 'taxi.destination.reach')) return;
         let driver = player;
+        if (!driver.character || !driver.taxiDriverDestination) return;
         let client = mp.players.at(driver.taxiDriverDestination.clientId);
+        if (!client || !client.character) return;
         let price = driver.taxiDriverDestination.price;
+        // Оплата только если клиент в машине водителя и машина у точки назначения
+        let dest = driver.taxiDriverDestination.destination;
+        if (!driver.vehicle || driver.seat != 0 || client.vehicle != driver.vehicle) return;
+        if (!dest || utils.vdistSqr(driver.position, dest) > 80) return;
 
         client.call('taxi.client.destination.reach');
 

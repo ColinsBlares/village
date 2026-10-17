@@ -7,6 +7,7 @@ let notify = call('notifications');
 let factions = call('factions');
 let timer = call('timer');
 let death = call('death');
+let anticheat = call('anticheat');
 const fs = require('fs');
 
 module.exports = {
@@ -57,6 +58,7 @@ module.exports = {
                 player.backDimension = player.dimension;
                 player.position = new mp.Vector3(target.position.x + 2, target.position.y, target.position.z);
                 player.dimension = target.dimension;
+                anticheat.allowMove(player);
                 player.house.place = target.house.place;
                 player.house.id = target.house.id;
                 mp.events.call("admin.notify.all", `!{#edffc2}[A] ${player.name} телепортировался к ${target.name}`);
@@ -74,6 +76,7 @@ module.exports = {
             if (!player.backPosition) return notify.error(player, `У вас нет исходной позиции`);
             player.position = player.backPosition;
             player.dimension = player.backDimension;
+            anticheat.allowMove(player);
             notify.info(player, `Вы вернулись на исходную позицию`);
         }
     },
@@ -95,6 +98,7 @@ module.exports = {
                 target.returnDimension = target.dimension;
                 target.position = new mp.Vector3(player.position.x + 2, player.position.y, player.position.z);
                 target.dimension = player.dimension;
+                anticheat.allowMove(target);
                 target.house.place = player.house.place;
                 target.house.id = player.house.id;
                 mp.events.call("admin.notify.all", `!{#edffc2}[A] ${player.name} телепортировал к себе ${target.name}`);
@@ -115,6 +119,7 @@ module.exports = {
             if (!target.returnPosition) return notify.error(player, `У игрока нет исходной позиции`);
             target.position = target.returnPosition;
             target.dimension = target.returnDimension;
+            anticheat.allowMove(target);
             target.returnPosition = null;
             target.returnDimension = null;
             notify.info(player, `Вы вернули игрока на исходную позицию`);
@@ -134,6 +139,7 @@ module.exports = {
                 if (target.getVariable('knocked')) return;
                 target.position = target.returnPosition;
                 target.dimension = target.returnDimension;
+                anticheat.allowMove(target);
                 target.returnPosition = null;
                 target.returnDimension = null;
                 notify.info(target, `${player.character.name} вернул вас на исходную позицию`);
@@ -157,6 +163,7 @@ module.exports = {
                 return;
             }
             try {
+                anticheat.allowHeal(target);
                 target.health = parseInt(args[1], 10);
                 mp.events.call("admin.notify.all", `!{#edffc2}[A] ${player.name} изменил здоровье игроку ${target.name}`);
             } catch (err) {
@@ -172,6 +179,7 @@ module.exports = {
             var rec = mp.players.at(args[0]);
             if (!rec) return out.error(`Игрок #${args[0]} не найден`, player);
 
+            anticheat.allowHeal(rec);
             rec.health = 0;
         }
     },
@@ -226,6 +234,7 @@ module.exports = {
         args: "[дальность]:n [высота]:n",
         handler: (player, args, out) => {
             let entity = (player.vehicle) ? player.vehicle : player;
+            anticheat.allowMove(player, 3000);
             player.call('admin.tpf', [entity, args[0], args[1]]);
         }
     },
@@ -252,6 +261,7 @@ module.exports = {
                     destroys: 0
                 };
                 veh = await vehicles.spawnVehicle(veh);
+                anticheat.allowMove(player);
                 player.putIntoVehicle(veh, 0);
                 veh.spawnedBy = player.name;
                 setTimeout(() => player.call('vehicles.onGroundProperly.set', []), 100);
@@ -340,6 +350,7 @@ module.exports = {
         handler: (player, args) => {
             var entity = (player.vehicle) ? player.vehicle : player;
             entity.position = new mp.Vector3(parseFloat(args[0]), parseFloat(args[1]), parseFloat(args[2]));
+            anticheat.allowMove(player);
         }
     },
     "/warn": {
@@ -770,6 +781,7 @@ module.exports = {
             let dim = parseInt(args[0]);
             if (isNaN(dim)) return;
             player.dimension = dim;
+            anticheat.allowMove(player);
             notify.info(player, `Установлено измерение: ${dim}`);
         }
     },
@@ -781,6 +793,7 @@ module.exports = {
             var rec = mp.players.at(args[0]);
             if (!rec) return out.error(`Игрок #${args[0]} не найден`, player);
             let health = Math.clamp(args[1], 0, 100);
+            anticheat.allowHeal(rec);
             rec.health = health;
             setTimeout(() => {
                 out.info(`Игроку ${rec.name} установлено ${health} ед. здоровья`, player);
@@ -797,6 +810,7 @@ module.exports = {
             var rec = mp.players.at(args[0]);
             if (!rec) return out.error(`Игрок #${args[0]} не найден`, player);
             rec.giveWeapon(mp.joaat(args[1]), args[2]);
+            anticheat.addAdminWeapon(rec, mp.joaat(args[1]));
         }
     },
     "/q": {
@@ -837,6 +851,7 @@ module.exports = {
         args: "",
         handler: (player, args, out) => {
             player.godmode = !player.godmode;
+            anticheat.allowHeal(player);
             player.call(`godmode.set`, [player.godmode]);
             if (player.godmode) return out.log(`Бессмертие включено`, player);
             else return out.log(`Бессмертие выключено`, player);
@@ -955,6 +970,7 @@ module.exports = {
             mp.players.forEachInRange(player.position, radius, (current) => {
                 if (!current.character) return;
                 if (current.dimension == player.dimension) {
+                    anticheat.allowHeal(current);
                     current.health = 100;
                     notify.info(current, `Ваше здоровье восстановлено администратором`);
                 };
@@ -987,6 +1003,7 @@ module.exports = {
             var rec = mp.players.at(args[0]);
             if (!rec || !rec.character) return out.error(`Игрок #${args[0]} не найден`, player);
 
+            anticheat.allowMove(rec, 3000);
             rec.call("slap");
             notify.warning(rec, `Администратор пнул вас`);
         }
@@ -998,6 +1015,7 @@ module.exports = {
         handler: (player, args, out) => {
             let target = mp.players.at(args[0]);
             if (!target) return out.error(`Игрок не найден`, player);;
+            anticheat.allowModel(target);
             target.model = mp.joaat(args[1]);
             notify.info(target, `${player.name} установил вам скин`);
             out.log(`Скин изменен`, player);
@@ -1009,12 +1027,15 @@ module.exports = {
         args: "",
         handler: (player, args, out) => {
             if (!player.isVanished) {
+                player.vanishAlpha = player.alpha > 0 ? player.alpha : 255;
                 player.setVariable('isVanished', true);
                 player.isVanished = true;
+                player.alpha = 0;
                 out.info('Режим невидимки включен', player);
             } else {
                 player.setVariable('isVanished', false);
                 player.isVanished = false;
+                player.alpha = player.noclip ? 0 : (player.vanishAlpha || 255);
                 out.info('Режим невидимки отключен', player);
             }
         }

@@ -1,5 +1,6 @@
 let farms = call('farms');
 let notifs = call('notifications');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/farmtp": {
@@ -11,6 +12,7 @@ module.exports = {
             if (!marker) return out.error(`Ферма #${args[0]} не найдена`, player);
             var pos = marker.position;
             pos.z += 2;
+            anticheat.allowMove(player);
             player.position = pos;
             out.info(`Вы телепортировались к ферме #${args[0]}`, player);
         }

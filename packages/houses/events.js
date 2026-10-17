@@ -1,6 +1,7 @@
 "use strict";
 /// Модуль системы домов
 let housesService = require("./index.js");
+let anticheat = call('anticheat');
 let money;
 let timer;
 let vehicles;
@@ -114,11 +115,13 @@ module.exports = {
         let rot;
 
         if (place === 0) {
+            anticheat.allowMove(player);
             player.dimension = 0;
             pos = new mp.Vector3(info.spawnX, info.spawnY, info.spawnZ);
             rot = info.angle;
         }
         else if (place === 1) {
+            anticheat.allowMove(player);
             player.dimension = info.id;
             pos = new mp.Vector3(info.Interior.x, info.Interior.y, info.Interior.z);
             rot = info.Interior.rotation;
@@ -126,6 +129,7 @@ module.exports = {
         }
         else if (place === 2) {
             if (info.Interior.Garage == null) return player.call('house.enter.ans', []);
+            anticheat.allowMove(player);
             player.dimension = info.id;
             pos = new mp.Vector3(info.Interior.Garage.x, info.Interior.Garage.y, info.Interior.Garage.z);
             rot = info.Interior.Garage.rotation;
@@ -310,6 +314,7 @@ module.exports = {
             //multiplier: 1
         };
         carPlaceVehicle[i] = await vehicles.spawnVehicle(veh);
+        anticheat.allowMove(player);
         player.putIntoVehicle(carPlaceVehicle[i], 0);
         if (garage) player.call("house.add.carSpawn.ans", [i]);
     },

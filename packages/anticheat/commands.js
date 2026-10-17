@@ -14,7 +14,35 @@ module.exports = {
             text += `<br/>Виды наказаний:<br/>`;
             text += `notify: оповестить администраторов<br/>`;
             text += `kick: кикнуть игрока<br/>`;
+            text += `ban: занести serial и Social Club в AntiCheatBan и кикнуть<br/>`;
             out.log(text, player);
+        }
+    },
+    "/acbans": {
+        description: "Последние баны анти-чита.",
+        access: 6,
+        args: "",
+        handler: async (player, args, out) => {
+            var bans = await db.Models.AntiCheatBan.findAll({
+                order: [['id', 'DESC']],
+                limit: 20
+            });
+            if (!bans.length) return out.info(`Банов анти-чита нет`, player);
+            var text = "ID) Имя (причина) - дата<br/>";
+            bans.forEach(ban => {
+                text += `${ban.id}) ${ban.name} (${ban.reason}) - ${ban.date.toLocaleString()}<br/>`;
+            });
+            out.log(text, player);
+        }
+    },
+    "/acunban": {
+        description: "Снять бан анти-чита (см. /acbans).",
+        access: 6,
+        args: "[ид_бана]:n",
+        handler: async (player, args, out) => {
+            var ban = await anticheat.unban(args[0]);
+            if (!ban) return out.error(`Бан #${args[0]} не найден`, player);
+            out.info(`${player.name} снял бан анти-чита #${ban.id} (${ban.name})`);
         }
     },
     "/acenable": {

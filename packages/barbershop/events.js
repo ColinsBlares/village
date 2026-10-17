@@ -1,6 +1,7 @@
 let barbershop = require('./index.js');
 let money = call('money');
 let inventory = call('inventory');
+let anticheat = call('anticheat');
 
 module.exports = {
     "init": async () => {
@@ -29,6 +30,7 @@ module.exports = {
         let id = player.currentBarbershopId;
         if (!id) return;
         let shopData = barbershop.getRawBarbershopData(id);
+        anticheat.enterInterior(player);
         player.dimension = player.id + 1;
         let gender = player.character.gender;
         let appearanceData = {
@@ -48,6 +50,7 @@ module.exports = {
     },
     "barbershop.exit": (player) => {
         player.dimension = 0;
+        anticheat.exitInterior(player);
         inventory.updateAllView(player);
         // TODO: выкинуть игрока куда то, можно на кассу
     },

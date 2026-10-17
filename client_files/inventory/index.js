@@ -332,21 +332,65 @@ mp.inventory = {
         });
         this.groundItemMarker.ignoreCheckVisible = true;
     },
+    // На склоне точка перед игроком уже внутри горы. getGroundZ от неё уходит под меш,
+    // а запасной сдвиг на метр вниз закапывает предмет. Ищем поверхность лучом сверху.
+    findSurface(x, y, pedZ) {
+        var ignore = mp.players.local;
+        var lifts = [1.2, 2.5, 4.5, 8];
+        mp.game.streaming.requestCollisionAtCoord(x, y, pedZ);
+        for (var i = 0; i < lifts.length; i++) {
+            var hit = null;
+            try {
+                hit = mp.raycasting.testPointToPoint(
+                    new mp.Vector3(x, y, pedZ + lifts[i]),
+                    new mp.Vector3(x, y, pedZ - 4),
+                    ignore,
+                    17
+                );
+            } catch (e) {}
+            if (hit && hit.entity) {
+                try {
+                    var handle = hit.entity.handle != null ? hit.entity.handle : hit.entity;
+                    if (handle) mp.game.shapetest.releaseScriptGuidFromEntity(handle);
+                } catch (e) {}
+            }
+            if (!hit || !hit.position || !isFinite(hit.position.z)) continue;
+            var normal = hit.normal || hit.surfaceNormal;
+            if (!normal || normal.z < 0.15) continue;
+            if (Math.abs(hit.position.z - pedZ) > 8) continue;
+            return {
+                z: hit.position.z,
+                nx: normal.x,
+                ny: normal.y,
+                nz: normal.z,
+            };
+        }
+        var gz = mp.game.gameplay.getGroundZFor3dCoord(x, y, pedZ + 8, false, false);
+        if (isFinite(gz) && Math.abs(gz - pedZ) <= 8 && !(gz === 0 && Math.abs(pedZ) > 2)) {
+            return { z: gz, nx: 0, ny: 0, nz: 1 };
+        }
+        return null;
+    },
     getGroundItemPos(player) {
         var pos;
         if (!player.vehicle) {
             pos = player.getOffsetFromInWorldCoords(0, 1, 0);
-            pos.z = mp.game.gameplay.getGroundZFor3dCoord(pos.x, pos.y, pos.z, false, false);
         } else {
             var seat = mp.moduleVehicles.getSeat(player);
             var offsetX = 0;
             if (seat == -1 || seat == 1) offsetX = -1;
             else if (seat === 0 || seat == 2) offsetX = 1;
             pos = player.getOffsetFromInWorldCoords(offsetX, 0, 0);
-            pos.z = mp.game.gameplay.getGroundZFor3dCoord(pos.x, pos.y, pos.z, false, false);
         }
-        if (mp.vdist(player.position, pos) > 10) pos = player.getOffsetFromInWorldCoords(0, 0, -1);
-        return pos;
+        var surface = this.findSurface(pos.x, pos.y, player.position.z);
+        return {
+            x: pos.x,
+            y: pos.y,
+            z: surface ? surface.z : player.position.z - 1,
+            nx: surface ? surface.nx : 0,
+            ny: surface ? surface.ny : 0,
+            nz: surface ? surface.nz : 1,
+        };
     },
     isFlood() {
         if (Date.now() - this.lastActionTime < this.waitActionTime) {

@@ -16,6 +16,8 @@ let police = call('police');
 let satiety = call('satiety');
 let timer = call('timer');
 let vehicles = call('vehicles');
+let anticheat = call('anticheat');
+let animations = call('animations');
 
 module.exports = {
     "init": async () => {
@@ -219,14 +221,12 @@ module.exports = {
             rec.inventory.ground.splice(i, 1);
         });
 
-        mp.players.forEachInRange(player.position, 20, rec => {
-            rec.call(`animations.play`, [player.id, {
-                dict: "anim@mp_snowball",
-                name: "pickup_snowball",
-                speed: 1,
-                flag: 1
-            }, 1500]);
-        });
+        mp.players.callInRange(player.position, 20, player.dimension, 'animations.play', [player.id, {
+            dict: "anim@mp_snowball",
+            name: "pickup_snowball",
+            speed: 1,
+            flag: 1
+        }, 1500]);
         var itemName = inventory.getName(obj.item.itemId);
         inventory.notifyOverhead(player, `Поднял '${itemName}'`);
         logger.log(`Поднял '${itemName}' (#${obj.item.id})`, `inventory`, player);
@@ -253,6 +253,7 @@ module.exports = {
         }
         player.lastUseMed = Date.now();
 
+        anticheat.allowHeal(player);
         player.health = Math.clamp(player.health + hospital.medHealth, 0, hospital.medMaxHealth);
 
         count--;
@@ -290,6 +291,7 @@ module.exports = {
             }
         }
 
+        anticheat.allowSpawn(rec);
         rec.spawn(rec.position);
         rec.health = 10;
         death.removeKnocked(rec);
@@ -324,6 +326,7 @@ module.exports = {
         }
         player.lastUsePatch = Date.now();
 
+        anticheat.allowHeal(player);
         player.health = Math.clamp(player.health + hospital.patchHealth, 0, hospital.medMaxHealth);
 
         count--;
@@ -351,6 +354,7 @@ module.exports = {
         }
         player.lastUseDrugs = Date.now();
 
+        anticheat.allowHeal(player);
         player.health = Math.clamp(player.health + bands.drugsHealth[i], 0, 100);
 
         count--;
@@ -386,6 +390,7 @@ module.exports = {
         }
         player.lastUseSmoke = Date.now();
 
+        anticheat.allowHeal(player);
         player.health = Math.clamp(player.health + 2, 0, 100);
 
         count--;
@@ -400,14 +405,7 @@ module.exports = {
         notifs.success(player, `Вы употребили сигарету`, header);
 
         if (!player.vehicle) {
-            mp.players.forEachInRange(player.position, 20, rec => {
-                rec.call(`animations.play`, [player.id, {
-                    dict: "amb@code_human_wander_smoking@male@idle_a",
-                    name: "idle_a",
-                    speed: 1,
-                    flag: 49
-                }, 8000]);
-            });
+            animations.playTimed(player, "amb@code_human_wander_smoking@male@idle_a", "idle_a", 1, 49, 8000);
         }
 
         player.character.nicotine++;
@@ -431,14 +429,7 @@ module.exports = {
 
         if (!player.vehicle) {
             var time = 7000;
-            mp.players.forEachInRange(player.position, 20, rec => {
-                rec.call(`animations.play`, [player.id, {
-                    dict: "amb@code_human_wander_eating_donut@male@idle_a",
-                    name: "idle_c",
-                    speed: 1,
-                    flag: 49
-                }, time]);
-            });
+            animations.playTimed(player, "amb@code_human_wander_eating_donut@male@idle_a", "idle_c", 1, 49, time);
             var playerId = player.id;
             var characterId = player.character.id;
             timer.add(() => {
@@ -475,14 +466,7 @@ module.exports = {
 
         if (!player.vehicle) {
             var time = 7000;
-            mp.players.forEachInRange(player.position, 20, rec => {
-                rec.call(`animations.play`, [player.id, {
-                    dict: "amb@code_human_wander_drinking_fat@female@idle_a",
-                    name: "idle_c",
-                    speed: 1,
-                    flag: 49
-                }, time]);
-            });
+            animations.playTimed(player, "amb@code_human_wander_drinking_fat@female@idle_a", "idle_c", 1, 49, time);
             var playerId = player.id;
             var characterId = player.character.id;
             timer.add(() => {
@@ -740,16 +724,24 @@ module.exports = {
 
         var params = inventory.getParamsValues(handsItem);
         if (params.ammo == null) return;
-        if (player.weapon == params.weaponHash && params.ammo != player.weaponAmmo) {
-            inventory.updateParam(player, handsItem, 'ammo', player.weaponAmmo);
+        // Клиент может только потратить патроны, но не добавить
+        var ammo = Math.min(player.weaponAmmo, params.ammo);
+        if (player.weapon == params.weaponHash && params.ammo != ammo) {
+            inventory.updateParam(player, handsItem, 'ammo', ammo);
         }
     },
     "inv.death.spawn": (player, pos, dimension) => {
         if (!player.character || !player.inventory) return;
+        if (!anticheat.isDead(player) && !player.getVariable("knocked")) return;
 
         var handsItem = inventory.getHandsItem(player);
         if (!handsItem || !inventory.isWeaponItem(handsItem)) return;
 
+        // Позицию берём с клиента только рядом с игроком, иначе предмет уезжает в любую точку карты
+        if (!pos || !anticheat.isNear(player, pos, 10) || dimension != player.dimension) {
+            pos = player.position;
+            dimension = player.dimension;
+        }
         inventory.putGround(player, handsItem, pos, dimension);
         notifs.warning(player, `Вы потеряли оружие из рук`, `Инвентарь`);
     },
@@ -772,8 +764,9 @@ module.exports = {
         var item = inventory.getHandsItem(player);
         if (item) {
             var param = inventory.getParam(item, 'weaponHash');
-            if (param) {
-                inventory.updateParam(player, item, 'ammo', player.weaponAmmo);
+            var ammoParam = inventory.getParam(item, 'ammo');
+            if (param && ammoParam) {
+                inventory.updateParam(player, item, 'ammo', Math.min(player.weaponAmmo, parseInt(ammoParam.value) || 0));
             }
             if (player.getVariable("knocked") && inventory.isWeaponItem(item)) {
                 var pos = player.position;
@@ -783,6 +776,10 @@ module.exports = {
         }
 
         var armourItem = inventory.getBodyItemByIndex(player, 4);
-        if (armourItem) inventory.updateParam(player, armourItem, 'health', parseInt(player.armour));
+        if (armourItem) {
+            var armourParam = inventory.getParam(armourItem, 'health');
+            var armour = Math.min(parseInt(player.armour) || 0, armourParam ? parseInt(armourParam.value) || 0 : 0);
+            inventory.updateParam(player, armourItem, 'health', armour);
+        }
     },
 };

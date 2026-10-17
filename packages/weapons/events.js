@@ -4,6 +4,7 @@ let inventory = call('inventory');
 let notifs = call('notifications');
 let terminal = call('terminal');
 let weapons = call('weapons');
+let anticheat = call('anticheat');
 
 module.exports = {
     "init": () => {
@@ -30,6 +31,7 @@ module.exports = {
         // });
     },
     "weapons.ammo.remove": (player, sqlId, ammo) => {
+        if (!anticheat.guard(player, 'weapons.ammo.remove')) return;
         // console.log(`weapons.ammo.remove: ${player.name} ${sqlId} (${ammo} пт.)`)
         var header = `Разрядка оружия`
         var weapon = inventory.getItem(player, sqlId);
@@ -40,11 +42,12 @@ module.exports = {
         if (!ammoId) return notifs.error(player, `Тип патронов для ${name} не найден`, header);
         var params = inventory.getParamsValues(weapon);
         if (!params.ammo) return notifs.error(player, `${name} пустой`, header);
+        ammo = Number(ammo);
+        if (!Number.isInteger(ammo) || ammo < 0) return anticheat.reject(player, 'money', `разрядка на ${ammo} патрон`);
+        if (!ammo) return notifs.error(player, `${name} пустой`, header);
         if (ammo > params.ammo) {
             terminal.log(`[weapons.ammo.remove] ${player.name} имеет на клиенте ${ammo} патрон, на сервере ${params.ammo} (weapon: ${params.weaponHash})`);
-            notifs.error(player, `Вы были кикнуты по подозрению в читерстве`, `Античит`);
-            player.kick();
-            return;
+            return anticheat.reject(player, 'ammo', `разрядка ${ammo} патрон, на сервере ${params.ammo}`);
         }
 
         inventory.addItem(player, ammoId, {
@@ -79,6 +82,7 @@ module.exports = {
         var newAmmo = weaponParams.ammo + params.count;
         inventory.updateParam(player, weapon, 'ammo', newAmmo);
         inventory.deleteItem(player, ammo);
+        anticheat.allowAmmo(player);
         if (inventory.isInHands(weapon)) player.setWeaponAmmo(weaponParams.weaponHash, newAmmo);
         notifs.success(player, `${name} заряжен`, ammoName);
         inventory.notifyOverhead(player, `Зарядил '${name}'`);

@@ -1,13 +1,20 @@
 let interaction = require("./index.js");
 
 let money = call('money');
+let anticheat = call('anticheat');
 
 module.exports = {
     "interaction.money.give": (player, targetId, sum) => {
+        if (!anticheat.guard(player, 'interaction.money.give')) return;
         let target = mp.players.at(targetId);
 
-        if (!target) return player.call('interaction.money.ans', [0]);
+        if (!target || !target.character) return player.call('interaction.money.ans', [0]);
         if (target == player) return player.call('interaction.money.ans', [5]);
+        // Передача на руки только рядом, в одном измерении
+        if (target.dimension != player.dimension || player.dist(target.position) > 5) {
+            anticheat.trigger(player, 'money', `передача денег игроку ${target.id} издалека`);
+            return player.call('interaction.money.ans', [0]);
+        }
         
         let value = parseInt(sum);
 

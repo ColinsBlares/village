@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+html, body { margin: 0; width: 100%; height: 100%; background: transparent; overflow: hidden; }
+body { font-family: "Segoe UI", sans-serif; color: #f2efe8; user-select: none; }
+button, input { font-family: inherit; }
+#player {
+    display: none;
+    position: fixed;
+    right: 28px;
+    top: 50%;
+    width: 380px;
+    transform: translateY(-50%);
+    background: rgba(14, 16, 18, 0.94);
+    border: 1px solid rgba(230, 177, 90, 0.35);
+    border-radius: 16px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    padding: 16px 16px 14px;
+    box-sizing: border-box;
+}
+#player.open { display: block; }
+.head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.title { font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: #e6b15a; }
+.close {
+    width: 28px; height: 28px; border: 0; border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06); color: #f2efe8; cursor: pointer;
+}
+.now { font-size: 14px; line-height: 1.35; min-height: 38px; word-break: break-all; }
+.now.empty { color: rgba(242, 239, 232, 0.45); }
+.time { display: flex; justify-content: space-between; font-size: 12px; color: rgba(242, 239, 232, 0.55); margin-top: 8px; }
+.bar {
+    position: relative; height: 6px; margin-top: 6px; border-radius: 99px;
+    background: rgba(255, 255, 255, 0.08); cursor: pointer;
+}
+.bar > i { display: block; height: 100%; width: 0; border-radius: 99px; background: #e6b15a; }
+.row { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+.row button, .add button, .item button {
+    border: 0; border-radius: 8px; cursor: pointer; color: #f2efe8;
+    background: rgba(255, 255, 255, 0.08);
+}
+.controls { display: flex; gap: 8px; }
+.controls button { height: 36px; min-width: 72px; }
+.controls button.main { background: #e6b15a; color: #1a140c; font-weight: 600; }
+.vol { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(242, 239, 232, 0.7); }
+.vol input { flex: 1; accent-color: #e6b15a; }
+.add { display: flex; gap: 8px; margin-top: 12px; }
+.add input {
+    flex: 1; height: 36px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.35); color: #f2efe8; padding: 0 10px; outline: none;
+}
+.add button { height: 36px; padding: 0 12px; background: #e6b15a; color: #1a140c; font-weight: 600; }
+.list { margin-top: 12px; max-height: 240px; overflow: auto; }
+.item {
+    display: flex; align-items: center; gap: 8px; padding: 8px;
+    border-radius: 8px; margin-bottom: 4px; background: rgba(255, 255, 255, 0.04);
+}
+.item.current { background: rgba(230, 177, 90, 0.16); }
+.item span { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item button { width: 28px; height: 28px; }
+.empty-list { font-size: 13px; color: rgba(242, 239, 232, 0.4); padding: 8px 0 2px; }
+</style>
+</head>
+<body>
+<div id="player">
+    <div class="head">
+        <div class="title">Плеер</div>
+        <button class="close" id="close" type="button">×</button>
+    </div>
+    <div class="now empty" id="now">Ничего не играет</div>
+    <div class="bar" id="bar"><i id="fill"></i></div>
+    <div class="time"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+    <div class="row">
+        <div class="controls">
+            <button type="button" id="prev">Назад</button>
+            <button type="button" id="next" class="main">Дальше</button>
+            <button type="button" id="stop">Стоп</button>
+        </div>
+        <label class="vol">громк.
+            <input id="vol" type="range" min="0" max="100" value="100">
+            <span id="voln">100</span>
+        </label>
+    </div>
+    <div class="add">
+        <input id="url" type="text" placeholder="https://...mp3" maxlength="300">
+        <button type="button" id="add">В очередь</button>
+    </div>
+    <div class="list" id="list"></div>
+</div>
+<script>
+var ctx = new (window.AudioContext || window.webkitAudioContext)();
+var tracks = {};
+var panelState = null;
+var dragging = false;
+
+function resume() {
+    if (ctx.state === "suspended") ctx.resume();
+}
+
+function finish(id, track) {
+    if (!track || track.endedSent || track.dead || tracks[id] !== track) return;
+    track.endedSent = true;
+    if (typeof mp !== "undefined" && mp.trigger) mp.trigger("audio3d.trackEnded", String(id));
+}
+
+function drop(id) {
+    var track = tracks[id];
+    if (!track) return;
+    track.dead = true;
+    if (track.source) {
+        try { track.source.stop(); } catch (err) {}
+    }
+    if (track.audio) {
+        track.audio.pause();
+        track.audio.src = "";
+    }
+    delete tracks[id];
+}
+
+function playElement(track, url, offset, volume) {
+    var audio = track.audio || new Audio();
+    audio.loop = false;
+    audio.preload = "auto";
+    audio.volume = volume;
+    if (!track.audio) {
+        track.audio = audio;
+        audio.addEventListener("loadedmetadata", function () {
+            if (!isFinite(audio.duration) || audio.duration <= 0 || !(offset > 1)) return;
+            try { audio.currentTime = offset % audio.duration; } catch (err) {}
+        });
+        audio.addEventListener("ended", function () {
+            if (track.handed) return;
+            finish(track.id, track);
+        });
+        audio.addEventListener("error", function () {
+            if (track.failed) return;
+            track.failed = true;
+            if (typeof mp !== "undefined" && mp.trigger) mp.trigger("audio3d.error", track.id);
+        });
+    }
+    if (audio.src !== url) audio.src = url;
+    var play = audio.play();
+    if (play && play.catch) play.catch(function () {});
+}
+
+function playBuffer(track, buffer, offset, volume) {
+    if (track.dead) return;
+    track.handed = true;
+    if (track.audio) {
+        track.audio.pause();
+        track.audio.src = "";
+        track.audio = null;
+    }
+    var filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = track.cutoff || 18000;
+    var left = ctx.createGain();
+    var right = ctx.createGain();
+    var merger = ctx.createChannelMerger(2);
+    filter.connect(left);
+    filter.connect(right);
+    left.connect(merger, 0, 0);
+    right.connect(merger, 0, 1);
+    merger.connect(ctx.destination);
+    var source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = false;
+    source.connect(filter);
+    var startAt = 0;
+    if (offset > 1 && isFinite(buffer.duration) && buffer.duration > 0) startAt = offset % buffer.duration;
+    source.onended = function () {
+        finish(track.id, track);
+    };
+    source.start(0, startAt);
+    track.source = source;
+    track.buffer = buffer;
+    track.started = ctx.currentTime;
+    track.offset = startAt;
+    track.filter = filter;
+    track.left = left;
+    track.right = right;
+    track.spatial = true;
+    track.volume = volume;
+    applyEars(track);
+}
+
+function applyEars(track) {
+    var pan = Math.max(-1, Math.min(1, track.pan || 0));
+    var volume = Math.max(0, Math.min(1, track.volume || 0));
+    track.left.gain.value = volume * Math.min(1, 1 - pan);
+    track.right.gain.value = volume * Math.min(1, 1 + pan);
+    if (track.filter) track.filter.frequency.value = Math.max(200, Math.min(18000, track.cutoff || 18000));
+}
+
+function clock(sec) {
+    sec = Math.max(0, sec | 0);
+    var m = (sec / 60) | 0;
+    var s = sec % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+}
+
+function label(url) {
+    if (!url) return "";
+    try {
+        var name = decodeURIComponent(url.split("?")[0].split("/").pop() || url);
+        return name || url;
+    } catch (err) {
+        return url;
+    }
+}
+
+function activeTrack() {
+    if (!panelState) return null;
+    return tracks[panelState.id] || null;
+}
+
+function progressOf(track) {
+    if (!track) return null;
+    if (track.buffer && track.started != null) {
+        return { time: track.offset + (ctx.currentTime - track.started), duration: track.buffer.duration };
+    }
+    if (track.audio && isFinite(track.audio.duration)) {
+        return { time: track.audio.currentTime, duration: track.audio.duration };
+    }
+    return null;
+}
+
+function paintProgress() {
+    var box = document.getElementById("player");
+    if (!box.classList.contains("open")) return;
+    var info = progressOf(activeTrack());
+    var time = info ? info.time : 0;
+    var duration = info && isFinite(info.duration) ? info.duration : 0;
+    document.getElementById("cur").textContent = clock(time);
+    document.getElementById("dur").textContent = duration ? clock(duration) : "0:00";
+    document.getElementById("fill").style.width = duration ? Math.min(100, time / duration * 100) + "%" : "0";
+}
+
+function renderList() {
+    var list = document.getElementById("list");
+    var queue = panelState && panelState.queue || [];
+    list.innerHTML = "";
+    if (!queue.length) {
+        var empty = document.createElement("div");
+        empty.className = "empty-list";
+        empty.textContent = "Очередь пустая";
+        list.appendChild(empty);
+        return;
+    }
+    queue.forEach(function (url, index) {
+        var row = document.createElement("div");
+        row.className = "item" + (panelState.url === url && panelState.index === index ? " current" : "");
+        var name = document.createElement("span");
+        name.textContent = label(url);
+        var play = document.createElement("button");
+        play.type = "button";
+        play.textContent = "▶";
+        play.setAttribute("data-play", String(index));
+        var remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.setAttribute("data-remove", String(index));
+        row.appendChild(name);
+        row.appendChild(play);
+        row.appendChild(remove);
+        list.appendChild(row);
+    });
+}
+
+function send(name, value) {
+    if (typeof mp === "undefined" || !mp.trigger) return;
+    if (value == null) mp.trigger(name);
+    else mp.trigger(name, value);
+}
+
+document.getElementById("close").onclick = function () { send("audio3d.ui.close"); };
+document.getElementById("stop").onclick = function () { send("audio3d.ui.stop"); };
+document.getElementById("next").onclick = function () { send("audio3d.ui.next"); };
+document.getElementById("prev").onclick = function () { send("audio3d.ui.prev"); };
+document.getElementById("add").onclick = function () {
+    var input = document.getElementById("url");
+    var url = input.value.trim();
+    if (!url) return;
+    send("audio3d.ui.add", url);
+    input.value = "";
+};
+document.getElementById("url").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") document.getElementById("add").click();
+});
+document.getElementById("vol").addEventListener("input", function (event) {
+    dragging = true;
+    document.getElementById("voln").textContent = event.target.value;
+    send("audio3d.ui.volume", event.target.value);
+});
+document.getElementById("vol").addEventListener("change", function () { dragging = false; });
+document.getElementById("list").onclick = function (event) {
+    var play = event.target.getAttribute("data-play");
+    var remove = event.target.getAttribute("data-remove");
+    if (play != null) send("audio3d.ui.play", play);
+    if (remove != null) send("audio3d.ui.remove", remove);
+};
+document.getElementById("bar").onclick = function (event) {
+    var info = progressOf(activeTrack());
+    if (!info || !info.duration) return;
+    var rect = event.currentTarget.getBoundingClientRect();
+    var ratio = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    send("audio3d.ui.seek", String(Math.round(info.duration * ratio)));
+};
+
+setInterval(paintProgress, 250);
+
+window.audio3d = {
+    set: function (id, url, offset, volume) {
+        resume();
+        drop(id);
+        if (!url) return;
+        volume = Math.max(0, Math.min(1, volume == null ? 1 : volume));
+        var track = { id: id, url: url, mark: offset, spatial: false, failed: false, volume: volume, pan: 0, cutoff: 18000, dead: false, endedSent: false, handed: false };
+        tracks[id] = track;
+        playElement(track, url, offset, volume);
+        fetch(url).then(function (res) {
+            if (!res.ok) throw new Error("http");
+            return res.arrayBuffer();
+        }).then(function (buf) {
+            return ctx.decodeAudioData(buf);
+        }).then(function (buffer) {
+            if (track.dead || tracks[id] !== track) return;
+            playBuffer(track, buffer, offset, track.volume);
+        }).catch(function () {});
+    },
+    update: function (id, volume, x, y, z, cutoff) {
+        var track = tracks[id];
+        if (!track) return;
+        resume();
+        volume = Math.max(0, Math.min(1, volume));
+        track.volume = volume;
+        track.pan = Math.max(-1, Math.min(1, (x || 0) / 2));
+        track.cutoff = cutoff || 18000;
+        if (track.spatial) {
+            applyEars(track);
+            return;
+        }
+        if (track.audio) {
+            track.audio.volume = volume;
+            if (track.audio.paused && !track.endedSent) {
+                var play = track.audio.play();
+                if (play && play.catch) play.catch(function () {});
+            }
+        }
+    },
+    stop: function (id) {
+        drop(id);
+    },
+    panel: function (state) {
+        panelState = state || { queue: [], index: -1, volume: 100, url: "", id: 0 };
+        var box = document.getElementById("player");
+        box.classList.add("open");
+        var now = document.getElementById("now");
+        if (panelState.url) {
+            now.textContent = label(panelState.url);
+            now.classList.remove("empty");
+        } else {
+            now.textContent = "Ничего не играет";
+            now.classList.add("empty");
+        }
+        if (!dragging) {
+            document.getElementById("vol").value = panelState.volume;
+            document.getElementById("voln").textContent = panelState.volume;
+        }
+        renderList();
+        paintProgress();
+    },
+    panelHide: function () {
+        document.getElementById("player").classList.remove("open");
+    }
+};
+
+if (typeof mp !== "undefined" && mp.trigger) mp.trigger("audio3d.ready");
+</script>
+</body>
+</html>

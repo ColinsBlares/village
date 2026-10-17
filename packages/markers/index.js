@@ -1,4 +1,5 @@
 "use strict";
+let anticheat = call('anticheat');
 
 module.exports = {
 
@@ -51,10 +52,11 @@ module.exports = {
             pos.z++;
 
             mp.players.forEachInRange(player.position, 10, rec => {
-                if (player.id == rec.id) return;
+                if (player.id == rec.id || rec.dimension != player.dimension) return;
                 rec.call(`markers.tp.player.teleported`, [player.id, pos, target.h, colshapeA.marker.id]);
             });
 
+            anticheat.allowMove(player);
             player.position = pos;
             player.heading = target.h;
             player.dimension = target.dimension;
@@ -74,10 +76,11 @@ module.exports = {
             pos.z++;
 
             mp.players.forEachInRange(player.position, 10, rec => {
-                if (player.id == rec.id) return;
+                if (player.id == rec.id || rec.dimension != player.dimension) return;
                 rec.call(`markers.tp.player.teleported`, [player.id, pos, target.h, colshapeB.marker.id]);
             });
 
+            anticheat.allowMove(player);
             player.position = pos;
             player.heading = target.h;
             player.dimension = target.dimension;

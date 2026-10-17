@@ -2,6 +2,7 @@ let clothingShop = require('./index.js');
 let money = call('money');
 let inventory = call('inventory');
 let clothes = call('clothes');
+let anticheat = call('anticheat');
 module.exports = {
     "init": async () => {
         await clothingShop.init();
@@ -27,6 +28,7 @@ module.exports = {
         player.call('clothingShop.shape.leave', []);
     },
     "clothingShop.entering": (player) => {
+        anticheat.enterInterior(player);
         player.dimension = player.id + 1;
         if (player.hasValidClothesData) {
             mp.events.call('clothingShop.enter', player);
@@ -52,6 +54,7 @@ module.exports = {
     },
     "clothingShop.exit": (player) => {
         player.dimension = 0;
+        anticheat.exitInterior(player);
         inventory.updateAllView(player);
 
         // TODO: выбросить игрока куда нибудь из примерочной, например на кассу

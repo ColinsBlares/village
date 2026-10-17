@@ -82,6 +82,8 @@ module.exports = {
             if (player.vehicle) return;
             player.call("bins.inside", [true]);
             player.insideBin = colshape;
+            // Поиск на клиенте идёт минимум 5 с от входа
+            call('anticheat').jobStart(player, 'bins.trash', 4500);
         };
         colshape.onExit = (player) => {
             player.call("bins.inside", [false]);

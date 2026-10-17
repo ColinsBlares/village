@@ -1,4 +1,5 @@
 let houseService = require('./index.js');
+let anticheat = call('anticheat');
 
 module.exports = {
 	'/gotohouse': {
@@ -9,6 +10,7 @@ module.exports = {
 			let house = houseService.getHouseById(parseInt(args[0]));
 			if (house == null) return;
 			let info = house.info;
+			anticheat.allowMove(player);
 			player.position = new mp.Vector3(info.spawnX, info.spawnY, info.spawnZ);
 		},
 	},

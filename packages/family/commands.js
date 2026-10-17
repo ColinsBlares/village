@@ -1,6 +1,7 @@
 "use strict";
 
 let family = require('./index');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/famlist": {
@@ -24,6 +25,7 @@ module.exports = {
             var fam = family.getFamily(args[0]);
             if (!fam) return out.error(`Семья #${args[0]} не найдена`, player);
             if (fam.x == null) return out.error(`У семьи нет базы (дома)`, player);
+            anticheat.allowMove(player);
             player.position = new mp.Vector3(fam.x, fam.y, fam.z + 0.5);
             player.dimension = fam.d || 0;
             out.info(`Вы телепортировались к семье ${fam.name}`, player);

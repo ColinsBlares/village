@@ -1,5 +1,6 @@
 let mafia = call('mafia');
 let factions = call('factions');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/mzonetp": {
@@ -10,6 +11,7 @@ module.exports = {
             var zone = mafia.getZone(args[0]);
             if (!zone) return out.error(`Зона #${args[0]} не найдена`, player);
             var pos = new mp.Vector3(zone.x, zone.y, 80);
+            anticheat.allowMove(player);
             player.position = pos;
         }
     },

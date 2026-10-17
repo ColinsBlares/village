@@ -1,6 +1,7 @@
 let masks = require('./index.js');
 let inventory = call('inventory');
 let money = call('money');
+let anticheat = call('anticheat');
 
 const MASK_ID = 14;
 
@@ -25,11 +26,13 @@ module.exports = {
             hairHighlightColor: player.character.hairHighlightColor,
             hairstyle: player.character.hair
         }
+        anticheat.enterInterior(player);
         player.dimension = player.id + 1;
         player.call("masks.shop.enter", [data, list, appearanceData]);
     },
     "masks.shop.exit": (player) => {
         player.dimension = 0;
+        anticheat.exitInterior(player);
         inventory.updateAllView(player);
     },
     "masks.buy": (player, maskId, textureId) => {

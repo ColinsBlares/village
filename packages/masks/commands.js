@@ -1,9 +1,11 @@
 let masks = require('./index.js');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/ms": {
         access: 6,
         handler: (player, args) => {
+            anticheat.allowSpawn(player);
             player.spawn(new mp.Vector3(-1338.8355712890625, -1279.46044921875, 4.861823558807373));
         }
     },

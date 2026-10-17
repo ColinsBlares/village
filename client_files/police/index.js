@@ -196,9 +196,7 @@ mp.events.add({
             mp.players.local.taskFollowNavMeshToCoord(pos.x, pos.y, pos.z, speed, -1, 1, true, 0);
         }
         mp.players.forEachInStreamRange(rec => {
-            if (mp.police.followPlayer) rec.call('police.following', [mp.players.local, mp.police.followPlayer, speed]);
-
-            if (rec.vehicle) return;
+            if (!rec.handle || rec.vehicle) return;
             if (!rec.getVariable("cuffs")) return;
             if (rec.isPlayingAnim('mp_arresting', 'idle', 3)) return;
             mp.utils.requestAnimDict('mp_arresting', () => {

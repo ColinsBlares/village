@@ -7,6 +7,13 @@ let money = call('money');
 let notifs = call('notifications');
 let routes = call('routes');
 let timer = call('timer');
+let anticheat = call('anticheat');
+
+// Целое из клиента в границах, иначе null: NaN и отрицательные суммы проходят сравнения ниже
+let int = (value, min, max) => {
+    value = Number(value);
+    return Number.isInteger(value) && value >= min && value <= max ? value : null;
+};
 
 module.exports = {
     "init": async () => {
@@ -73,6 +80,8 @@ module.exports = {
         if (!rec || !rec.character) return out(`Игрок #${data.playerId} не найден`);
         if (rec.id == player.id) return out(`Нельзя продать самому себе`);
         if (player.dist(rec.position) > 10) return out(`Игрок далеко`);
+        data.sum = int(data.sum, 1, 1000000000);
+        if (data.sum == null) return out(`Некорректная сумма`);
 
         rec.offer = {
             type: "farm_sell",
@@ -194,6 +203,8 @@ module.exports = {
         jobs.deleteMember(player);
     },
     "farms.field.crop.take": (player, objId) => {
+        if (!anticheat.guard(player, 'farms.field.crop.take')) return;
+        if (!player.character) return;
         // console.log(`farms.field.crop.take: ${player.name} ${objId}`)
         var header = `Сбор урожая`;
         var object = mp.objects.at(objId);
@@ -247,6 +258,8 @@ module.exports = {
         }, farms.takeCropTime);
     },
     "farms.vehicle.products.put": (player, vehId) => {
+        if (!anticheat.guard(player, 'farms.vehicle.products.put')) return;
+        if (!player.character) return;
         // console.log(`farms.vehicle.products.put: ${player.name}`);
         var header = `Загрузка урожая`;
         var veh = mp.vehicles.at(vehId);
@@ -321,6 +334,9 @@ module.exports = {
         if (!player.farm) return out(`Вы далеко`);
         if (player.character.job != 4) return out(`Вы не грузоперевозчик`);
         if (veh.products && veh.products.count) return out(`Грузовик уже содержит товар`);
+        data.count = int(data.count, 1, 1000000);
+        data.index = int(data.index, 0, 2);
+        if (data.count == null || data.index == null) return anticheat.trigger(player, 'money', `farms.products.buy: count/index`);
         var max = carrier.getProductsMax(player);
         if (data.count > max) return out(`Ваш навык не позволяет загрузить более ${max} ед.`);
 
@@ -356,6 +372,9 @@ module.exports = {
         };
         if (player.vehicle) return out(`Выйдите из авто`);
         if (!player.farm) return out(`Вы далеко`);
+        data.count = int(data.count, 1, 1000000);
+        data.index = int(data.index, 0, 2);
+        if (data.count == null || data.index == null) return anticheat.trigger(player, 'money', `farms.products.inv.buy: count/index`);
         var farm = player.farm;
         var key = ["productA", "productB", "productC"][data.index];
         // if (key == 'productC' && !factions.isMafiaFaction(player.character.factionId)) return out(`Доступно только членам мафии`);
@@ -400,6 +419,9 @@ module.exports = {
         }
         if (veh.products && veh.products.count) return notifs.error(player, `Трактор уже загружен`, header);
         var farm = player.farm;
+        data.field = int(data.field, 0, farm.fields.length - 1);
+        data.grain = int(data.grain, 0, 2);
+        if (data.field == null || data.grain == null) return notifs.error(player, `Поле не найдено`, header);
         if (data.field < 0 || data.field >= farm.fields.length) return notifs.error(player, `Поле #${data.field} не найдено`, header);
         var field = farm.fields[data.field];
         if (!field) return notifs.error(player, `Поле #${data.field} не найдено`, header);
@@ -592,7 +614,8 @@ module.exports = {
         var header = `Цена на зерно`
         if (!player.farm) return notifs.error(player, `Вы не у фермы`, header);
         if (player.farm.playerId != player.character.id) return notifs.error(player, `Вы не хозяин фермы`, header);
-        if (val < 0 || val > farms.priceMax) return notifs.error(player, `Не более $${farms.priceMax}`, header);
+        val = int(val, 0, farms.priceMax);
+        if (val == null) return notifs.error(player, `Не более $${farms.priceMax}`, header);
         var farm = player.farm;
         farm.grainPrice = val;
         farm.save();
@@ -602,7 +625,8 @@ module.exports = {
         var header = `Цена на удобрение`
         if (!player.farm) return notifs.error(player, `Вы не у фермы`, header);
         if (player.farm.playerId != player.character.id) return notifs.error(player, `Вы не хозяин фермы`, header);
-        if (val < 0 || val > farms.priceMax) return notifs.error(player, `Не более $${farms.priceMax}`, header);
+        val = int(val, 0, farms.priceMax);
+        if (val == null) return notifs.error(player, `Не более $${farms.priceMax}`, header);
         var farm = player.farm;
         farm.soilPrice = val;
         farm.save();
@@ -613,7 +637,9 @@ module.exports = {
         var header = `Цена на удобрение`
         if (!player.farm) return notifs.error(player, `Вы не у фермы`, header);
         if (player.farm.playerId != player.character.id) return notifs.error(player, `Вы не хозяин фермы`, header);
-        if (data.price < 0 || data.price > farms.priceMax) return notifs.error(player, `Не более $${farms.priceMax}`, header);
+        data.price = int(data.price, 0, farms.priceMax);
+        data.field = int(data.field, 0, 2);
+        if (data.price == null || data.field == null) return notifs.error(player, `Не более $${farms.priceMax}`, header);
         var names = ["productAPrice", "productBPrice", "productCPrice"];
         var farm = player.farm;
         farm[names[data.field]] = data.price;
@@ -629,6 +655,9 @@ module.exports = {
         };
         if (!player.farm) return out(`Вы не у фермы`);
         if (player.farm.playerId != player.character.id) return out(`Вы не хозяин фермы`);
+        data.balance = int(data.balance, 0, 1);
+        data.sum = int(data.sum, 0, 1000000000);
+        if (data.balance == null || data.sum == null) return out(`Некорректная сумма`);
         if (data.balance == 1 && data.sum > farms.taxBalanceMax) return out(`Баланс налога не более $${farms.taxBalanceMax}`);
         var key = ["balance", "taxBalance"][data.balance];
         var farm = player.farm;
@@ -665,9 +694,11 @@ module.exports = {
         };
         if (!player.farm) return out(`Вы не у фермы`);
         if (player.farm.playerId != player.character.id) return out(`Вы не хозяин фермы`);
+        data.job = int(data.job, 0, 3);
+        data.sum = int(data.sum, 0, farms.payMax);
+        if (data.job == null || data.sum == null) return out(`Не более $${farms.payMax}`);
         var key = ["pay", "farmerPay", "tractorPay", "pilotPay"][data.job];
         var farm = player.farm;
-        if (data.sum < 0 || data.sum > farms.payMax) return out(`Не более $${farms.payMax}`);
 
         farm[key] = data.sum;
         farm.save();

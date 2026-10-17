@@ -6,6 +6,7 @@ let admin = call('admin');
 let notify = call('notifications');
 let jobs = call('jobs');
 let family = call('family');
+let anticheat = call('anticheat');
 
 module.exports = {
 	'characterInit.done': player => {
@@ -51,7 +52,12 @@ module.exports = {
 	},
 
 	'chat.message.get': (player, type, message) => {
-		if (message.length > 100) {
+		if (!anticheat.guard(player, 'chat.message.get', 6, 5000)) return;
+		if (!player.character || typeof message != 'string') return;
+		var musicCmd = message == '/music' || message.indexOf('/music ') === 0;
+		if (musicCmd) {
+			if (message.length > 320) message = message.slice(0, 320);
+		} else if (message.length > 100) {
 			message = message.slice(0, 100);
 		}
 
@@ -103,6 +109,7 @@ module.exports = {
 	},
 
 	'chat.command.handle': (player, command, args) => {
+		if (!player.character || typeof command != 'string' || !Array.isArray(args)) return;
 		switch (command) {
 			case '/s':
 			case '/r':
@@ -135,6 +142,9 @@ module.exports = {
 			case '/tp':
 				mp.events.call('/tp', player);
 				break;
+			case '/music':
+				mp.events.call('vehicles.music', player, args.join(' ').trim());
+				break;
 			case '/fc':
 				mp.events.call('/fc', player);
 				break;
@@ -146,6 +156,8 @@ module.exports = {
 	},
 
 	'chat.action.say': (player, message) => {
+		if (!player.character || typeof message != 'string') return;
+		message = message.slice(0, 100);
 		var playerInStream = news.isInStream(player);
 
 		mp.players.forEachInRange(player.position, 10, currentPlayer => {
@@ -346,6 +358,7 @@ module.exports = {
 			return notify.error(player, 'Массовый телепорт отключен');
 		player.returnPosition = player.position;
 		player.returnDimension = player.dimension;
+		anticheat.allowMove(player);
 		player.position = data.position;
 		player.dimension = data.dimension;
 		notify.success(player, 'Вы были телепортированы');

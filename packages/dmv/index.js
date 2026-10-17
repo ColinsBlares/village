@@ -1,4 +1,5 @@
 "use strict";
+let anticheat = call('anticheat');
 
 let dmv = {
     x: -129.16294860839844,
@@ -52,6 +53,7 @@ module.exports = {
         let enter = mp.colshapes.newSphere(dmv.enter.x, dmv.enter.y, dmv.enter.z, 1.5);
         enter.onEnter = (player) => {
             if (player.vehicle) return;
+            anticheat.allowMove(player);
             player.position = new mp.Vector3(dmv.enter.toX, dmv.enter.toY, dmv.enter.toZ);
             player.dimension = dmv.enter.toD;
             player.heading = dmv.enter.toH;
@@ -65,6 +67,7 @@ module.exports = {
         let exit = mp.colshapes.newSphere(dmv.exit.x, dmv.exit.y, dmv.exit.z, 1.5);
         exit.dimension = dmv.exit.d;
         exit.onEnter = (player) => {
+            anticheat.allowMove(player);
             player.position = new mp.Vector3(dmv.exit.toX, dmv.exit.toY, dmv.exit.toZ);
             player.dimension = 0;
             player.heading = dmv.exit.toH;

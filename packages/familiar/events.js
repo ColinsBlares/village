@@ -1,5 +1,6 @@
 let familiar = call('familiar');
 let notifs = call('notifications');
+let animations = call('animations');
 
 module.exports = {
     "init": () => {
@@ -34,25 +35,10 @@ module.exports = {
         notifs.success(rec, `${player.name} ваш новый знакомый`, header);
 
         if (!player.vehicle && !player.getVariable("knocked")) {
-            var time = 5000;
-            mp.players.forEachInRange(player.position, 20, current => {
-                current.call(`animations.play`, [player.id, {
-                    dict: "mp_ped_interaction",
-                    name: "handshake_guy_a",
-                    speed: 1,
-                    flag: 1
-                }, time]);
-            });
+            animations.playTimed(player, "mp_ped_interaction", "handshake_guy_a", 1, 1, 5000);
         }
         if (!rec.vehicle && !rec.getVariable("knocked")) {
-            mp.players.forEachInRange(rec.position, 20, current => {
-                current.call(`animations.play`, [rec.id, {
-                    dict: "mp_ped_interaction",
-                    name: "handshake_guy_a",
-                    speed: 1,
-                    flag: 1
-                }, time]);
-            });
+            animations.playTimed(rec, "mp_ped_interaction", "handshake_guy_a", 1, 1, 5000);
         }
     },
     "player.name.changed": (player, oldName) => {

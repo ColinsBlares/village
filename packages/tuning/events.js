@@ -1,6 +1,7 @@
 let tuning = require('./index.js');
 let money = call('money');
 let vehicles = call('vehicles');
+let anticheat = call('anticheat');
 
 module.exports = {
     "init": async () => {
@@ -28,6 +29,7 @@ module.exports = {
             player.call('tuning.fadeOut');
             let customs = tuning.getCustomsDataById(shape.customsId);
             player.currentCustomsId = shape.customsId;
+            anticheat.allowMove(player);
             player.vehicle.dimension = player.id + 10000;
             player.vehicle.position = new mp.Vector3(customs.tuneX, customs.tuneY, customs.tuneZ);
             player.call('vehicles.heading.set', [customs.tuneH])
@@ -50,11 +52,13 @@ module.exports = {
                 if (rec.id == player.id) return;
                 if (rec.dimension != player.vehicle.dimension) return;
 
+                anticheat.allowMove(rec);
                 rec.dimension = 0;
             });
         }
     },
     "tuning.end": (player, id) => {
+        anticheat.allowMove(player);
         if (!player.vehicle) return player.dimension = 0;
         let customs = tuning.getCustomsDataById(id);
         player.vehicle.position = new mp.Vector3(customs.returnX, customs.returnY, customs.returnZ);
@@ -172,7 +176,9 @@ module.exports = {
         money.removeCash(player, price, function (result) {
             if (!result) return player.call('tuning.repair.ans', [4]);
             
+            player.vehicle.acRepair = Date.now() + 2000;
             player.vehicle.repair();
+            vehicles.clearBodyDamage(player.vehicle);
             player.call('tuning.repair.ans', [0]);
             tuning.removeProducts(customsId, products);
             tuning.updateCashbox(customsId, price);

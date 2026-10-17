@@ -7,6 +7,191 @@ let currentSirenState = false;
 let isCurrentVehicleElectric = false;
 mp.speedometerEnabled = true;
 
+// Смещения от центра кузова, в которых снимается вмятина
+var DAMAGE_OFFSETS = [
+    [0, 1.5, 0.4],
+    [0, -1.5, 0.4],
+    [-0.9, 0.6, 0.4],
+    [0.9, 0.6, 0.4],
+    [-0.9, -0.6, 0.4],
+    [0.9, -0.6, 0.4],
+    [0, 1.2, 0.8],
+    [0, -1.2, 0.7],
+    [-0.9, 0, 0.6],
+    [0.9, 0, 0.6],
+    [0, 0.5, 1.0],
+    [0, -0.5, 1.0]
+];
+// Биты маски: 0, 1, 4, 5 — те же колёса, что бьёт ограбление
+var WHEEL_IDS = [0, 1, 4, 5];
+
+function isLocalDriver(vehicle) {
+    var local = mp.players.local;
+    return !!(vehicle && local.vehicle === vehicle && vehicle.getPedInSeat(-1) === local.handle);
+}
+
+function applyEngine(vehicle, engine) {
+    if (!vehicle || vehicle.type != 'vehicle' || !vehicle.handle) return;
+    vehicle.setUndriveable(!engine);
+    vehicle.setEngineOn(!!engine, true, true);
+}
+
+function isDoorDamaged(vehicle, door) {
+    try {
+        if (typeof vehicle.isDoorDamaged == 'function') return !!vehicle.isDoorDamaged(door);
+        return !!mp.game.vehicle.isVehicleDoorDamaged(vehicle.handle, door);
+    } catch (err) {
+        return false;
+    }
+}
+
+function applyHoodTrunk(vehicle, doorsMask) {
+    if (!vehicle || vehicle.type != 'vehicle' || !vehicle.handle) return;
+    if (vehicle.getVariable('robbed')) return;
+    var hoodBroken = doorsMask != null ? !!(doorsMask & 16) : isDoorDamaged(vehicle, 4);
+    var trunkBroken = doorsMask != null ? !!(doorsMask & 32) : isDoorDamaged(vehicle, 5);
+    if (!hoodBroken) {
+        if (vehicle.getVariable('hood')) vehicle.setDoorOpen(4, false, false);
+        else vehicle.setDoorShut(4, false);
+    }
+    if (!trunkBroken) {
+        if (vehicle.getVariable('trunk')) vehicle.setDoorOpen(5, false, false);
+        else vehicle.setDoorShut(5, false);
+    }
+}
+
+function applySignals(vehicle) {
+    if (!vehicle || vehicle.type != 'vehicle' || !vehicle.handle) return;
+    vehicle.setIndicatorLights(1, !!vehicle.getVariable('leftTurnSignal'));
+    vehicle.setIndicatorLights(0, !!vehicle.getVariable('rightTurnSignal'));
+}
+
+function applySiren(vehicle) {
+    if (!vehicle || vehicle.type != 'vehicle' || !vehicle.handle) return;
+    vehicle.setSiren(!!vehicle.getVariable('sirenLights'));
+    vehicle.setSirenSound(!!vehicle.getVariable('sirenSound'));
+}
+
+// 0 выкл, 1 дальний, 2 ближний, 3 оба. Водитель не трогаем: у него фары уже свои
+function applyLights(vehicle, state) {
+    if (!vehicle || vehicle.type != 'vehicle' || !vehicle.handle || isLocalDriver(vehicle)) return;
+    if (state == null) state = vehicle.getVariable('lights');
+    if (state == null) return;
+    var on = state == 2 || state == 3;
+    var high = state == 1 || state == 3;
+    try {
+        if (typeof vehicle.setLights == 'function') vehicle.setLights(on ? 2 : 1);
+        else mp.game.vehicle.setVehicleLights(vehicle.handle, on ? 2 : 1);
+        if (typeof vehicle.setFullbeam == 'function') vehicle.setFullbeam(high);
+        else mp.game.vehicle.setVehicleFullbeam(vehicle.handle, high);
+    } catch (err) {}
+}
+
+function applyHeading(entity, value) {
+    if (value == null || !entity || !entity.handle) return;
+    if (entity.type == 'vehicle' && isLocalDriver(entity)) return;
+    entity.setHeading(value);
+}
+
+function damageStamp(snapshot) {
+    if (!snapshot || !snapshot.length) return '';
+    return snapshot.join(',');
+}
+
+// Снимок не накладывается на водителя: повторный setDamage удваивает вмятину
+function applyDamage(vehicle, snapshot) {
+    if (!vehicle || vehicle.type != "vehicle") return;
+    if (!snapshot) vehicle.__brokenWindows = 0;
+    if (!vehicle.handle) return;
+    if (vehicle.getVariable("robbed")) return;
+    if (isLocalDriver(vehicle)) return;
+    var stamp = damageStamp(snapshot);
+    if (vehicle.__damageStamp === stamp) return;
+    var had = !!vehicle.__damageStamp;
+    vehicle.__damageStamp = stamp;
+    if (!stamp) {
+        if (!had) return;
+        vehicle.setFixed();
+        applyEngine(vehicle, vehicle.getVariable('engine'));
+        applySignals(vehicle);
+        applyHoodTrunk(vehicle, 0);
+        applySiren(vehicle);
+        return;
+    }
+    if (had && typeof vehicle.setDeformationFixed == "function") vehicle.setDeformationFixed();
+    var doors = snapshot[0] | 0;
+    var windows = snapshot[1] | 0;
+    var wheels = snapshot[2] | 0;
+    var dirt = snapshot[3] || 0;
+    var i;
+    for (i = 0; i < 6; i++) {
+        if (doors & (1 << i)) vehicle.setDoorBroken(i, false);
+    }
+    for (i = 0; i < 8; i++) {
+        if (!(windows & (1 << i))) continue;
+        try {
+            mp.game.vehicle.smashVehicleWindow(vehicle.handle, i);
+        } catch (err) {}
+    }
+    for (i = 0; i < WHEEL_IDS.length; i++) {
+        if (wheels & (1 << i)) vehicle.setTyreBurst(WHEEL_IDS[i], true, 1000);
+    }
+    if (typeof vehicle.setDirtLevel == 'function') vehicle.setDirtLevel(dirt);
+    for (i = 4; i + 3 < snapshot.length; i += 4) {
+        var amount = snapshot[i + 3];
+        vehicle.setDamage(snapshot[i], snapshot[i + 1], snapshot[i + 2], amount < 10 ? amount * 100 : amount, 50, false);
+    }
+    applyEngine(vehicle, vehicle.getVariable('engine'));
+    applySignals(vehicle);
+    applyHoodTrunk(vehicle, doors);
+    applySiren(vehicle);
+}
+
+function collectDamage(vehicle) {
+    var doors = 0;
+    var windows = 0;
+    var wheels = 0;
+    var i;
+    for (i = 0; i < 6; i++) {
+        if (isDoorDamaged(vehicle, i)) doors |= (1 << i);
+    }
+    for (i = 0; i < 8; i++) {
+        try {
+            var rolled = vehicle.getVariable("windowsDown") | 0;
+            if (!rolled || !(rolled & (1 << i))) {
+                if (!mp.game.vehicle.isVehicleWindowIntact(vehicle.handle, i)) windows |= (1 << i);
+            }
+        } catch (err) {}
+    }
+    windows |= vehicle.__brokenWindows | 0;
+    var saved = vehicle.getVariable("damage");
+    if (saved) windows |= saved[1] | 0;
+    for (i = 0; i < WHEEL_IDS.length; i++) {
+        try {
+            if (mp.game.vehicle.isVehicleTyreBurst(vehicle.handle, WHEEL_IDS[i], false)) wheels |= (1 << i);
+        } catch (err) {}
+    }
+    var dirt = 0;
+    try {
+        dirt = typeof vehicle.getDirtLevel == 'function' ? vehicle.getDirtLevel() : mp.game.vehicle.getVehicleDirtLevel(vehicle.handle);
+    } catch (err) {
+        dirt = 0;
+    }
+    var snapshot = [doors, windows, wheels, Math.round((dirt || 0) * 10) / 10];
+    for (i = 0; i < DAMAGE_OFFSETS.length && snapshot.length < 52; i++) {
+        var offset = DAMAGE_OFFSETS[i];
+        var amount = 0;
+        try {
+            amount = mp.game.vehicle.getVehicleDeformationAtPos(vehicle.handle, offset[0], offset[1], offset[2]);
+        } catch (err) {
+            amount = 0;
+        }
+        if (!(amount > 0.15)) continue;
+        snapshot.push(offset[0], offset[1], offset[2], Math.round(amount * 100) / 100);
+    }
+    return snapshot;
+}
+
 mp.events.add("playerLeaveVehicle", () => {
     mp.callCEFV('speedometer.arrow = 0');
     mp.callCEFV('speedometer.emergency = false');
@@ -21,28 +206,60 @@ mp.events.add("playerLeaveVehicle", () => {
 
 });
 
-mp.events.addDataHandler("engine", (entity) => {
-    var player = mp.players.local;
-    var engine = entity.getVariable('engine');
-    entity.setUndriveable(!engine);
-    entity.setEngineOn(engine, true, true);
-
+mp.events.addDataHandler("engine", (entity, value) => {
+    applyEngine(entity, value);
 });
 
-mp.timer.addInterval(() => { /// Синхронизация двигателя
+mp.timer.addInterval(() => { /// GTA глушит мотор у водителя, чужие машины берёт стрим
     try {
         var player = mp.players.local;
-        if (player.vehicle && mp.vehicles.exists(player.vehicle)) {
-            var engine = player.vehicle.getVariable('engine') || false;
-
-            player.vehicle.setUndriveable(!engine);
-            player.vehicle.setEngineOn(engine, true, true);
-        }
+        var vehicle = player.vehicle;
+        if (!vehicle || !mp.vehicles.exists(vehicle)) return;
+        if (vehicle.getPedInSeat(-1) !== player.handle) return;
+        applyEngine(vehicle, vehicle.getVariable('engine') || false);
     } catch (err) {
         mp.chat.debug('engine sync error');
     }
 
 }, 100);
+
+mp.timer.addInterval(() => {
+    try {
+        var player = mp.players.local;
+        var vehicle = player.vehicle;
+        if (!vehicle || !mp.vehicles.exists(vehicle) || !vehicle.handle) return;
+        if (vehicle.getPedInSeat(-1) !== player.handle) return;
+        if (vehicle.getVariable('robbed')) return;
+        var snapshot = collectDamage(vehicle);
+        var clean = snapshot[0] == 0 && snapshot[1] == 0 && snapshot[2] == 0 && snapshot[3] < 0.05 && snapshot.length == 4;
+        var key = clean ? '' : snapshot.join(',');
+        if (vehicle.__damageSent === key) return;
+        vehicle.__damageSent = key;
+        mp.events.callRemote('vehicles.damage.sync', JSON.stringify(clean ? [0, 0, 0, 0] : snapshot));
+    } catch (err) {
+        mp.chat.debug('damage sync error');
+    }
+}, 1000);
+
+mp.timer.addInterval(() => {
+    mp.vehicles.forEachInStreamRange((vehicle) => {
+        if (!vehicle.handle) return;
+        var bits = vehicle.__brokenWindows | 0;
+        var saved = vehicle.getVariable("damage");
+        if (saved) bits |= saved[1] | 0;
+        var rolled = vehicle.getVariable("windowsDown") | 0;
+        if (!bits && !rolled) return;
+        for (var n = 0; n < 4; n++) {
+            try {
+                if (rolled & (1 << n)) {
+                    mp.game.vehicle.rollDownWindow(vehicle.handle, n);
+                    continue;
+                }
+                if (bits & (1 << n)) mp.game.vehicle.smashVehicleWindow(vehicle.handle, n);
+            } catch (err) {}
+        }
+    });
+}, 1000);
 
 let lastLightState;
 let lightState = 0;
@@ -79,6 +296,7 @@ speedometerUpdateTimer = mp.timer.addInterval(() => { /// Обновление �
         if (lastLightState != lightState) {
             mp.callCEFV(`speedometer.headlights = ${lightState}`);
             lastLightState = lightState;
+            mp.events.callRemote('vehicles.lights.set', lightState);
         }
         let lockStatus = mp.players.local.vehicle.getDoorLockStatus();
         if (lockStatus != lastLockStatus) {
@@ -95,6 +313,42 @@ speedometerUpdateTimer = mp.timer.addInterval(() => { /// Обновление �
 
 
 }, 100);
+
+function applyRolledWindows(vehicle) {
+    if (!vehicle || vehicle.type != "vehicle" || !vehicle.handle) return;
+    var bits = vehicle.getVariable("windowsDown") | 0;
+    for (var i = 0; i < 4; i++) {
+        try {
+            if (bits & (1 << i)) mp.game.vehicle.rollDownWindow(vehicle.handle, i);
+            else mp.game.vehicle.rollUpWindow(vehicle.handle, i);
+        } catch (err) {}
+    }
+}
+
+mp.events.addDataHandler("windowsDown", (entity) => {
+    applyRolledWindows(entity);
+});
+
+mp.keys.bind(0x5A, true, function() {
+    if (mp.busy.includes(['chat', 'cuffs', 'terminal'])) return;
+    var vehicle = mp.players.local.vehicle;
+    if (!vehicle) return;
+    var handle = mp.players.local.handle;
+    var seat = -2;
+    if (vehicle.getPedInSeat(-1) === handle) seat = -1;
+    else {
+        for (var i = 0; i < 3; i++) {
+            if (vehicle.getPedInSeat(i) === handle) {
+                seat = i;
+                break;
+            }
+        }
+    }
+    if (seat < -1) return;
+    var index = seat === -1 ? 0 : seat + 1;
+    if (seat === -1 && mp.keys.isDown(0x11)) index = -1;
+    mp.events.callRemote("vehicles.window.roll", index);
+});
 
 mp.keys.bind(0x32, true, function() {
     if (mp.busy.includes(['chat', 'cuffs', 'terminal'])) return;
@@ -288,84 +542,54 @@ mp.keys.bind(87, true, () => { // W
 });
 
 mp.events.addDataHandler("leftTurnSignal", (entity) => {
-    var player = mp.players.local;
-    var left = entity.getVariable('leftTurnSignal');
-    entity.setIndicatorLights(1, left);
+    applySignals(entity);
 });
 
 mp.events.addDataHandler("rightTurnSignal", (entity) => {
-    var player = mp.players.local;
-    var right = entity.getVariable('rightTurnSignal');
-    entity.setIndicatorLights(0, right);
+    applySignals(entity);
 });
 
 mp.events.addDataHandler("hood", (entity) => {
-    var hood = entity.getVariable('hood');
-    if (hood) {
-        entity.setDoorOpen(4, false, false);
-    } else {
-        entity.setDoorShut(4, false);
-    }
+    applyHoodTrunk(entity);
 });
 
-
 mp.events.addDataHandler("trunk", (entity) => {
-    var trunk = entity.getVariable('trunk');
-    if (trunk) {
-        entity.setDoorOpen(5, false, false);
-    } else {
-        entity.setDoorShut(5, false);
-    }
+    applyHoodTrunk(entity);
 });
 
 mp.events.addDataHandler("sirenSound", (entity) => {
-    var sirenSound = entity.getVariable("sirenSound");
-    entity.setSirenSound(sirenSound);
+    applySiren(entity);
 });
 
 mp.events.addDataHandler("sirenLights", (entity) => {
-    var sirenLights = entity.getVariable("sirenLights");
-    entity.setSiren(sirenLights);
+    applySiren(entity);
 });
 
 mp.events.addDataHandler("heading", (entity, value) => {
-    if (value != null) entity.setHeading(value);
+    applyHeading(entity, value);
+});
+
+mp.events.addDataHandler("damage", (entity, value) => {
+    applyDamage(entity, value);
+});
+
+mp.events.addDataHandler("lights", (entity, value) => {
+    applyLights(entity, value);
 });
 
 mp.events.add('entityStreamIn', (entity) => {
-    if (entity.type == 'vehicle') {
-        let left = entity.getVariable("leftTurnSignal") || false;
-        let right = entity.getVariable("rightTurnSignal") || false;
-        entity.setIndicatorLights(1, left);
-        entity.setIndicatorLights(0, right);
+    if (entity.type != 'vehicle') return;
+    applyEngine(entity, entity.getVariable('engine'));
+    applySignals(entity);
+    applySiren(entity);
+    applyLights(entity, entity.getVariable('lights'));
+    applyRolledWindows(entity);
+    if (entity.getVariable('robbed')) return;
+    applyDamage(entity, entity.getVariable('damage'));
+    applyHoodTrunk(entity);
 
-        let hood = entity.getVariable("hood") || false;
-        let trunk = entity.getVariable("trunk") || false;
-
-        let sirenLights = entity.getVariable("sirenLights") || false;
-        let sirenSound = entity.getVariable("sirenSound") || false;
-
-        if (hood) {
-            entity.setDoorOpen(4, false, false);
-        } else {
-            entity.setDoorShut(4, false);
-        }
-
-        if (trunk) {
-            entity.setDoorOpen(5, false, false);
-        } else {
-            entity.setDoorShut(5, false);
-        }
-
-        entity.setSiren(sirenLights);
-        entity.setSirenSound(sirenSound);
-
-        var rotation = entity.getVariable("rotation");
-        if (rotation) entity.setRotation(rotation);
-
-        entity.setDoorBreakable(4, false); // hood
-        entity.setDoorBreakable(5, false); // trunk
-    }
+    var rotation = entity.getVariable("rotation");
+    if (rotation && !isLocalDriver(entity)) entity.setRotation(rotation);
 });
 
 mp.events.add('vehicles.lock', () => {
@@ -421,10 +645,11 @@ mp.events.add('vehicles.siren.sound', () => {
 
 let sirenLightsUpdater = mp.timer.addInterval(() => {
     try {
-        if (!mp.players.local.vehicle) return;
-        if (currentSirenState == mp.players.local.vehicle.isSirenOn()) return;
+        var vehicle = mp.players.local.vehicle;
+        if (!vehicle || vehicle.getPedInSeat(-1) !== mp.players.local.handle) return;
+        if (currentSirenState == vehicle.isSirenOn()) return;
         mp.events.callRemote('vehicles.siren.lights');
-        currentSirenState = mp.players.local.vehicle.isSirenOn();
+        currentSirenState = vehicle.isSirenOn();
     } catch (err) {
         mp.chat.debug('sirenLightsUpdater error');
     }

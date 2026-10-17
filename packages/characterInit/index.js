@@ -10,6 +10,7 @@ let inventory;
 let notifs;
 let utils;
 let promocodes;
+let anticheat;
 
 let clothesConfig = {
     0: {
@@ -69,6 +70,7 @@ module.exports = {
         utils = call("utils");
         promocodes = call("promocodes");
         jobs = call('jobs');
+        anticheat = call('anticheat');
     },
     async init(player) {
         if (player.character != null) player.character = null;
@@ -220,6 +222,7 @@ module.exports = {
 
         mp.events.call('characterInit.create.init', player);
 
+        anticheat.allowModel(player);
         player.model = freemodeCharacters[1];
         this.applyCharacter(player);
         this.sendToCreator(player);
@@ -261,16 +264,22 @@ module.exports = {
             ]
         });
         player.name = player.character.name;
-        this.applyCharacter(player);
-        player.characterInit.created = true;
-        player.call('characterInit.create.check.ans', [1]);
-        this.spawn(player);
-        mp.events.call('characterInit.done', player);
+        mp.network.startBatch();
+        try {
+            this.applyCharacter(player);
+            player.characterInit.created = true;
+            player.call('characterInit.create.check.ans', [1]);
+            this.spawn(player);
+            mp.events.call('characterInit.done', player);
+        } finally {
+            mp.network.endBatch();
+        }
     },
     sendToCreator(player) {
         player.call("characterInit.create", [true, JSON.stringify(player.characterInfo)]);
     },
     applyCharacter(player) {
+        anticheat.allowModel(player);
         if (player.character) {
             let features = [];
             player.character.Features.forEach((element) => {
@@ -466,6 +475,7 @@ module.exports = {
 
         if (settings.spawn === 1 && !house) settings.spawn = 0;
         if (settings.spawn === 2 && !player.character.factionId) settings.spawn = 0;
+        anticheat.allowSpawn(player);
         switch (settings.spawn) {
             case 0: // улица
                 player.spawn(new mp.Vector3(player.character.x, player.character.y, player.character.z));

@@ -242,7 +242,9 @@ module.exports = {
             let target = mp.players.at(args[0]);
             if (!target) return out.error('Игрок не найден', player);
             if (!target.vehicle) return out.error('Игрок не в транспорте', player);
+            target.vehicle.acRepair = Date.now() + 2000;
             target.vehicle.repair();
+            vehicles.clearBodyDamage(target.vehicle);
             out.info('Автомобиль игрока отремонтирован', player);
         }
     },

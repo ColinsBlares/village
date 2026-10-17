@@ -1,4 +1,5 @@
 var carshow = require('./index.js');
+let anticheat = call('anticheat');
 module.exports = {
     "init": () => {
         //carshow.init();
@@ -18,11 +19,13 @@ module.exports = {
     },
     "carshow.list.show": (player, carShowId) => {
         var list = carshow.getCarShowList(carShowId);
+        anticheat.allowMove(player);
         player.dimension = player.id + 1;
         let info = carshow.getCarShowInfoById(carShowId);
         player.call('carshow.list.show', [list, info]);
     },
     "carshow.list.close": (player, carShowId) => {
+        anticheat.allowMove(player);
         player.dimension = 0;
         let info = carshow.getCarShowInfoById(carShowId);
         player.position = new mp.Vector3(info.returnX, info.returnY, info.returnZ);

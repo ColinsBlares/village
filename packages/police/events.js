@@ -10,6 +10,7 @@ var notifs = require('../notifications');
 var police = require('../police')
 let timer = call('timer');
 let vehicles = call('vehicles');
+let anticheat = call('anticheat');
 
 module.exports = {
     "init": () => {
@@ -720,6 +721,7 @@ module.exports = {
         if (freeSeat.length == 0) return notifs.error(player, `В авто нет места`, header);
         rec.call(`police.follow.stop`);
         delete rec.isFollowing;
+        anticheat.allowMove(rec);
         rec.putIntoVehicle(veh, freeSeat[0]);
         notifs.success(player, `${rec.name} посажен в авто`, header);
         notifs.info(rec, `${player.name} посадил вас в авто`, header);

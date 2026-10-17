@@ -4,6 +4,7 @@ var mapCase = require('../mapCase');
 var notifs = require('../notifications');
 var utils = require('../utils');
 let timer = call('timer');
+let anticheat = call('anticheat');
 
 module.exports = {
     // Кол-во боеприпасов, списываемое за выдачу формы (LSPD, LSSD)
@@ -213,6 +214,7 @@ module.exports = {
             cell = this.lsCells[i];
         }
 
+        anticheat.allowSpawn(player);
         (!player.health) ? player.spawn(cell): player.position = cell;
         player.dimension = 0;
         player.heading = cell.h;
@@ -258,6 +260,7 @@ module.exports = {
             cell = this.jailCells[i];
         }
 
+        anticheat.allowSpawn(player);
         (!player.health) ? player.spawn(cell): player.position = cell;
         player.dimension = 0;
         player.heading = cell.h;
@@ -284,6 +287,7 @@ module.exports = {
                 rec.call(`inventory.enable`, [true]);
                 rec.call(`police.arrest.set`, [null]);
 
+                anticheat.allowMove(rec);
                 rec.position = this.jailExit;
                 rec.heading = this.jailExit.h;
 
@@ -313,6 +317,7 @@ module.exports = {
             cell = this.bcCells[i];
         }
 
+        anticheat.allowSpawn(player);
         (!player.health) ? player.spawn(cell): player.position = cell;
         player.dimension = 0;
         player.heading = cell.h;
@@ -351,6 +356,7 @@ module.exports = {
             arrestTimeMax: 0
         }]);
 
+        anticheat.allowMove(player);
         player.position = (!player.character.arrestType) ? this.lsCellExit : this.bcCellExit;
         player.heading = (!player.character.arrestType) ? this.lsCellExit.h : this.bcCellExit.h;
 

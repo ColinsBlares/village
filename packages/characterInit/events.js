@@ -40,12 +40,16 @@ module.exports = {
             player.character = player.characters[charnumber];
             player.name = player.character.name;
             delete player.characters;
-            characterInit.applyCharacter(player);
-
-            player.call('characterInit.choose.ans', [1]);
-            characterInit.spawn(player);
-            admin.checkClearWarns(player);
-            mp.events.call('characterInit.done', player);
+            mp.network.startBatch();
+            try {
+                characterInit.applyCharacter(player);
+                player.call('characterInit.choose.ans', [1]);
+                characterInit.spawn(player);
+                admin.checkClearWarns(player);
+                mp.events.call('characterInit.done', player);
+            } finally {
+                mp.network.endBatch();
+            }
         } else {
             player.call('characterInit.choose.ans', [1]);
             characterInit.create(player);

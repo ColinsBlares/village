@@ -3,6 +3,7 @@
 let wheel = require('./wheel.js');
 let horseracing = require('./horseracing.js');
 let slots = require('./slots.js');
+let anticheat = call('anticheat');
 
 let info = {
     x: 936.0476684570312,
@@ -116,6 +117,7 @@ module.exports = {
 
         let enter = mp.colshapes.newSphere(info.enter.x, info.enter.y, info.enter.z, 1.5);
         enter.onEnter = (player) => {
+            anticheat.allowMove(player);
             player.position = new mp.Vector3(info.enter.toX, info.enter.toY, info.enter.toZ);
             player.dimension = info.enter.toD;
             player.heading = info.enter.toH;
@@ -129,6 +131,7 @@ module.exports = {
         let exit = mp.colshapes.newSphere(info.exit.x, info.exit.y, info.exit.z, 1.5);
         exit.dimension = info.exit.d;
         exit.onEnter = (player) => {
+            anticheat.allowMove(player);
             player.position = new mp.Vector3(info.exit.toX, info.exit.toY, info.exit.toZ);
             player.dimension = 0;
             player.heading = info.exit.toH;

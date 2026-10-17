@@ -71,6 +71,8 @@ let utils = {
         }));
     },
     clamp(value, min, max) {
+        // NaN из клиента иначе проходит clamp насквозь
+        if (isNaN(value)) return min;
         return Math.max(min, Math.min(max, value));
     },
     getPlayerBySqlId(sqlId) {
@@ -151,7 +153,7 @@ let utils = {
     // Добавить текст над головой игрока
     addOverheadText(player, text, color = [255, 255, 255, 255]) {
         mp.players.forEachInRange(player.position, 20, rec => {
-            if (rec.id == player.id) return;
+            if (rec.id == player.id || rec.dimension != player.dimension) return;
             rec.call(`addOverheadText`, [player.id, text, color]);
         });
     },

@@ -1,6 +1,7 @@
 let tattoo = require('./index.js');
 let inventory = call('inventory');
 let money = call('money');
+let anticheat = call('anticheat');
 
 module.exports = {
     "init": async () => {
@@ -32,6 +33,7 @@ module.exports = {
         if (!player.character) return;
         if (!player.isInTattooParlorShape) return;
 
+        anticheat.enterInterior(player);
         player.dimension = player.id + 1;
         if (player.hasValidTattooData) return mp.events.call('tattoo.enter', player);
 
@@ -60,6 +62,7 @@ module.exports = {
     },
     "tattoo.exit": (player) => {
         player.dimension = 0;
+        anticheat.exitInterior(player);
         inventory.updateAllView(player);
     },
     "tattoo.buy": (player, tattooId) => {

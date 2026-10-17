@@ -302,6 +302,7 @@ module.exports = {
                     alpha: 255,
                     heading: 90
                 });
+                object.setVariable('sgr', 0);
                 object.count = fieldCount;
                 object.field = field;
                 this.fieldObjects[field.id].push(object);
@@ -581,6 +582,8 @@ module.exports = {
                             alpha: 255,
                             heading: 90
                         });
+                        object.setVariable('sgr', 0);
+                        object.setVariable('sgrZ', -0.5);
                         object.count = parseInt(600 / objPositions.length);
                         object.field = field;
                         this.fieldObjects[field.id].push(object);
@@ -588,16 +591,20 @@ module.exports = {
                     // debug(`Поле ${field.sqlId} проросло!`)
                 } else if (field.state == 2) {
                     for (var i = 0; i < this.fieldObjects[field.id].length; i++) {
-                        var pos = this.fieldObjects[field.id][i].position;
+                        var grown = this.fieldObjects[field.id][i];
+                        var pos = grown.position;
                         pos.z += 0.25;
-                        this.fieldObjects[field.id][i].position = pos;
+                        grown.setVariable('sgrZ', (grown.getVariable('sgrZ') || 0) + 0.25);
+                        grown.position = pos;
                     }
                     // debug(`Поле ${field.sqlId} почти созрело!`)
                 } else if (field.state == 3) {
                     for (var i = 0; i < this.fieldObjects[field.id].length; i++) {
-                        var pos = this.fieldObjects[field.id][i].position;
+                        var grown = this.fieldObjects[field.id][i];
+                        var pos = grown.position;
                         pos.z += 0.25;
-                        this.fieldObjects[field.id][i].position = pos;
+                        grown.setVariable('sgrZ', (grown.getVariable('sgrZ') || 0) + 0.25);
+                        grown.position = pos;
                     }
 
                     // debug(`Поле ${field.sqlId} созрело!`)

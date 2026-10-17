@@ -7,6 +7,47 @@ var timer = call('timer');
 
 let money = call('money');
 let houses = call('houses');
+let anticheat = call('anticheat');
+
+function readMusicQueue(vehicle) {
+    var raw = vehicle.getVariable("musicQueue");
+    if (!raw || typeof raw != "string") return [];
+    try {
+        var list = JSON.parse(raw);
+        if (!Array.isArray(list)) return [];
+        return list.filter((item) => typeof item == "string" && item.length > 0 && item.length <= 300).slice(0, 15);
+    } catch (err) {
+        return [];
+    }
+}
+
+function applyMusicQueue(vehicle, queue, index) {
+    if (!queue.length || index < 0 || index >= queue.length) {
+        vehicle.setVariable("musicQueue", null);
+        vehicle.setVariable("musicIndex", null);
+        vehicle.setVariable("musicUrl", null);
+        vehicle.setVariable("musicAt", null);
+        return;
+    }
+    var at = Date.now();
+    vehicle.setVariable("musicQueue", JSON.stringify(queue));
+    vehicle.setVariable("musicIndex", index);
+    vehicle.setVariable("musicAt", at);
+    vehicle.setVariable("musicUrl", queue[index]);
+}
+
+function musicDriver(player) {
+    if (!player.character) return null;
+    if (!player.vehicle || player.seat != 0) {
+        notifs.error(player, `Нужно быть за рулём`, `Музыка`);
+        return null;
+    }
+    return player.vehicle;
+}
+
+function musicUrlOk(raw) {
+    return typeof raw == "string" && raw.length <= 300 && /^https?:\/\/\S+$/i.test(raw);
+}
 
 module.exports = {
     "init": async () => {
@@ -159,16 +200,22 @@ module.exports = {
         player.vehicle.setVariable("leftTurnSignal", state);
     },
     "vehicles.hood": (player, vehicleId, state) => {
+        if (!anticheat.guard(player, 'vehicles.hood')) return;
+        if (!player.character) return;
         let vehicle = mp.vehicles.at(vehicleId);
         if (!vehicle) return;
+        if (vehicle.dimension != player.dimension || player.dist(vehicle.position) > 12) return;
         if (vehicle.key == 'private' && !vehicles.haveKeys(player, vehicle)) return notifs.error(player, `Вы не имеете ключи`, vehicle.properties.name);
         if (vehicle.db && vehicle.db.key == 'faction' && player.character.factionId != vehicle.db.owner) return notifs.error(player, `Нет доступа`, vehicle.properties.name);
 
         vehicle.setVariable("hood", state);
     },
     "vehicles.trunk": (player, vehicleId, state) => {
+        if (!anticheat.guard(player, 'vehicles.trunk')) return;
+        if (!player.character) return;
         let vehicle = mp.vehicles.at(vehicleId);
         if (!vehicle) return;
+        if (vehicle.dimension != player.dimension || player.dist(vehicle.position) > 12) return;
         if (vehicle.db && vehicle.db.key == 'private' && !vehicles.haveKeys(player, vehicle)) return notifs.error(player, `Вы не имеете ключи`, vehicle.properties.name);
         if (vehicle.db && vehicle.db.key == 'faction' && player.character.factionId != vehicle.db.owner) return notifs.error(player, `Нет доступа`, vehicle.properties.name);
 
@@ -184,8 +231,11 @@ module.exports = {
         vehicles.loadPrivateVehicles(player);
     },
     "vehicles.lock": (player, vehicleId) => {
+        if (!anticheat.guard(player, 'vehicles.lock')) return;
+        if (!player.character) return;
         let vehicle = mp.vehicles.at(vehicleId);
         if (!vehicle) return;
+        if (vehicle.dimension != player.dimension || player.dist(vehicle.position) > 12) return;
         
         let allowedKeys = ['faction', 'private'];
         if (!allowedKeys.includes(vehicle.key)) return notifs.error(player, `Это не ваш транспорт`);
@@ -203,9 +253,15 @@ module.exports = {
         }
     },
     "vehicles.explode": (player, vehicleId) => {
+        if (!anticheat.guard(player, 'vehicles.explode', 3, 5000)) return;
+        if (!player.character) return;
         let vehicle = mp.vehicles.at(vehicleId);
         if (!vehicle) return;
+        // Удаление чужой целой машины по id — только админу или уже мёртвой рядом
+        if (vehicle.dimension != player.dimension || player.dist(vehicle.position) > 10) return;
+        if (player.character.admin < 4 && !vehicles.isDead(vehicle)) return anticheat.trigger(player, 'explosion', `vehicles.explode целой машины ${vehicle.id}`);
         timer.add(() => {
+            if (!mp.vehicles.exists(vehicle)) return;
             vehicle.explode();
             vehicle.destroy();
         }, 2000);
@@ -255,11 +311,74 @@ module.exports = {
         vehicle.setVariable("sirenSound", !sirenSound);
     },
     "vehicles.siren.lights": (player) => {
-        if (!player.vehicle) return;
+        if (!player.vehicle || player.seat != 0) return;
 
         var sirenLights = player.vehicle.getVariable("sirenLights");
         if (sirenLights == player.vehicle.siren) return;
         player.vehicle.setVariable("sirenLights", player.vehicle.siren);
+    },
+    "vehicles.damage.sync": (player, raw) => {
+        if (!player.vehicle || player.seat != 0) return;
+        if (player.vehicle.getVariable('robbed')) return;
+        var now = Date.now();
+        if (player.damageSyncAt && now - player.damageSyncAt < 700) return;
+        player.damageSyncAt = now;
+        if (typeof raw != 'string' || raw.length > 700) return;
+        var snapshot;
+        try {
+            snapshot = JSON.parse(raw);
+        } catch (err) {
+            return;
+        }
+        if (!Array.isArray(snapshot) || snapshot.length < 4 || snapshot.length > 52) return;
+        for (var i = 0; i < snapshot.length; i++) {
+            if (typeof snapshot[i] != 'number' || !isFinite(snapshot[i])) return;
+        }
+        snapshot[1] = (snapshot[1] | 0) | (player.vehicle.brokenWindows | 0);
+        var clean = snapshot[0] == 0 && snapshot[1] == 0 && snapshot[2] == 0 && snapshot[3] < 0.05 && snapshot.length == 4;
+        var nextKey = clean ? '' : snapshot.join(',');
+        if ((player.vehicle.__damageKey || '') == nextKey) return;
+        player.vehicle.__damageKey = nextKey;
+        player.vehicle.setVariable('damage', clean ? null : snapshot);
+    },
+    "vehicles.lights.set": (player, state) => {
+        if (!player.vehicle || player.seat != 0) return;
+        state = state | 0;
+        if (state < 0 || state > 3) return;
+        if (player.vehicle.getVariable('lights') === state) return;
+        player.vehicle.setVariable('lights', state);
+    },
+    "vehicles.window.roll": (player, index) => {
+        if (!player.character || !player.vehicle) return;
+        if (player.vehicle.getVariable("robbed")) return;
+        index = index | 0;
+        if (player.seat != 0 && index != player.seat) return;
+        if (index != -1 && (index < 0 || index > 3)) return;
+        var broken = player.vehicle.brokenWindows | 0;
+        var bits = player.vehicle.getVariable("windowsDown") | 0;
+        if (index == -1) {
+            if (player.seat != 0) return;
+            var open = false;
+            for (var i = 0; i < 4; i++) {
+                if (broken & (1 << i)) continue;
+                if (!(bits & (1 << i))) open = true;
+            }
+            for (var n = 0; n < 4; n++) {
+                if (broken & (1 << n)) continue;
+                if (open) bits |= (1 << n);
+                else bits &= ~(1 << n);
+            }
+        } else {
+            if (broken & (1 << index)) return notifs.error(player, `Стекло разбито`, `Окна`);
+            if (bits & (1 << index)) bits &= ~(1 << index);
+            else bits |= (1 << index);
+        }
+        bits &= ~broken;
+        var prev = player.vehicle.getVariable("windowsDown") | 0;
+        if (bits === prev) return;
+        player.vehicle.setVariable("windowsDown", bits ? bits : null);
+        if (index == -1) notifs.info(player, open ? `Стёкла опущены` : `Стёкла подняты`, `Окна`);
+        else notifs.info(player, bits & (1 << index) ? `Стекло опущено` : `Стекло поднято`, `Окна`);
     },
     "vehicles.sell.send": (player, data) => {
         data = JSON.parse(data);
@@ -459,15 +578,142 @@ module.exports = {
         if (!streetPlace) return;
         player.vehicle.isInGarage = false;
         player.call('vehicles.garage', false);
+        anticheat.allowMove(player);
         player.vehicle.position = new mp.Vector3(streetPlace.x, streetPlace.y, streetPlace.z);
         //player.vehicle.rotation = new mp.Vector3(0, 0, 0);
         //player.vehicle.setHeading(streetPlace.h);
         player.call('vehicles.heading.set', [streetPlace.h]);
 
+        anticheat.allowMove(player);
         player.vehicle.dimension = 0;
+    },
+    "vehicles.music": (player, raw) => {
+        var vehicle = musicDriver(player);
+        if (!vehicle) return;
+        raw = typeof raw == 'string' ? raw.trim() : '';
+        var volMatch = raw.match(/^(?:volume|vol|громкость)\s+(\d{1,3})$/i);
+        if (volMatch) {
+            var level = Math.max(0, Math.min(100, parseInt(volMatch[1], 10)));
+            vehicle.setVariable('musicVol', level);
+            return notifs.info(player, `Громкость ${level}%`, `Музыка`);
+        }
+        if (!raw || raw == 'off' || raw == 'stop') {
+            applyMusicQueue(vehicle, [], 0);
+            return notifs.info(player, `Музыка выключена`, `Музыка`);
+        }
+        if (!musicUrlOk(raw)) return notifs.error(player, `Нужна прямая ссылка http или https`, `Музыка`);
+        var now = Date.now();
+        if (player.musicSetAt && now - player.musicSetAt < 400) return;
+        player.musicSetAt = now;
+        var queue = readMusicQueue(vehicle);
+        if (queue.length >= 15) return notifs.error(player, `В очереди уже 15 треков`, `Музыка`);
+        queue.push(raw);
+        if (vehicle.getVariable('musicUrl')) {
+            vehicle.setVariable('musicQueue', JSON.stringify(queue));
+            return notifs.success(player, `Трек добавлен в очередь`, `Музыка`);
+        }
+        applyMusicQueue(vehicle, queue, 0);
+        notifs.success(player, `Трек включён в машине`, `Музыка`);
+    },
+    "vehicles.music.add": (player, raw) => {
+        mp.events.call('vehicles.music', player, typeof raw == 'string' ? raw.trim() : '');
+    },
+    "vehicles.music.volume": (player, level) => {
+        var vehicle = musicDriver(player);
+        if (!vehicle) return;
+        level = Math.max(0, Math.min(100, parseInt(level, 10) || 0));
+        if (vehicle.getVariable('musicVol') === level) return;
+        vehicle.setVariable('musicVol', level);
+    },
+    "vehicles.music.stop": (player) => {
+        var vehicle = musicDriver(player);
+        if (!vehicle) return;
+        applyMusicQueue(vehicle, [], 0);
+    },
+    "vehicles.music.play": (player, index) => {
+        var vehicle = musicDriver(player);
+        if (!vehicle) return;
+        var queue = readMusicQueue(vehicle);
+        index = parseInt(index, 10);
+        if (!queue.length || index < 0 || index >= queue.length) return;
+        applyMusicQueue(vehicle, queue, index);
+    },
+    "vehicles.music.remove": (player, index) => {
+        var vehicle = musicDriver(player);
+        if (!vehicle) return;
+        var queue = readMusicQueue(vehicle);
+        index = parseInt(index, 10);
+        if (index < 0 || index >= queue.length) return;
+        var current = vehicle.getVariable('musicIndex');
+        if (current == null) current = 0;
+        queue.splice(index, 1);
+        if (!queue.length) return applyMusicQueue(vehicle, [], 0);
+        if (index < current) return applyMusicQueue(vehicle, queue, current - 1);
+        if (index == current) return applyMusicQueue(vehicle, queue, Math.min(index, queue.length - 1));
+        vehicle.setVariable('musicQueue', JSON.stringify(queue));
+        vehicle.setVariable('musicIndex', current);
+    },
+    "vehicles.music.next": (player) => {
+        var vehicle = musicDriver(player);
+        if (!vehicle) return;
+        var queue = readMusicQueue(vehicle);
+        var index = (vehicle.getVariable('musicIndex') | 0) + 1;
+        applyMusicQueue(vehicle, queue, index);
+    },
+    "vehicles.music.prev": (player) => {
+        var vehicle = musicDriver(player);
+        if (!vehicle) return;
+        var queue = readMusicQueue(vehicle);
+        var index = (vehicle.getVariable('musicIndex') | 0) - 1;
+        if (index < 0) index = 0;
+        applyMusicQueue(vehicle, queue, index);
+    },
+    "vehicles.music.seek": (player, seconds) => {
+        var vehicle = musicDriver(player);
+        if (!vehicle || !vehicle.getVariable('musicUrl')) return;
+        seconds = Math.max(0, Math.min(3600, Number(seconds) || 0));
+        var now = Date.now();
+        if (vehicle.musicSeekAt && now - vehicle.musicSeekAt < 250) return;
+        vehicle.musicSeekAt = now;
+        vehicle.setVariable('musicAt', now - Math.round(seconds * 1000));
+    },
+    "vehicles.music.ended": (player, remoteId) => {
+        if (!player.character) return;
+        var vehicle = mp.vehicles.at(remoteId);
+        if (!vehicle || !vehicle.getVariable('musicUrl')) return;
+        if (player.dimension != vehicle.dimension || player.dist(vehicle.position) > 80) return;
+        var now = Date.now();
+        var started = vehicle.getVariable('musicAt') || 0;
+        if (now - started < 1500) return;
+        if (vehicle.musicEndAt && now - vehicle.musicEndAt < 2000) return;
+        vehicle.musicEndAt = now;
+        var queue = readMusicQueue(vehicle);
+        var index = vehicle.getVariable('musicIndex');
+        if (index == null) index = -1;
+        applyMusicQueue(vehicle, queue, index + 1);
+    },
+    "vehicles.window.broke": (player, remoteId, index) => {
+        if (!player.character) return;
+        var vehicle = mp.vehicles.at(remoteId);
+        if (!vehicle) return;
+        if (player.dimension != vehicle.dimension || player.dist(vehicle.position) > 25) return;
+        index = index | 0;
+        if (index < 0 || index > 7) return;
+        vehicle.brokenWindows = (vehicle.brokenWindows | 0) | (1 << index);
+        var damage = vehicle.getVariable("damage");
+        if (!damage || !damage.length) damage = [0, 0, 0, 0];
+        else damage = damage.slice();
+        var bits = (damage[1] | 0) | vehicle.brokenWindows;
+        if (bits === (damage[1] | 0)) return;
+        damage[1] = bits;
+        vehicle.__damageKey = damage.join(",");
+        vehicle.setVariable("damage", damage);
     },
     "vehicles.radio.set": (player, radioIndex) => {
         if (!player.vehicle) return;
+        if (player.seat != 0 && player.vehicle.getVariable('radioIndex') != null) return;
+        radioIndex = radioIndex | 0;
+        if (player.vehicle.getVariable('radioIndex') === radioIndex) return;
         player.vehicle.setVariable('radioIndex', radioIndex);
     },
     "time.main.tick": (ticks) => {

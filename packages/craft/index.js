@@ -259,6 +259,7 @@ module.exports = {
         crafter.object = mp.objects.new(mp.joaat(crafter.model), crafter.pos, {
             rotation: crafter.rot
         });
+        crafter.object.setVariable('sgr', 0);
     },
     convertToClientCrafter(crafter) {
         var clientData = {

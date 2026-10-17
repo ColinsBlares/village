@@ -646,6 +646,13 @@ module.exports = {
         // Обходим баги рейджа через проверку на player.vehicle в радиусе авто
         return occupants;
     },
+    // Снимок вмятин после ремонта, иначе стрим снова натянет старый кузов
+    clearBodyDamage(vehicle) {
+        if (!vehicle || !mp.vehicles.exists(vehicle)) return;
+        vehicle.__damageKey = '';
+        vehicle.brokenWindows = 0;
+        if (vehicle.getVariable('damage') != null) vehicle.setVariable('damage', null);
+    },
     // Убито ли авто
     isDead(vehicle) {
         return !vehicle.engineHealth || !vehicle.bodyHealth || vehicle.dead;
@@ -660,7 +667,9 @@ module.exports = {
         veh.engine = false;
         veh.setVariable("engine", false);
 
+        veh.acRepair = Date.now() + 2000;
         veh.repair();
+        this.clearBodyDamage(veh);
         veh.position = new mp.Vector3(veh.db.x, veh.db.y, veh.db.z);
         veh.rotation = new mp.Vector3(0, 0, veh.db.h);
         veh.setVariable("heading", veh.db.h);

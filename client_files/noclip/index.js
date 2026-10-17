@@ -49,6 +49,11 @@ mp.events.add('characterInit.done', () => {
 function startNoClip() {
     //mp.game.graphics.notify('NoClip ~g~activated');
     mp.notify.success('Режим полета включен', 'Fly mode');
+    // Курсор после ошибки рендера блокирует и полёт, и обзор
+    mp.gui.cursor.show(false, false);
+    // Сервер пропускает проверки позиции только у админа в ноуклипе
+    mp.events.call('anticheat.noclip', true);
+    mp.events.callRemote('anticheat.noclip', true);
     let camPos = new mp.Vector3(
         localPlayer.position.x,
         localPlayer.position.y,
@@ -67,9 +72,11 @@ function startNoClip() {
 function stopNoClip() {
     //mp.game.graphics.notify('NoClip ~r~disabled');
     mp.notify.success('Режим полета отключен', 'Fly mode');
+    var pos = null;
+    var heading = 0;
     if (noClipCamera) {
-        localPlayer.position = noClipCamera.getCoord();
-        localPlayer.setHeading(noClipCamera.getRot(2).z);
+        pos = noClipCamera.getCoord();
+        heading = noClipCamera.getRot(2).z;
         noClipCamera.destroy(true);
         noClipCamera = null;
     }
@@ -78,12 +85,18 @@ function stopNoClip() {
     localPlayer.setInvincible(false);
     localPlayer.setVisible(true, false);
     localPlayer.setCollision(true, false);
+    if (pos) {
+        localPlayer.position = pos;
+        localPlayer.setHeading(heading);
+        mp.events.callRemote('anticheat.noclip', false, pos.x, pos.y, pos.z, heading);
+    } else {
+        mp.events.callRemote('anticheat.noclip', false);
+    }
+    mp.events.call('anticheat.noclip', false);
 }
 mp.events.add('render', function() {
     var start = Date.now();
-    if (!noClipCamera || mp.gui.cursor.visible) {
-        return;
-    }
+    if (!noClipCamera || mp.gui.cursor.visible) return;
     controlModifier = mp.keys.isDown(bindASCIIKeys.LCtrl);
     shiftModifier = mp.keys.isDown(bindASCIIKeys.Shift);
     let rot = noClipCamera.getRot(2);

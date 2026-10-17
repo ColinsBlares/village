@@ -267,6 +267,7 @@ module.exports = {
         var obj = mp.objects.new('prop_fence_log_02', slot.pos, {
             rotation: slot.rot
         });
+        obj.setVariable('sgr', 0);
         var pos = obj.position;
         var logColshape = mp.colshapes.newSphere(pos.x, pos.y, pos.z, 3);
         logColshape.onEnter = (player) => {
@@ -316,7 +317,7 @@ module.exports = {
 
         var obj = colshape.obj;
         mp.players.forEachInRange(obj.position, 3, rec => {
-            if (!rec.character) return;
+            if (!rec.character || rec.dimension != obj.dimension) return;
             rec.call(`woodman.log.health`, [obj.id, index, colshape.squats[index]]);
         });
 

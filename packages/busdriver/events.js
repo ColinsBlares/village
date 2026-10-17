@@ -4,6 +4,7 @@ let vehicles = call('vehicles');
 let notify = call('notifications');
 let jobs = call('jobs');
 let timer = call('timer');
+let anticheat = call('anticheat');
 
 module.exports = {
     "init": () => {
@@ -19,6 +20,8 @@ module.exports = {
         }
     },
     "busdriver.route.add": async (player, data) => {
+        // Редактор маршрутов /rc — access 5, иначе любой клиент пишет маршрут с любой зарплатой
+        if (!player.character || player.character.admin < 5) return anticheat.trigger(player, 'money', 'busdriver.route.add без админки');
         data = JSON.parse(data);
         let route = await db.Models.BusRoute.create({
             name: data.name,
@@ -89,8 +92,15 @@ module.exports = {
 
     },
     "busdriver.route.start": (player, routeId, price) => {
+        if (!anticheat.guard(player, 'busdriver.route.start')) return;
         if (!player.vehicle || !player.vehicle.isActiveBus) return player.call('busdriver.route.start.ans', [0]);
+        if (player.vehicle.busDriverId != player.id) return player.call('busdriver.route.start.ans', [0]);
+        // Цена из меню 0..10, маршрут — только из доступных по уровню
+        price = parseInt(price);
+        if (!Number.isInteger(price) || price < 0 || price > 10) return anticheat.trigger(player, 'money', `автобус: цена ${price}`);
+        if (!bus.getAvailiableRoutes(player).some(current => current.id == routeId)) return player.call('busdriver.route.start.ans', [0]);
         let route = bus.getRouteById(routeId);
+        if (!route) return player.call('busdriver.route.start.ans', [0]);
         player.vehicle.hasBusRoute = true;
         player.busRoute = route;
         player.busPointIndex = 0;
@@ -155,6 +165,10 @@ module.exports = {
     "busdriver.checkpoint.entered": (player) => {
         if (!player.vehicle) return;
         if (player.vehicle.busDriverId != player.id) return;
+        if (!player.busRoute || !player.busPoints) return;
+        // Чекпоинт — только у текущей точки и не раньше таймера остановки
+        if (!anticheat.isNear(player, player.busPoints[player.busPointIndex], 20)) return;
+        if (!anticheat.jobReady(player, 'busdriver.checkpoint')) return;
 
         let bonus = bus.calculateBonus(player);
         let salary = parseInt(player.busRoute.salary * (1 + bonus));
@@ -181,6 +195,7 @@ module.exports = {
         player.busPointIndex++;
         if (player.busPointIndex == player.busPoints.length) player.busPointIndex = 0;
         let point = player.busPoints[player.busPointIndex];
+        anticheat.jobStart(player, 'busdriver.checkpoint', Math.max(timeout - 1000, 0));
         player.call('busdriver.checkpoint.create', [point, timeout]);
     },
     "playerExitVehicle": (player, vehicle) => {

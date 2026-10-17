@@ -1,6 +1,7 @@
 let carservice = require('./index.js');
 
 let money = call('money');
+let vehicles = call('vehicles');
 let jobs = call('jobs');
 let timer = call('timer');
 
@@ -392,7 +393,9 @@ module.exports = {
             /// Ремонт завершен удачно
             case 0:
                 player.call('notifications.push.success', [`Ремонт окончен`, 'Автомастерская']);
+                vehicle.acRepair = Date.now() + 2000;
                 vehicle.repair();
+                vehicles.clearBodyDamage(vehicle);
                 vehicle.isBeingRepaired = false;
                 vehicle.setVariable('hood', false);
                 break;

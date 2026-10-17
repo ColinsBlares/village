@@ -43,7 +43,7 @@ mp.events.add('phone.app.remove', function (appName, index) {
 
 mp.events.add('characterInit.done', function () {
     /// Добавление канала в войсчат
-    mp.speechChanel.addChannel("phone");
+    mp.speechChanel.addChannel("phone", 0, false, false, "phone");
 });
 
 /// Начало разговора на нашем конце

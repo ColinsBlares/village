@@ -3,6 +3,7 @@ let jobs = call('jobs');
 let inventory = call('inventory');
 let money = call('money');
 let notifs = call('notifications');
+let anticheat = call('anticheat');
 
 module.exports = {
     "init": async () => {
@@ -10,8 +11,11 @@ module.exports = {
         inited(__dirname);
     },
     "bins.trash.take": (player) => {
+        if (!anticheat.guard(player, 'bins.trash.take')) return;
+        if (!player.character) return;
         var colshape = player.insideBin;
         if (!colshape) return notifs.error(player, `Вы не возле мусорки`);
+        if (!anticheat.jobReady(player, 'bins.trash')) return;
         if (colshape.lastFindTime) {
             var diff = Date.now() - colshape.lastFindTime;
             if (diff < bins.findInterval) return notifs.error(player, `Эту мусорку уже вычистили до вас`);
@@ -37,6 +41,8 @@ module.exports = {
         notifs.success(player, `Вы нашли ${name}`, `Мусорка`);
     },
     "bins.trash.sell": (player) => {
+        if (!anticheat.guard(player, 'bins.trash.sell')) return;
+        if (!player.character) return;
         var header = `Сдача мусора`;
         if (!player.insideDumb) return notifs.error(player, `Вы не у свалки`, header);
 

@@ -36,14 +36,12 @@ module.exports = {
         inventory.addItem(player, winter.snowballItemId, params, (e) => {
             if (e) return out(e);
 
-            mp.players.forEachInRange(player.position, 20, rec => {
-                rec.call(`animations.play`, [player.id, {
-                    dict: "anim@mp_snowball",
-                    name: "pickup_snowball",
-                    speed: 1,
-                    flag: 1
-                }, 1500]);
-            });
+            mp.players.callInRange(player.position, 20, player.dimension, 'animations.play', [player.id, {
+                dict: "anim@mp_snowball",
+                name: "pickup_snowball",
+                speed: 1,
+                flag: 1
+            }, 1500]);
             notifs.success(player, `Вы слепили снежок`, header);
             inventory.notifyOverhead(player, `Слепил '${inventory.getName(winter.snowballItemId)}'`);
         });

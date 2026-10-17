@@ -2,6 +2,7 @@ mp.attachmentMngr = {
     attachments: {},
 
     addFor: function(entity, id) {
+        if (!entity || !entity.handle) return;
         if (!this.attachments.hasOwnProperty(id)) return;
 
         if (entity && entity.__attachmentObjects && !entity.__attachmentObjects.hasOwnProperty(id)) {
@@ -214,6 +215,9 @@ mp.events.addDataHandler("attachmentsData", (entity, data) => {
 });
 
 function updateAttach(entity, data) {
+    if (!entity || !entity.handle) return;
+    if (data == null) data = '';
+    if (typeof data != 'string') return;
     let newAttachments = (data.length > 0) ? data.split('|').map(att => parseInt(att, 36)) : [];
 
     try {

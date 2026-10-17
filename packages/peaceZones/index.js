@@ -80,9 +80,11 @@ module.exports = {
         this.zones.forEach(zone => {
             var colshape = mp.colshapes.newCircle(zone.pos.x, zone.pos.y, zone.radius, zone.dimension || 0);
             colshape.onEnter = (player) => {
+                call('anticheat').setPeace(player, true);
                 player.call("peaceZones.inside", [true]);
             };
             colshape.onExit = (player) => {
+                call('anticheat').setPeace(player, false);
                 player.call("peaceZones.inside", [false]);
             };
         });

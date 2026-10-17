@@ -4,6 +4,7 @@ var inventory = require('../inventory');
 var money = require('../money');
 var notifs = require('../notifications');
 var hospital = require('../hospital');
+var anticheat = require('../anticheat');
 
 module.exports = {
     "init": () => {
@@ -288,6 +289,7 @@ module.exports = {
                 if (!count) inventory.deleteItem(inviter, med);
                 else inventory.updateParam(inviter, med, 'count', count);
 
+                anticheat.allowHeal(player);
                 player.health = Math.clamp(player.health + offer.health, 1, 100);
                 notifs.success(inviter, `${player.name} вылечился`, header);
                 notifs.success(player, `${inviter.name} вас вылечил`, header);

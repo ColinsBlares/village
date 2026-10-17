@@ -6,6 +6,7 @@ let money = call('money');
 let notify = call('notifications');
 let utils = call('utils');
 let timer = call('timer');
+let anticheat = call('anticheat');
 let inventory;
 
 module.exports = {
@@ -19,8 +20,13 @@ module.exports = {
 		inited(__dirname);
 	},
 	'casino.dice.offer.send': (player, data) => {
+		if (!anticheat.guard(player, 'casino.dice.offer.send')) return;
 		if (typeof data == 'string') data = JSON.parse(data);
 		if (!data || !player.character) return;
+		// NaN проходит все сравнения ниже
+		data.amount = parseInt(data.amount);
+		if (!Number.isInteger(data.amount) || data.amount <= 0)
+			return anticheat.trigger(player, 'money', `кости: сумма ${data.amount}`);
 
 		let target = mp.players.at(data.targetId);
 		if (!target || !target.character)
@@ -59,7 +65,7 @@ module.exports = {
 		notify.info(player, `Вы предложили игру в кости`);
 		player.hasActiveDiceOffer = true;
 		player.diceOfferTimeout = timer.add(() => {
-			hasActiveDiceOffer = false;
+			player.hasActiveDiceOffer = false;
 		}, 10000);
 
 		target.diceOffer = {
@@ -123,6 +129,7 @@ module.exports = {
 		notify.info(player, `Тест: спин с призом «${prize.text}», слот ${wheelSlot}`, `DEBUG`);
 	},
 	'casino.dice.offer.accept': (player, accept) => {
+		if (!anticheat.guard(player, 'casino.dice.offer.accept')) return;
 		let target = player;
 		if (!target.diceOffer || !target.character) return;
 		let offer = player.diceOffer;
@@ -183,7 +190,7 @@ module.exports = {
 			};
 
 			mp.players.forEachInRange(target.position, 5, current => {
-				//console.log('push txt')
+				if (current.dimension != target.dimension) return;
 				current.call(`casino.dice.text.show`, [JSON.stringify(data)]);
 			});
 		} else {
@@ -209,6 +216,7 @@ module.exports = {
 
 	/// Приём ставки: валидация, списание, генерация забега, старт на экране.
 	'casino.horse.bet': (player, data) => {
+		if (!anticheat.guard(player, 'casino.horse.bet')) return;
 		if (typeof data === 'string') data = JSON.parse(data);
 		if (!data || !player.character) return;
 
@@ -243,6 +251,7 @@ module.exports = {
 					horse: horse.num,
 					amount,
 					order: race.order,
+					durationMs: race.durationSec * 1000,
 					createdAt: Date.now(),
 				};
 
@@ -264,8 +273,12 @@ module.exports = {
 	/// Клиент доиграл анимацию забега — выдаём выигрыш по сохранённому порядку.
 	'casino.horse.race.done': player => {
 		if (!player.character || !player.horseRace) return;
+		// done до половины забега — клиент не смотрел анимацию
+		const race = player.horseRace;
+		if (race.durationMs && Date.now() - race.createdAt < race.durationMs / 2)
+			return anticheat.trigger(player, 'flood', `скачки: done через ${Date.now() - race.createdAt} мс`, true);
 
-		const { horse, amount, order } = player.horseRace;
+		const { horse, amount, order } = race;
 		delete player.horseRace;
 
 		const winner = order[0];
@@ -299,6 +312,7 @@ module.exports = {
 	/// Спин слот-машины: валидация, списание ставки, расчёт исхода, выплата.
 	/// Барабаны на клиенте лишь анимируются к присланному результату.
 	'casino.slots.spin': (player, bet) => {
+		if (!anticheat.guard(player, 'casino.slots.spin')) return;
 		if (!player.character) return;
 
 		const fail = (msg, level = 'error') => {
@@ -392,6 +406,7 @@ module.exports = {
 			player.call('casino.wheel.spin.fail');
 		};
 
+		if (!anticheat.guard(player, 'casino.wheel.spin.try')) return player.call('casino.wheel.spin.fail');
 		if (!player.character) return player.call('casino.wheel.spin.fail');
 		if (!casino.isPlayerInCasinoArea(player)) return fail(`Вы не в казино`);
 		if (!casino.isPlayerNearWheel(player))

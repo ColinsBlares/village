@@ -1,4 +1,5 @@
 let bankService = require('./index.js');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/createbank": {
@@ -29,6 +30,7 @@ module.exports = {
         args: "[id]:n",
         handler: async (player, args, out) => {
             let bank = bankService.getBankById(args[0]);
+            anticheat.allowMove(player);
             if (bank != null) player.position = new mp.Vector3(bank.info.x, bank.info.y, bank.info.z + 1);
         }
     },

@@ -1,5 +1,6 @@
 let bizService = require('./index.js');
 let factions = call('factions');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/createbiz": {
@@ -63,6 +64,7 @@ module.exports = {
         args: "[id]:n",
         handler: (player, args) => {
             let position = bizService.getBizPosition(parseInt(args[0]));
+            anticheat.allowMove(player);
             if (position) player.position = position;
         }
     },

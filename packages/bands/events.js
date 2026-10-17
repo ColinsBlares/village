@@ -258,6 +258,8 @@ module.exports = {
 
         var itemIds = [29, 30, 31, 32];
         data.index = Math.clamp(data.index, 0, itemIds.length - 1);
+        data.count = parseInt(data.count);
+        if (!Number.isInteger(data.count) || data.count <= 0) return notifs.error(player, `Некорректное количество`, header);
         var price = bands.drugsPrice[data.index] * data.count;
         var power = bands.getPowerBand(faction.id);
         // стоимость зависит от уровня влияния

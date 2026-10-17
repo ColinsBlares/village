@@ -1,8 +1,10 @@
 var carmarket = require('./index.js');
+let anticheat = call('anticheat');
 module.exports = {
     "/mr": {
         access: 6,
         handler: (player, args) => {
+            anticheat.allowMove(player);
             player.position = new mp.Vector3(39.54726791381836, -1716.88525390625, 28.982471466064453);
         }
     },

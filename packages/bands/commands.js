@@ -1,5 +1,6 @@
 let bands = call('bands');
 let factions = call('factions');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/bsetzoneowner": {
@@ -24,6 +25,7 @@ module.exports = {
             var zone = bands.getZone(args[0]);
             if (!zone) return out.error(`Зона #${args[0]} не найдена`, player);
             var pos = new mp.Vector3(zone.x, zone.y, 50);
+            anticheat.allowMove(player);
             player.position = pos;
         }
     },

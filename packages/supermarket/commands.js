@@ -1,4 +1,5 @@
 let supermarket = require('./index.js');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/loadmarkets": {
@@ -126,6 +127,7 @@ module.exports = {
         access: 6,
         args: '',
         handler: (player, args) => {
+            anticheat.allowMove(player);
             player.position = new mp.Vector3(26.74213981628418, -1347.25341796875, 29.497028350830078);
         }
     }

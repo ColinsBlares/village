@@ -3,6 +3,79 @@
 let notifs = call('notifications');
 let timer = call('timer');
 let utils = call('utils');
+let anticheat = call('anticheat');
+
+function qmul(a, b) {
+    return {
+        x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+        y: a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+        z: a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
+        w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
+    };
+}
+
+function qnorm(q) {
+    var l = Math.hypot(q.x, q.y, q.z, q.w) || 1;
+    return { x: q.x / l, y: q.y / l, z: q.z / l, w: q.w / l };
+}
+
+function qax(x, y, z, deg) {
+    var half = (deg || 0) * Math.PI / 360;
+    var s = Math.sin(half);
+    var l = Math.hypot(x, y, z) || 1;
+    return { x: x / l * s, y: y / l * s, z: z / l * s, w: Math.cos(half) };
+}
+
+function eulerToQuat(x, y, z) {
+    return qnorm(qmul(qmul(qax(0, 0, 1, z), qax(0, 1, 0, y)), qax(1, 0, 0, x)));
+}
+
+function quatToEuler(q) {
+    q = qnorm(q);
+    var x = q.x;
+    var y = q.y;
+    var z = q.z;
+    var w = q.w;
+    var rx = Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y));
+    var sinp = 2 * (w * y - z * x);
+    var ry = Math.abs(sinp) >= 1 ? Math.sign(sinp) * Math.PI / 2 : Math.asin(sinp);
+    var rz = Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
+    return new mp.Vector3(rx * 180 / Math.PI, ry * 180 / Math.PI, rz * 180 / Math.PI);
+}
+
+function quatFromTo(from, to) {
+    var ax = from.y * to.z - from.z * to.y;
+    var ay = from.z * to.x - from.x * to.z;
+    var az = from.x * to.y - from.y * to.x;
+    var len = Math.hypot(ax, ay, az);
+    var dot = from.x * to.x + from.y * to.y + from.z * to.z;
+    if (len < 1e-8) {
+        return dot > 0 ? { x: 0, y: 0, z: 0, w: 1 } : { x: 1, y: 0, z: 0, w: 0 };
+    }
+    var half = Math.atan2(len, dot) * 0.5;
+    var s = Math.sin(half);
+    return { x: ax / len * s, y: ay / len * s, z: az / len * s, w: Math.cos(half) };
+}
+
+// Поза предмета на ровной земле, затем весь поворот наклоняется так, чтобы верх смотрел по нормали склона.
+function slopeRotation(heading, pos, rX, rY) {
+    rX = Number(rX) || 0;
+    rY = Number(rY) || 0;
+    heading = Number(heading) || 0;
+    if (!pos || !isFinite(pos.nx) || !isFinite(pos.ny) || !isFinite(pos.nz)) {
+        return new mp.Vector3(rX, rY, heading);
+    }
+    var l = Math.hypot(pos.nx, pos.ny, pos.nz) || 1;
+    var n = { x: pos.nx / l, y: pos.ny / l, z: pos.nz / l };
+    if (n.z < 0) {
+        n.x = -n.x;
+        n.y = -n.y;
+        n.z = -n.z;
+    }
+    var tilt = quatFromTo({ x: 0, y: 0, z: 1 }, n);
+    var flat = eulerToQuat(rX, rY, heading);
+    return quatToEuler(qmul(tilt, flat));
+}
 
 module.exports = {
     // Макс. вес предметов, переносимый игроком
@@ -652,6 +725,7 @@ module.exports = {
                 //     player.armour = parseInt(params.health);
                 //     player.setClothes(9, params.variation, params.texture, 0);
                 // }
+                anticheat.allowArmour(player);
                 player.armour = parseInt(params.health);
                 player.setClothes(9, params.variation, params.texture, 0);
             },
@@ -702,10 +776,13 @@ module.exports = {
                     for (var i = 0; i < player.inventory.items.length; i++) {
                         var item = player.inventory.items[i];
                         if (!item.parentId && item.itemId == itemId && item.index == 4) {
-                            this.updateParam(player, item, "health", parseInt(player.armour));
+                            var armourParam = this.getParam(item, "health");
+                            var armour = Math.min(parseInt(player.armour) || 0, armourParam ? parseInt(armourParam.value) || 0 : 0);
+                            this.updateParam(player, item, "health", armour);
                         }
                     }
                 }
+                anticheat.allowArmour(player);
                 player.armour = 0;
                 player.setClothes(9, 0, 0, 0);
             },
@@ -1263,6 +1340,7 @@ module.exports = {
     },
     giveWeapon(player, hash, ammo) {
         if (!hash) return;
+        anticheat.allowAmmo(player);
         player.setWeaponAmmo(hash, 0);
         player.giveWeapon(hash, 0);
         player.setWeaponAmmo(hash, parseInt(ammo));
@@ -1274,7 +1352,9 @@ module.exports = {
         if (!item) return;
         var param = this.getParam(item, 'weaponHash');
         if (!param || param.value != hash) return;
-        if (player.weapon == hash) this.updateParam(player, item, 'ammo', player.weaponAmmo);
+        // Клиент может только потратить патроны, но не добавить
+        var ammoParam = this.getParam(item, 'ammo');
+        if (player.weapon == hash && ammoParam) this.updateParam(player, item, 'ammo', Math.min(player.weaponAmmo, parseInt(ammoParam.value) || 0));
         player.removeWeapon(hash);
         player.call(`weapons.removeWeapon`, [hash.toString()]);
     },
@@ -1290,13 +1370,15 @@ module.exports = {
         pos.z += info.deltaZ;
 
         var newObj = mp.objects.new(mp.joaat(info.model), pos, {
-            rotation: new mp.Vector3(info.rX, info.rY, player.heading),
+            rotation: slopeRotation(player.heading, pos, info.rX, info.rY),
             dimension: dimension
         });
         newObj.playerId = player.id;
         newObj.item = item;
         newObj.children = children;
         newObj.setVariable("groundItem", true);
+        // Поворот уже по нормали склона. Клиент только поджимает высоту, иначе перезапишет угол.
+        newObj.setVariable('sgr', 2);
         player.inventory.ground.push(newObj);
 
 
@@ -1351,6 +1433,9 @@ module.exports = {
         newObj.item = item;
         newObj.children = [];
         newObj.setVariable("groundItem", true);
+        var layRx = pos.rX || info.rX;
+        var layRy = pos.rY || info.rY;
+        newObj.setVariable('sgr', (Math.abs(layRx) > 45 || Math.abs(layRy) > 45) ? 1 : 0);
 
         var objId = newObj.id;
         var sqlId = item.id;
@@ -1474,7 +1559,7 @@ module.exports = {
     },
     notifyOverhead(player, text) {
         mp.players.forEachInRange(player.position, 20, rec => {
-            if (rec.id == player.id) return;
+            if (rec.id == player.id || rec.dimension != player.dimension) return;
             rec.call(`addOverheadText`, [player.id, text, [221, 144, 255, 255]]);
         });
     },

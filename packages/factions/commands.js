@@ -1,5 +1,6 @@
 let factions = require('./index');
 let notifs = require('../notifications');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/flist": {
@@ -24,6 +25,7 @@ module.exports = {
             if (!marker) return out.error(`Организация #${args[0]} не найдена`, player);
             var pos = marker.position;
             pos.z++;
+            anticheat.allowMove(player);
             player.position = pos;
             player.dimension = marker.dimension;
             out.info(`Вы телепортировались к организации #${args[0]}`, player);

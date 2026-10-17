@@ -1,4 +1,5 @@
 let bus = require('./index');
+let anticheat = call('anticheat');
 
 module.exports = {
     "/bus": {
@@ -6,6 +7,7 @@ module.exports = {
         access: 6,
         args: "",
         handler: (player, args) => {
+            anticheat.allowMove(player);
             player.position = new mp.Vector3(432.8280944824219, -645.812255859375, 28.725753784179688);
         }
     },
