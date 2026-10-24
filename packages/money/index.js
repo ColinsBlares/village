@@ -193,6 +193,7 @@ module.exports = {
         }).then(result => {
             this.changing(player);
             logger.log(`-${number}$ CASH | ${reason}`, "money", player);
+            mp.events.call("battlePass.cash.spent", player, number);
             callback(true);
         }).catch(err => {
             if (cash != null) {

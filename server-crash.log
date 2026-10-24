@@ -1,0 +1,617 @@
+[2026-10-18T04:42:56.454Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.456Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.456Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.457Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.457Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.457Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.458Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.458Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.459Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.459Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.460Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.460Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.461Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.461Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.461Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.462Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.462Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.462Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.463Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.463Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.464Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.464Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.464Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.465Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.465Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.466Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.466Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.466Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.467Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.467Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.467Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.468Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.468Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.469Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.469Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.469Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.470Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.470Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.470Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.471Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.471Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.472Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-18T04:42:56.477Z] unhandledRejection
+SequelizeHostNotFoundError: getaddrinfo ENOTFOUND maindbserer
+    at E:\rage\zhenya\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:127:19
+    at tryCatcher (E:\rage\zhenya\node_modules\bluebird\js\release\util.js:16:23)
+    at Promise._settlePromiseFromHandler (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:547:31)
+    at Promise._settlePromise (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:604:18)
+    at Promise._settlePromise0 (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:649:10)
+    at Promise._settlePromises (E:\rage\zhenya\node_modules\bluebird\js\release\promise.js:725:18)
+    at _drainQueueStep (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:93:12)
+    at _drainQueue (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:86:9)
+    at Async._drainQueues (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:102:5)
+    at Immediate.Async.drainQueues [as _onImmediate] (E:\rage\zhenya\node_modules\bluebird\js\release\async.js:15:14)
+    at processImmediate (internal/timers.js:461:21)
+
+[2026-10-24T18:31:20.256Z] unhandledRejection
+Error: Expired multiplayer object has been used
+    at Object.playerMethod_call [as call] (<anonymous>:687:6)
+    at Object.characterInit.start [as self] (E:\rage\zhenya\packages\characterInit\events.js:27:16)
+
+[2026-10-24T18:31:20.258Z] unhandledRejection
+Error: Expired multiplayer object has been used
+    at Object.playerMethod_call [as call] (<anonymous>:687:6)
+    at Object.characterInit.start [as self] (E:\rage\zhenya\packages\characterInit\events.js:27:16)
+
+[2026-10-24T20:08:52.953Z] unhandledRejection
+TypeError: Cannot read property 'map' of undefined
+    at Object.init (E:\rage\zhenya\packages\characterInit\index.js:179:59)
+    at async Object.characterInit.start [as self] (E:\rage\zhenya\packages\characterInit\events.js:22:25)
+

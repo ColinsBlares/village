@@ -2,9 +2,11 @@
 	grid-row-end: span 3;
 	overflow-x: hidden;
 	overflow-y: auto;
-	background-color: rgba(12, 12, 12, 0.8);
-	padding: 1.8vh 2.1vh;
-	border-radius: 1.2vh;
+	background: linear-gradient(145deg, rgba(18, 24, 29, 0.94), rgba(11, 16, 20, 0.92));
+	border: 1px solid rgba(222, 232, 235, 0.09);
+	box-shadow: 0 1.2vh 3.5vh rgba(0, 0, 0, 0.24), inset 0 1px rgba(255, 255, 255, 0.035);
+	padding: 1.8vh 1.7vh;
+	border-radius: 1.4vh;
 }
 
 .container {
@@ -13,25 +15,26 @@
 
 .header,
 .headerHidden {
-	color: #fff;
+	color: #d9e0e1;
 	display: flex;
-	font-size: 1.5vh;
+	font-size: 1.2vh;
 	justify-content: flex-end;
-	margin-top: 1vh;
-	margin-bottom: 1.3vh;
+	margin-top: 0.7vh;
+	margin-bottom: 1.05vh;
 	cursor: pointer;
+	min-height: 2.7vh;
 }
 
 .header div,
 .headerHidden div {
-	margin-right: 1.7vh;
+	margin-right: 1.15vh;
 }
 
 .title {
-	font-size: 1.8vh;
+	font-size: 1.55vh;
 	font-weight: 700;
 	margin-right: auto;
-	text-transform: uppercase;
-	color: #ffdf29;
-	margin-left: 1.5vh;
+	color: #f0f3f1;
+	letter-spacing: 0.025em;
+	margin-left: 0.5vh;
 }

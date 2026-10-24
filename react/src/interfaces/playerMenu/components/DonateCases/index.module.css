@@ -1,0 +1,248 @@
+.root {
+	height: 100%;
+	overflow: auto;
+	position: relative;
+	text-align: center;
+}
+
+.hidden {
+	display: none;
+}
+
+.head {
+	color: #ffdf29;
+	font-size: 2.2vh;
+	font-weight: bold;
+}
+
+.description {
+	color: rgba(255, 255, 255, 0.72);
+	font-size: 1.3vh;
+	margin: 0.8vh auto 1.2vh;
+	max-width: 90%;
+}
+
+.balance {
+	color: rgba(255, 255, 255, 0.75);
+	font-size: 1.2vh;
+	margin-bottom: 1.2vh;
+	text-align: right;
+}
+
+.balance strong {
+	color: #ffdf29;
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: 1vh;
+	text-align: left;
+}
+
+.card {
+	align-items: center;
+	background: linear-gradient(105deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.18));
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 0.7vh;
+	display: flex;
+	gap: 1.5vh;
+	min-height: 11vh;
+	padding: 1.1vh 1.3vh;
+}
+
+.bronze {
+	border-color: rgba(205, 137, 82, 0.55);
+}
+
+.silver {
+	border-color: rgba(193, 206, 224, 0.55);
+}
+
+.gold {
+	border-color: rgba(255, 211, 87, 0.64);
+}
+
+.caseIcon,
+.resultCase {
+	align-items: center;
+	background: linear-gradient(145deg, #b97848, #563b32);
+	border: 1px solid rgba(255, 223, 170, 0.55);
+	border-radius: 0.8vh;
+	box-shadow: 0 0.7vh 1.8vh rgba(0, 0, 0, 0.35), inset 0 0 1vh rgba(255, 255, 255, 0.16);
+	color: #ffe8be;
+	display: flex;
+	flex: 0 0 7vh;
+	font-size: 2.8vh;
+	height: 7vh;
+	justify-content: center;
+	position: relative;
+}
+
+.caseIcon::after,
+.resultCase::after {
+	border: 1px solid rgba(255, 238, 205, 0.4);
+	border-radius: 0.5vh;
+	content: '';
+	inset: 0.45vh;
+	position: absolute;
+}
+
+.silver .caseIcon,
+.silver .resultCase {
+	background: linear-gradient(145deg, #b6c6d8, #52647b);
+	border-color: rgba(237, 246, 255, 0.6);
+	color: #f3f7fc;
+}
+
+.gold .caseIcon,
+.gold .resultCase {
+	background: linear-gradient(145deg, #e9bd56, #795223);
+	border-color: rgba(255, 236, 171, 0.72);
+	color: #fff4cf;
+}
+
+.caseInfo {
+	flex: 1;
+	min-width: 0;
+}
+
+.caseInfo strong {
+	color: #fff;
+	font-size: 1.45vh;
+}
+
+.caseInfo p {
+	color: rgba(255, 255, 255, 0.78);
+	font-size: 1.15vh;
+	margin: 0.45vh 0;
+}
+
+.caseInfo small {
+	color: rgba(255, 255, 255, 0.52);
+	font-size: 0.95vh;
+}
+
+.buyArea {
+	align-items: center;
+	display: flex;
+	flex: 0 0 17vh;
+	flex-direction: column;
+	gap: 0.8vh;
+}
+
+.buyArea span {
+	color: #ffdf29;
+	font-size: 1.25vh;
+	font-weight: bold;
+}
+
+.buyArea button,
+.resultDialog button {
+	background: linear-gradient(100deg, #e5bd32, #ffdf29);
+	border: 0;
+	border-radius: 1.2vh;
+	color: #151515;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 1vh;
+	font-weight: bold;
+	padding: 0.8vh 1.3vh;
+}
+
+.buyArea button:disabled {
+	cursor: default;
+	opacity: 0.48;
+}
+
+.resultOverlay {
+	align-items: center;
+	animation: fadeIn 0.2s ease-out both;
+	background: rgba(7, 8, 12, 0.82);
+	display: flex;
+	inset: 0;
+	justify-content: center;
+	position: fixed;
+	z-index: 100;
+}
+
+.resultDialog {
+	align-items: center;
+	background: radial-gradient(ellipse at 50% 15%, rgba(255, 220, 103, 0.18), transparent 55%), #171922;
+	border: 1px solid rgba(255, 220, 103, 0.5);
+	border-radius: 1vh;
+	box-shadow: 0 2vh 7vh rgba(0, 0, 0, 0.6);
+	display: flex;
+	flex-direction: column;
+	min-width: 35vh;
+	padding: 3vh 4vh;
+}
+
+.resultCase {
+	animation: caseShake 0.65s ease-in-out infinite;
+	flex-basis: 9vh;
+	height: 9vh;
+	width: 9vh;
+}
+
+.resultDialog strong {
+	color: #fff;
+	font-size: 1.65vh;
+	margin-top: 1.2vh;
+}
+
+.resultDialog p {
+	color: rgba(255, 255, 255, 0.68);
+	font-size: 1.1vh;
+	margin: 0.8vh 0 0.3vh;
+}
+
+.resultDialog b {
+	animation: prizeIn 0.55s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+	color: #ffdf81;
+	font-size: 2.8vh;
+}
+
+.resultDialog button {
+	margin-top: 2vh;
+	min-width: 16vh;
+}
+
+.revealed .resultCase {
+	animation: reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.opening .resultCase {
+	animation-duration: 0.5s;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes caseShake {
+	0%, 100% { transform: rotate(0) translateY(0); }
+	25% { transform: rotate(-4deg) translateY(-0.3vh); }
+	75% { transform: rotate(4deg) translateY(-0.3vh); }
+}
+
+@keyframes reveal {
+	0% { opacity: 0.5; transform: scale(0.7) rotate(-8deg); }
+	65% { opacity: 1; transform: scale(1.16) rotate(5deg); }
+	100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes prizeIn {
+	from { opacity: 0; transform: translateY(0.8vh) scale(0.8); }
+	to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.resultOverlay,
+	.resultCase,
+	.resultDialog b {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+	}
+}

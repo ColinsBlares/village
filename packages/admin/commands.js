@@ -802,6 +802,68 @@ module.exports = {
             if (rec.getVariable("knocked")) death.removeKnocked(rec);
         }
     },
+    "/licensegive": {
+        description: "Выдать игроку водительскую лицензию.",
+        access: 6,
+        args: "[ид_игрока]:n [категория]:s",
+        handler: (player, args, out) => {
+            const target = mp.players.at(args[0]);
+            if (!target || !target.character) return out.error(`Игрок #${args[0]} не найден`, player);
+            const licenses = {
+                car: ["carLicense", "автомобиль"],
+                passenger: ["passengerLicense", "пассажирский транспорт"],
+                bike: ["bikeLicense", "мотоцикл"],
+                truck: ["truckLicense", "грузовой транспорт"],
+                air: ["airLicense", "воздушный транспорт"],
+                boat: ["boatLicense", "водный транспорт"],
+            };
+            const license = licenses[args[1]];
+            if (!license) return out.error("Категория: car, passenger, bike, truck, air или boat", player);
+            if (target.character[license[0]]) return out.error(`${target.name} уже имеет лицензию (${license[1]})`, player);
+            target.character[license[0]] = true;
+            target.character.save();
+            notify.info(target, `${player.name} выдал вам лицензию (${license[1]})`, "Админ");
+            out.info(`${player.name} выдал ${target.name} лицензию (${license[1]})`);
+        }
+    },
+    "/licenseremove": {
+        description: "Забрать у игрока водительскую лицензию.",
+        access: 6,
+        args: "[ид_игрока]:n [категория]:s",
+        handler: (player, args, out) => {
+            const target = mp.players.at(args[0]);
+            if (!target || !target.character) return out.error(`Игрок #${args[0]} не найден`, player);
+            const licenses = {
+                car: ["carLicense", "автомобиль"],
+                passenger: ["passengerLicense", "пассажирский транспорт"],
+                bike: ["bikeLicense", "мотоцикл"],
+                truck: ["truckLicense", "грузовой транспорт"],
+                air: ["airLicense", "воздушный транспорт"],
+                boat: ["boatLicense", "водный транспорт"],
+            };
+            const license = licenses[args[1]];
+            if (!license) return out.error("Категория: car, passenger, bike, truck, air или boat", player);
+            if (!target.character[license[0]]) return out.error(`${target.name} не имеет лицензии (${license[1]})`, player);
+            target.character[license[0]] = false;
+            target.character.save();
+            notify.warning(target, `${player.name} забрал у вас лицензию (${license[1]})`, "Админ");
+            out.info(`${player.name} забрал у ${target.name} лицензию (${license[1]})`);
+        }
+    },
+    "/gunlicenseremove": {
+        description: "Забрать у игрока лицензию на оружие.",
+        access: 6,
+        args: "[ид_игрока]:n",
+        handler: (player, args, out) => {
+            const target = mp.players.at(args[0]);
+            if (!target || !target.character) return out.error(`Игрок #${args[0]} не найден`, player);
+            if (!target.character.gunLicenseDate) return out.error(`${target.name} не имеет лицензию на оружие`, player);
+            target.character.gunLicenseDate = null;
+            target.character.save();
+            notify.warning(target, `${player.name} забрал у вас лицензию на оружие`, "Админ");
+            out.info(`${player.name} забрал у ${target.name} лицензию на оружие`);
+        }
+    },
     "/weapon": {
         description: "Выдать оружие игроку (не в инвентарь).",
         access: 4,

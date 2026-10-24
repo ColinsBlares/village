@@ -35,7 +35,7 @@ function Report() {
 
 	return (
 		<div className={styles.report}>
-			<div className={styles.head}>Задайте вопрос или оставьте жалобу на игрока, указав его ID и причину жалобы</div>
+			<div className={styles.head}>Задайте вопрос или оставьте жалобу, указав ID игрока и причину. Пока репорт открыт, новые сообщения продолжат тот же чат, а ответ администрации придёт сюда.</div>
 			<input
 				placeholder="Введите вопрос или жалобу..."
 				value={message}

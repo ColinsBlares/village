@@ -1,20 +1,27 @@
 import React, { memo } from 'react';
 import styles from './index.module.css';
-import fishImg from '@imgs/fishing/fish.png';
 import { useFishingStore } from '../../store';
 
-function Wait() {
+interface WaitProps {
+	isInZone: boolean;
+}
+
+function Wait({ isInZone }: WaitProps) {
 	const isStarted = useFishingStore(state => state.isStarted);
 	const isFetch = useFishingStore(state => state.isFetch);
 
-	if (!isStarted || isFetch) return null;
+	const message = !isStarted
+		? 'Забросьте удочку, чтобы начать рыбалку.'
+		: isFetch
+			? isInZone
+				? 'Есть! Нажмите Space, чтобы подсечь.'
+				: 'Следите за поплавком и нажмите Space в светлой зоне.'
+			: 'Поплавок на воде — ждём поклёвку.';
 
 	return (
 		<div className={styles.wait}>
-			<div>
-				<img className={styles.fish} src={fishImg} alt="" />
-			</div>
-			Ждите, пока рыба клюнет...
+			<span className={styles.indicator} />
+			<p>{message}</p>
 		</div>
 	);
 }

@@ -1,16 +1,18 @@
 .hands {
 	display: grid;
 	padding: 0;
-	background-color: rgba(12, 12, 12, 0.8);
-	border-radius: 1.2vh;
+	background: linear-gradient(145deg, rgba(18, 24, 29, 0.94), rgba(11, 16, 20, 0.92));
+	border: 1px solid rgba(222, 232, 235, 0.09);
+	border-radius: 1.4vh;
+	box-shadow: 0 1vh 2.5vh rgba(0, 0, 0, 0.2), inset 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .active {
-	background-color: rgba(106, 201, 61, 0.2);
+	background-color: rgba(106, 180, 125, 0.13);
 }
 
 .blocked {
-	background: #422d;
+	background: rgba(181, 77, 73, 0.14);
 }
 
 .hands img {
@@ -20,7 +22,7 @@
 
 .slot {
 	align-items: center;
-	color: #ddd7;
+	color: rgba(207, 220, 220, 0.48);
 	display: flex;
 	font-size: 1.7vh;
 	justify-content: space-around;
@@ -34,14 +36,14 @@
 
 .busy {
 	background-image: none;
-	background-color: rgba(255, 255, 255, 0.4);
+	background-color: rgba(255, 255, 255, 0.065);
 	width: 100%;
 	margin: 0;
 	border-radius: 1.1vh;
 }
 
 .focus {
-	background-color: rgba(255, 255, 255, 0.6);
+	background-color: rgba(143, 204, 154, 0.2);
 	border-radius: 1.1vh;
 }
 

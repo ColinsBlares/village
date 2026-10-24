@@ -1,0 +1,1 @@
+import{a as r,R as a}from"./vendor.js";import{aj as o,dE as s,u as i,dF as u}from"./shared.js";mp.event=o;s().then(function(t){const n=t.filter(function(e){return e.select(i.getState())}).map(function(e){return e.ensure()});return Promise.all(n)}).then(function(){r.render(a.createElement(u,null),document.getElementById("root"))});
