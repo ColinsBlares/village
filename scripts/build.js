@@ -91,7 +91,12 @@ function collectModules(since) {
             return;
         }
 
-        let rebuild = !fs.existsSync(path.join(outRoot, name, 'index.js'));
+        const outIndex = path.join(outRoot, name, 'index.js');
+        let rebuild = !fs.existsSync(outIndex);
+        if (!rebuild) {
+            const head = fs.readFileSync(outIndex, 'utf8').slice(0, 12);
+            if (head.indexOf('!function') === 0) rebuild = true;
+        }
 
         files.walkFiles(dir, (abs, stat) => {
             if (abs.endsWith('.js')) {

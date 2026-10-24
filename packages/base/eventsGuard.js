@@ -65,21 +65,29 @@ const INTERNAL_EVENTS = new Set([
 
 const TOKEN = Object.create(null);
 
+/// RAGE передаёт в обработчик не больше аргументов, чем function.length.
+/// Rest-параметр даёт length 0, токен init не доходит, и модуль молча не стартует.
 function wrapHandler(name, handler, writeCrashLog) {
 	if (typeof handler !== 'function') return handler;
+	if (handler.__rageInternal) return handler;
 	const internal = INTERNAL_EVENTS.has(name);
-	return function (...args) {
+	const wrapped = function (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) {
+		const args = [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o];
+		const count = arguments.length < args.length ? arguments.length : args.length;
+		args.length = count;
 		try {
 			if (internal) {
 				if (args[0] !== TOKEN) return;
 				return handler.apply(this, args.slice(1));
 			}
 			return handler.apply(this, args);
-		} catch (e) {
-			if (writeCrashLog) writeCrashLog(`event ${name}`, e);
-			else console.log(`event ${name}`, e && e.stack ? e.stack : e);
+		} catch (err) {
+			if (writeCrashLog) writeCrashLog(`event ${name}`, err);
+			else console.log(`event ${name}`, err && err.stack ? err.stack : err);
 		}
 	};
+	wrapped.__rageInternal = true;
+	return wrapped;
 }
 
 module.exports = {
@@ -103,12 +111,15 @@ module.exports = {
 
 		const origAdd = mp.events.add.bind(mp.events);
 		mp.events.add = function (nameOrObj, handler) {
-			if (typeof nameOrObj === 'object' && nameOrObj !== null) {
-				const wrapped = {};
+			if (
+				typeof nameOrObj === 'object' &&
+				nameOrObj !== null &&
+				typeof handler !== 'function'
+			) {
 				for (const key of Object.keys(nameOrObj)) {
-					wrapped[key] = wrapHandler(key, nameOrObj[key], writeCrashLog);
+					origAdd(key, wrapHandler(key, nameOrObj[key], writeCrashLog));
 				}
-				return origAdd(wrapped);
+				return;
 			}
 			return origAdd(
 				nameOrObj,
