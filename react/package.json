@@ -6,8 +6,9 @@
     "jquery": "^3.4.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@xyflow/react": "^12.3.6",
     "zustand": "4.4.7"
   },
   "scripts": {
@@ -16,8 +17,8 @@
   },
   "devDependencies": {
     "@types/jquery": "^3.5.29",
-    "@types/react": "^16.14.56",
-    "@types/react-dom": "^16.9.19",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^4.9.5",
     "vite": "^5.4.11"

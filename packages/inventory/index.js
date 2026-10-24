@@ -401,6 +401,7 @@ module.exports = {
         }
         callback();
         await item.save();
+        mp.events.call("inventory.add", player, itemId);
         player.call("inventory.addItem", [this.convertServerToClientItem(player.inventory.items, item), item.pocketIndex, item.index, item.parentId]);
     },
     async addOldItem(player, item, callback = () => {}) {

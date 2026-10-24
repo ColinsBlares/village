@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import { useMapCaseStore } from '../../store';
 import styles from './index.module.css';
 
@@ -19,7 +20,7 @@ function Load() {
 				<div className={count === 1 ? styles.focus : undefined}>.</div>
 				<div className={count === 2 ? styles.focus : undefined}>.</div>
 			</div>
-			<div className={styles.message} dangerouslySetInnerHTML={{ __html: loadMod.message || '' }} />
+			<div className={styles.message} dangerouslySetInnerHTML={{ __html: sanitizeHtml(loadMod.message || '') }} />
 		</div>
 	);
 }

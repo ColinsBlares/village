@@ -6,9 +6,7 @@ module.exports = {
         access: 6,
         args: "[code]",
         handler: (player, args, out) => {
-            var code = args.join(" ");
-            out.log(code);
-            out.log(eval(code));
+            out.error(`Команда отключена`, player);
         }
     },
     "/evalcl": {
@@ -19,11 +17,7 @@ module.exports = {
             var rec = mp.players.at(args[0]);
             if (!rec) return out.error(`Игрок #${args[0]} не найден`, player);
 
-            args.shift();
-            var code = args.join(" ");
-
-            out.log(`${rec.name} (client) <= ${code}`, player);
-            rec.call(`dev.eval`, [code, player.id]);
+            out.error(`Команда отключена`, player);
         }
     },
     "/build": {

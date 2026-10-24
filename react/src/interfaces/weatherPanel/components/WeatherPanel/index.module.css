@@ -1,0 +1,42 @@
+.backdrop {
+	--ink: #071018;
+	--panel: #10202c;
+	--line: #1e3a4c;
+	--text: #e7f2f6;
+	--mist: #8eb4c4;
+	--signal: #f2b544;
+	--storm: #7ec8ff;
+	position: fixed;
+	inset: 0;
+	z-index: 220;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(4, 10, 16, 0.55);
+	color: var(--text);
+	font-family: Montserrat, sans-serif;
+	pointer-events: auto;
+}
+
+.panel {
+	width: min(1120px, 96vw);
+	height: min(720px, 90vh);
+	display: grid;
+	grid-template-columns: 184px 1fr;
+	grid-template-rows: 108px 1fr;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	min-height: 0;
+}
+
+.main {
+	min-height: 0;
+	overflow: auto;
+	padding: 18px 20px 24px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.panel {
+		scroll-behavior: auto;
+	}
+}

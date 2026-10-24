@@ -16,7 +16,8 @@ module.exports = {
         let cmd = commands[command];
         if (!cmd) return;
 
-        // TODO: проверка на access
+        if (!player.character) return;
+        args = Array.isArray(args) ? args.slice() : [];
         if (player.character.admin >= cmd.access) {
             if (cmd.args) {
                 let requiredArgs;
@@ -165,7 +166,10 @@ module.exports = {
     },
     // Поступила жалоба от игрока
     "admin.report": (player, message) => {
-        var media = player.character.Promocode.media;
+        if (!player.character) return;
+        var media = player.character.Promocode && player.character.Promocode.media;
+        message = String(message || '').replace(/[<>]/g, '').slice(0, 200);
+        if (!message) return;
         var color = (!media) ? "#ffe838" : "#ff3ec8";
         player.call('chat.message.split', [message, `!{#87c924}Ваш репорт:!{${color}} `]);
         mp.events.call('admin.notify.all.split', message, `!{#87c924}${player.name}[${player.id}]:!{${color}} `);

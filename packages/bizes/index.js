@@ -234,20 +234,25 @@ let removeProducts = async function(id, count) {
 let createOrder = async function(biz, count, price) {
     if (biz == null) return 0;
     if (biz.info.productsOrder != null) return 0;
+    count = parseInt(count);
+    price = Math.round(Number(price));
+    if (!Number.isInteger(count) || count < 1 || !Number.isInteger(price) || price < 1) return 0;
     if (biz.info.productsCount + count > biz.info.productsMaxCount) return 3;
     let min = bizesModules[biz.info.type].productPrice * bizesModules[biz.info.type].minProductPriceMultiplier == null ? minProductPriceMultiplier : bizesModules[biz.info.type].minProductPriceMultiplier;
     let max = bizesModules[biz.info.type].productPrice * bizesModules[biz.info.type].maxProductPriceMultiplier == null ? maxProductPriceMultiplier : bizesModules[biz.info.type].maxProductPriceMultiplier;
     if (price <= min || price >= max) return 0;
+    const total = price * count;
+    if (!Number.isSafeInteger(total) || total < 1) return 0;
     if (!bizesModules[biz.info.type].business.isFactionOwner) {
-        if (parseInt(price * count) > biz.info.cashBox) return 0;
+        if (total > biz.info.cashBox) return 0;
         biz.info.productsOrder = count;
-        biz.info.productsOrderPrice = parseInt(price * count);
+        biz.info.productsOrderPrice = total;
         biz.info.cashBox -= biz.info.productsOrderPrice;
     }
     else {
-        if (parseInt(price * count) > factions.getFaction(biz.info.factionId).cash) return 0;
+        if (total > factions.getFaction(biz.info.factionId).cash) return 0;
         biz.info.productsOrder = count;
-        biz.info.productsOrderPrice = parseInt(price * count);
+        biz.info.productsOrderPrice = total;
         let faction = factions.getFaction(biz.info.factionId);
         faction.cash -= biz.info.productsOrderPrice;
         await faction.save();
@@ -452,24 +457,38 @@ module.exports = {
         return bizes[bizes.length - 1];
     },
     sellBiz(biz, cost, seller, buyer, callback) {
-        biz.info.characterId = buyer.character.id;
-        biz.info.characterNick = buyer.character.name;
-        biz.info.date = getDropDate(1);
-        setTimer(biz);
-        biz.info.save().then(() => {
-            if (money == null) return;
-            money.moveCash(buyer, seller, cost, function(result) {
-                if (result) {
-                    callback(true);
-                    mp.events.call('player.biz.changed', seller);
-                    mp.events.call('player.biz.changed', buyer);
-                    let bizInfo = getBizInfoForApp(biz);
-                    bizInfo != null && buyer.call('phone.app.add', ["biz", bizInfo]);
-                } else {
-                    callback(false);
-                }
-            }, `Покупка бизнеса #${biz.info.id} у персонажа #${seller.character.id}`, `Продажа бизнеса #${biz.info.id} персонажу #${buyer.character.id}`);
-        });
+        if (biz._selling) return callback(false);
+        if (money == null) return callback(false);
+        biz._selling = true;
+        const prevId = biz.info.characterId;
+        const prevNick = biz.info.characterNick;
+        const prevDate = biz.info.date;
+        money.moveCash(buyer, seller, cost, function(result) {
+            if (!result) {
+                biz._selling = false;
+                return callback(false);
+            }
+            biz.info.characterId = buyer.character.id;
+            biz.info.characterNick = buyer.character.name;
+            biz.info.date = getDropDate(1);
+            setTimer(biz);
+            biz.info.save().then(() => {
+                biz._selling = false;
+                callback(true);
+                mp.events.call('player.biz.changed', seller);
+                mp.events.call('player.biz.changed', buyer);
+                let bizInfo = getBizInfoForApp(biz);
+                bizInfo != null && buyer.call('phone.app.add', ["biz", bizInfo]);
+            }).catch(() => {
+                biz.info.characterId = prevId;
+                biz.info.characterNick = prevNick;
+                biz.info.date = prevDate;
+                setTimer(biz);
+                biz._selling = false;
+                money.moveCash(seller, buyer, cost, () => {}, `Откат продажи бизнеса #${biz.info.id}`, `Откат покупки бизнеса #${biz.info.id}`);
+                callback(false);
+            });
+        }, `Покупка бизнеса #${biz.info.id} у персонажа #${seller.character.id}`, `Продажа бизнеса #${biz.info.id} персонажу #${buyer.character.id}`);
     },
     getBizById: getBizById,
     getBizByCharId: getBizByCharId,
@@ -564,13 +583,19 @@ module.exports = {
         return {bizId: biz.info.id, params: params};
     },
     setBizParameters(charId, bizParameters) {
+        if (!bizParameters || !Array.isArray(bizParameters.params)) return false;
         let biz = getBizById(bizParameters.bizId);
         if (biz == null) return false;
         if (!bizesModules[biz.info.type].business.isFactionOwner) {
             if (biz.info.characterId !== charId) return false;
         }
+        const current = bizesModules[biz.info.type].getBizParamsById(biz.info.id) || [];
+        const allowed = {};
+        current.forEach(param => { allowed[param.key] = true; });
         bizParameters.params.forEach(param => {
-            bizesModules[biz.info.type].setBizParam(bizParameters.bizId, param.key, param.value);
+            if (!param || !allowed[param.key]) return;
+            if (typeof param.value === 'string' && param.value.length > 64) return;
+            bizesModules[biz.info.type].setBizParam(biz.info.id, param.key, param.value);
         });
         mp.events.call("biz.finance.save.done", biz.info.id, biz.info.type);
         return true;

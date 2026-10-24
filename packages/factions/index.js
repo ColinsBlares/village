@@ -320,6 +320,7 @@ module.exports = {
     },
     getRankById(faction, rankId) {
         if (typeof faction == 'number') faction = this.getFaction(faction);
+        if (!faction || !faction.ranks) return null;
         var ranks = faction.ranks;
         for (var i = 0; i < ranks.length; i++) {
             if (ranks[i].id == rankId) return ranks[i];
@@ -339,7 +340,9 @@ module.exports = {
         return faction.ranks[faction.ranks.length - 1];
     },
     getRankNames(faction) {
+        if (faction == null) return [];
         if (typeof faction == 'number') faction = this.getFaction(faction);
+        if (!faction || !faction.ranks) return [];
         var names = [];
         for (var i = 0; i < faction.ranks.length; i++) {
             names.push(faction.ranks[i].name);
@@ -476,8 +479,10 @@ module.exports = {
     },
     getMembers(player) {
         var members = [];
+        if (!player.character || player.character.factionId == null) return members;
         mp.players.forEach((rec) => {
             if (!rec.character) return;
+            if (rec.character.factionId == null) return;
             if (rec.character.factionId != player.character.factionId) return;
             members.push(rec);
         });

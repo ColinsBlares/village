@@ -483,35 +483,46 @@ module.exports = {
         return parseInt(house.info.price * house.info.Interior.rent);
     },
     sellHouse(house, cost, seller, buyer, callback) {
-        house.info.characterId = buyer.character.id;
-        house.info.characterNick = buyer.character.name;
-        house.info.save().then(() => {
-            if (money == null) return;
-            money.moveCash(buyer, seller, cost, (result) => {
-                if (result) {
-                    callback(true);
-                    mp.events.call('player.house.changed', seller);
-                    mp.events.call('player.house.changed', buyer);
-                    this.updateHouse(house);
-                    buyer.call('phone.app.add', ["house", {
-                        name: house.info.id,
-                        class: house.info.Interior.class,
-                        numRooms: house.info.Interior.numRooms,
-                        garage: house.info.Interior.Garage != null,
-                        carPlaces: house.info.Interior.Garage != null ? house.info.Interior.Garage.carPlaces : 1,
-                        rent: this.getRent(house),
-                        isOpened: house.info.isOpened,
-                        improvements: [],
-                        price: house.info.price,
-                        days: this.getDateDays(house.info.date),
-                        pos: [house.info.pickupX, house.info.pickupY, house.info.pickupZ]
-                    }]);
-                    vehicles != null && vehicles.setPlayerCarPlaces(buyer);
-                } else {
-                    callback(false);
-                }
-            }, `Покупка дома #${house.info.id} у персонажа #${seller.character.id}`, `Продажа дома #${house.info.id} персонажу #${buyer.character.id}`);
-        });
+        if (house._selling) return callback(false);
+        if (money == null) return callback(false);
+        house._selling = true;
+        const prevId = house.info.characterId;
+        const prevNick = house.info.characterNick;
+        money.moveCash(buyer, seller, cost, (result) => {
+            if (!result) {
+                house._selling = false;
+                return callback(false);
+            }
+            house.info.characterId = buyer.character.id;
+            house.info.characterNick = buyer.character.name;
+            house.info.save().then(() => {
+                house._selling = false;
+                callback(true);
+                mp.events.call('player.house.changed', seller);
+                mp.events.call('player.house.changed', buyer);
+                this.updateHouse(house);
+                buyer.call('phone.app.add', ["house", {
+                    name: house.info.id,
+                    class: house.info.Interior.class,
+                    numRooms: house.info.Interior.numRooms,
+                    garage: house.info.Interior.Garage != null,
+                    carPlaces: house.info.Interior.Garage != null ? house.info.Interior.Garage.carPlaces : 1,
+                    rent: this.getRent(house),
+                    isOpened: house.info.isOpened,
+                    improvements: [],
+                    price: house.info.price,
+                    days: this.getDateDays(house.info.date),
+                    pos: [house.info.pickupX, house.info.pickupY, house.info.pickupZ]
+                }]);
+                vehicles != null && vehicles.setPlayerCarPlaces(buyer);
+            }).catch(() => {
+                house.info.characterId = prevId;
+                house.info.characterNick = prevNick;
+                house._selling = false;
+                money.moveCash(seller, buyer, cost, () => {}, `Откат продажи дома #${house.info.id}`, `Откат покупки дома #${house.info.id}`);
+                callback(false);
+            });
+        }, `Покупка дома #${house.info.id} у персонажа #${seller.character.id}`, `Продажа дома #${house.info.id} персонажу #${buyer.character.id}`);
     },
     getImprovmentPrice(type, housePrice) {
         switch (type) {
@@ -522,7 +533,10 @@ module.exports = {
         }
     },
     buyImprovments(player, house, type, callback) {
-        money.removeMoney(player, this.getImprovmentPrice(type, house.info.price), async (result) => {
+        if (type !== 'holder' || house.info.holder) return callback(false);
+        const price = this.getImprovmentPrice(type, house.info.price);
+        if (price == null) return callback(false);
+        money.removeMoney(player, price, async (result) => {
             if (result) {
                 house.info.holder = true;
                 await house.info.save();
@@ -544,8 +558,9 @@ module.exports = {
         }
     },
     getHouseCarPlaces(id) {
-        let house = this.getHouseByCharId(id).info;
-        if (house == null) return null;
+        let found = this.getHouseByCharId(id);
+        if (found == null || found.info == null) return null;
+        let house = found.info;
 
         let garagePlaces = [{
             x: house.carX,

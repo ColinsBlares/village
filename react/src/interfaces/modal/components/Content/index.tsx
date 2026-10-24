@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './index.module.css';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import { useModalStore } from '../../store';
 
 function Content() {
@@ -11,7 +12,7 @@ function Content() {
 	return (
 		<div
 			className={styles.content}
-			dangerouslySetInnerHTML={{ __html: content || '' }}
+			dangerouslySetInnerHTML={{ __html: sanitizeHtml(content || '') }}
 		/>
 	);
 }

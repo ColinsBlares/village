@@ -34,8 +34,7 @@ mp.events.add('documents.show', (type, data) => {
         let newDate = data.regDate ? data.regDate.slice(0, 10) : null;
         data.regDate = dateFormatter(newDate);
         for (var key in data) {
-            if (typeof data[key] == 'string') data[key] = `'${data[key]}'`;
-            mp.callCEFV(`carPass.${key} = ${data[key]}`);
+            mp.callCEFV(`carPass.${key} = ${JSON.stringify(data[key])}`);
         }
         mp.callCEFV('carPass.show = true');
     }

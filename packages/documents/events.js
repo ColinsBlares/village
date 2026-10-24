@@ -8,6 +8,11 @@ module.exports = {
         inited(__dirname);
     },
     "documents.offer": (player, type, targetId, data) => {
+        const allowed = ['characterPass', 'carPass', 'driverLicense', 'gunLicense', 'medCard', 'governmentBadge'];
+        if (!player.character || !allowed.includes(type)) return;
+        if (type == 'carPass' && (data == null || data === '')) {
+            return player.call('notifications.push.error', ['Нет паспорта транспорта', 'Документы']);
+        }
         if (type == 'driverLicense') {
             if (!player.character.carLicense && !player.character.passengerLicense && !player.character.bikeLicense && !player.character.truckLicense && !player.character.airLicense && !player.character.boatLicense) {
                 return player.call('notifications.push.error', ['У вас нет лицензий', 'Документы']);

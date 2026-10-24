@@ -9,7 +9,7 @@ module.exports = {
         inited(__dirname);
     },
     "clothes.clime.check": (player) => {
-        var temperature = weather.getCurrentWeather().temperature;
+        var temperature = weather.getCurrentWeather(player).temperature;
         inventory.checkClimeDamage(player, temperature, (text) => {
             notifs.warning(player, text, `Климат`);
         });

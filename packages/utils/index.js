@@ -31,6 +31,14 @@ let utils = {
             // else console.log(`[MAIL] ${info}`);
         });
     },
+    escapeHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    },
     randomInteger(min, max) {
         var rand = min - 0.5 + Math.random() * (max - min + 1);
         rand = Math.round(rand);

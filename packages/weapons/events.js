@@ -50,14 +50,21 @@ module.exports = {
             return anticheat.reject(player, 'ammo', `разрядка ${ammo} патрон, на сервере ${params.ammo}`);
         }
 
+        if (weapon._ammoLock) return;
+        weapon._ammoLock = true;
+        const take = ammo;
+        inventory.updateParam(player, weapon, 'ammo', params.ammo - take);
         inventory.addItem(player, ammoId, {
-            count: ammo
+            count: take
         }, (e) => {
-            if (e) return notifs.error(player, e, header);
+            weapon._ammoLock = false;
+            if (e) {
+                inventory.updateParam(player, weapon, 'ammo', params.ammo);
+                return notifs.error(player, e, header);
+            }
             var ammoName = inventory.getName(ammoId);
 
-            inventory.updateParam(player, weapon, 'ammo', 0);
-            player.setWeaponAmmo(params.weaponHash, 0);
+            player.setWeaponAmmo(params.weaponHash, params.ammo - take);
             notifs.success(player, `${name} разряжен`, ammoName);
             inventory.notifyOverhead(player, `Разрядил '${name}'`);
         });
@@ -78,10 +85,16 @@ module.exports = {
         var name = inventory.getName(weapon.itemId);
         var ammoName = inventory.getName(ammo.itemId);
 
+        if (ammo._ammoLock || weapon._ammoLock) return;
+        ammo._ammoLock = true;
+        weapon._ammoLock = true;
         var weaponParams = inventory.getParamsValues(weapon);
-        var newAmmo = weaponParams.ammo + params.count;
+        var loaded = params.count;
+        var newAmmo = weaponParams.ammo + loaded;
         inventory.updateParam(player, weapon, 'ammo', newAmmo);
         inventory.deleteItem(player, ammo);
+        ammo._ammoLock = false;
+        weapon._ammoLock = false;
         anticheat.allowAmmo(player);
         if (inventory.isInHands(weapon)) player.setWeaponAmmo(weaponParams.weaponHash, newAmmo);
         notifs.success(player, `${name} заряжен`, ammoName);

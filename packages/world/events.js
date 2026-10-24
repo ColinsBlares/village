@@ -11,6 +11,7 @@ module.exports = {
         player.call(`world.doors.init`, [world.doors]);
     },
     "world.doors.create": (player, hash, pos) => {
+        if (!player.character || player.character.admin < 5) return;
         if (typeof pos == 'string') pos = JSON.parse(pos);
         if (!pos) return notifs.error(player, `Неверная позиция`);
         var oldDoor = world.getDoor(hash, pos);
@@ -19,14 +20,17 @@ module.exports = {
         notifs.success(player, `Дверь создана`);
     },
     "world.doors.set": (player, id, locked) => {
+        if (!player.character || player.character.admin < 5) return;
         world.setDoorLocked(id, locked);
     },
     "world.objects.add": async (player, data) => {
+        if (!player.character || player.character.admin < 5) return;
         data = JSON.parse(data);
         await world.addObject(data);
         terminal.info(`${player.name} добавил объект мира типа ${data.type}`);
     },
     "world.objects.position.set": (player, data) => {
+        if (!player.character || player.character.admin < 5) return;
         data = JSON.parse(data);
         world.setObjectPos(data);
         terminal.info(`${player.name} изменил позицию объекта мира #${data.id}`);

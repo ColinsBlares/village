@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './index.module.css';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import { useSelectionWindowStore } from '../../store';
 
 function Description() {
@@ -8,7 +9,7 @@ function Description() {
 	return (
 		<div
 			className={styles.description}
-			dangerouslySetInnerHTML={{ __html: description || '' }}
+			dangerouslySetInnerHTML={{ __html: sanitizeHtml(description || '') }}
 		/>
 	);
 }

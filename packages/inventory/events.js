@@ -36,7 +36,15 @@ module.exports = {
     },
     // срабатывает, когда игрок переместил предмет (в любом месте)
     "item.add": (player, data) => {
-        data = JSON.parse(data);
+        try {
+            data = typeof data === 'string' ? JSON.parse(data) : data;
+        } catch (e) {
+            return;
+        }
+        if (!data || !player.inventory) return;
+        if (data.placeSqlId > 0 && !inventory.getItem(player, data.placeSqlId)) {
+            return notifs.error(player, `Контейнер не найден`, `Инвентарь`);
+        }
         // debug(`item.add: ${player.name}`)
         // debug(data)
         var item = inventory.getItem(player, data.sqlId);
@@ -77,6 +85,10 @@ module.exports = {
                         inventory.updateView(player, item);
                         inventory.notifyOverhead(player, `Надел '${inventory.getName(item.itemId)}'`);
                     }
+                }
+                if (data.placeSqlId == null && data.index != null && data.index !== 13) {
+                    const allowed = inventory.bodyList[data.index];
+                    if (allowed && !allowed.includes(item.itemId)) return;
                 }
                 item.pocketIndex = data.pocketI;
                 item.index = data.index;
@@ -127,7 +139,16 @@ module.exports = {
     },
     // срабатывает, когда игрок выкидывает предмет
     "item.ground.put": (player, sqlId, pos) => {
-        pos = JSON.parse(pos);
+        try {
+            pos = typeof pos === 'string' ? JSON.parse(pos) : pos;
+        } catch (e) {
+            return;
+        }
+        if (!pos || !Number.isFinite(Number(pos.x))) return;
+        const dx = player.position.x - Number(pos.x);
+        const dy = player.position.y - Number(pos.y);
+        const dz = player.position.z - Number(pos.z);
+        if (dx * dx + dy * dy + dz * dz > 25) return notifs.error(player, `Слишком далеко`, `Выброс предмета`);
         var header = `Выброс предмета`;
         var item = inventory.getItem(player, sqlId);
         if (!item) return notifs.error(player, `Предмет #${sqlId} не найден`, header);
@@ -549,16 +570,18 @@ module.exports = {
                     var price = fuelstations.getFuelPriceById(fuelStationId) * fuel;
                     if (player.character.cash < price) return out(`Необходимо $${price}`);
 
+                    if (player._canisterLock) return out(`Подождите`);
+                    player._canisterLock = true;
                     money.removeCash(player, price, (res) => {
+                        player._canisterLock = false;
                         if (!res) return out(`Ошибка списания наличных`);
 
                         fuelstations.removeProducts(fuelStationId, fuel);
                         fuelstations.updateCashbox(fuelStationId, price);
                         inventory.updateParam(player, item, 'litres', params.litres + fuel);
+                        notifs.success(player, `Канистра заправлена на ${fuel} л.`, header);
+                        inventory.notifyOverhead(player, `Заправил канистру`);
                     }, `Заправка канистры на АЗС #${biz.info.id}`);
-
-                    notifs.success(player, `Канистра заправлена на ${fuel} л.`, header);
-                    inventory.notifyOverhead(player, `Заправил канистру`);
                 } else if (data.index == 2) { // слить содержимое канистры
                     var params = inventory.getParamsValues(item);
                     if (!params.litres) return out(`Канистра пустая`);
@@ -581,7 +604,7 @@ module.exports = {
 
                     craft.removeMaterials(player, [{
                         itemId: craft.firewoodItemId,
-                        count: 5
+                        count: 3
                     }]);
 
                     data.pos.z += 0.1;
@@ -594,7 +617,12 @@ module.exports = {
     // удалить кидаемое оружие
     "inventory.throwableWeapon.delete": (player, sqlId) => {
         var item = inventory.getItem(player, sqlId);
-        if (item) inventory.deleteItem(player, item);
+        if (!item || !inventory.isInHands(item)) return;
+        var params = inventory.getParamsValues(item);
+        var hash = params.weaponHash >>> 0;
+        var throwables = ['weapon_grenade', 'weapon_bzgas', 'weapon_molotov', 'weapon_stickybomb', 'weapon_proxmine', 'weapon_snowball', 'weapon_pipebomb', 'weapon_ball', 'weapon_smokegrenade', 'weapon_flare'];
+        if (!throwables.some(name => (mp.joaat(name) >>> 0) === hash)) return;
+        inventory.deleteItem(player, item);
     },
     // Запрос предметов инвентаря в багажнике авто
     "vehicle.boot.items.request": (player, vehId) => {
@@ -612,6 +640,11 @@ module.exports = {
         }
         if (veh.db.key == 'private' && veh.db.owner != player.character.id) return notifs.error(player, `Вы не являетесь владельцем авто`, header);
         if (veh.db.key == 'faction' && veh.db.owner != player.character.factionId) return notifs.error(player, `Вы не состоите в ${factions.getFaction(veh.db.owner).name}`, header);
+        if (veh.db.key == 'job' && player.character.job != veh.db.owner) return notifs.error(player, `Это не ваш рабочий транспорт`, header);
+        if (veh.db.key == 'rent' && veh.db.owner != player.character.id) return notifs.error(player, `Это не ваш арендованный транспорт`, header);
+        if (veh.db.key == 'admin' && !(player.character.admin > 0)) return notifs.error(player, `Нет доступа`, header);
+        if (veh.db.key == 'farm' && player.character.job != veh.db.owner && veh.db.owner != player.character.id) return notifs.error(player, `Нет доступа`, header);
+        if (!['private', 'faction', 'job', 'rent', 'admin', 'farm'].includes(veh.db.key)) return notifs.error(player, `Нет доступа`, header);
 
         veh.bootPlayerId = player.id;
 
@@ -643,8 +676,12 @@ module.exports = {
     },
     // Запрос предметов инвентаря в шкафу организации
     "faction.holder.items.request": (player, faction) => {
-        var header = `Шкаф ${faction.name}`;
+        if (!player.character || !player.character.factionId) return;
+        faction = factions.getFaction(player.character.factionId);
+        if (!faction) return;
         var holder = factions.getHolder(faction.id);
+        if (!holder || player.dist(holder.position) > 5) return;
+        var header = `Шкаф ${faction.name}`;
 
         var items = holder.inventory.items[player.character.id];
         if (!items) return notifs.error(player, `У вас нет личного шкафа`, header);
@@ -676,6 +713,8 @@ module.exports = {
     },
     // Запрос предметов инвентаря в шкафу дома
     "house.holder.items.request": (player, holder) => {
+        if (!holder || !holder.houseInfo || !holder.position) return;
+        if (player.dist(holder.position) > 5) return;
         var header = `Шкаф`;
 
         var items = holder.inventory.items;

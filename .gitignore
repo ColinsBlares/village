@@ -32,3 +32,10 @@ migrations
 migrations/*
 
 .cursor
+
+site/**/node_modules
+site/**/dist
+site/**/.output
+site/**/.tanstack
+site/runtime/live.json
+site/runtime/receipts.jsonl

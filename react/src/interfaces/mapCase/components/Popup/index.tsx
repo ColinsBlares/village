@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import errorIcon from '@imgs/mapCase/error.svg';
 import successIcon from '@imgs/mapCase/success.svg';
 import tapIcon from '@imgs/mapCase/tap.svg';
@@ -17,7 +18,7 @@ function Popup() {
 				<div>
 					<img src={icon} alt="" />
 				</div>
-				<div dangerouslySetInnerHTML={{ __html: popupMessage.message }} />
+				<div dangerouslySetInnerHTML={{ __html: sanitizeHtml(popupMessage.message || '') }} />
 			</div>
 			<div className={styles.hint}>
 				<div>

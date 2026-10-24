@@ -83,6 +83,7 @@ module.exports = {
 	},
 	'casino.wheel.debug': player => {
 		if (!player || !player.character) return;
+		if (!player.character.admin || player.character.admin < 3) return;
 		player.call('casino.wheel.debug.player');
 	},
 	'casino.wheel.spin.debugCar': player => {
@@ -328,6 +329,8 @@ module.exports = {
 		if (bet > player.character.cash) return fail(`Недостаточно наличных`);
 
 		player.slotBusy = true;
+		player.slotSpinReady = false;
+		player.slotBusyAt = Date.now();
 		// Страховочный сброс блокировки, если клиент не пришлёт done.
 		player.slotBusyTimer = timer.add(() => {
 			player.slotBusy = false;
@@ -345,6 +348,7 @@ module.exports = {
 
 				const result = slots.generateSpin(bet);
 
+				player.slotSpinReady = true;
 				player.call('casino.slots.result', [
 					JSON.stringify({
 						reels: result.reels,
@@ -378,8 +382,10 @@ module.exports = {
 
 	/// Клиент доиграл анимацию барабанов — снимаем блокировку для нового спина.
 	'casino.slots.spin.done': player => {
-		if (!player) return;
+		if (!player || !player.slotSpinReady) return;
+		if (Date.now() - player.slotBusyAt < 2500) return;
 		player.slotBusy = false;
+		player.slotSpinReady = false;
 		timer.remove(player.slotBusyTimer);
 	},
 
@@ -432,7 +438,13 @@ module.exports = {
 		const wheelSlot = wheel.pickWheelSlot(prize);
 		const winAngle = wheel.getWinAngle(wheelSlot);
 
+		if (casino.isWheelSpinning()) return fail(`Колесо уже крутится`, 'warning');
+
 		const startSpin = () => {
+			if (casino.isWheelSpinning()) {
+				fail(`Колесо уже крутится`, 'warning');
+				return false;
+			}
 			if (freeAvailable) {
 				player.character.lastWheelSpin = new Date();
 				player.character.save();
@@ -445,11 +457,6 @@ module.exports = {
 				createdAt: Date.now(),
 			};
 
-			if (casino.isWheelSpinning()) {
-				delete player.wheelSpinPending;
-				return fail(`Колесо уже крутится`, 'warning');
-			}
-
 			// Только анимация — вращение после casino.wheel.spin.anim.ready
 			player.call('casino.wheel.spin.start', [
 				{
@@ -460,6 +467,7 @@ module.exports = {
 					animLeadMs: wheel.SPIN_ANIM_LEAD_MS,
 				},
 			]);
+			return true;
 		};
 
 		if (usePaid) {
@@ -471,7 +479,9 @@ module.exports = {
 						notify.error(player, `Не удалось списать $${wheel.SPIN_PRICE}`);
 						return player.call('casino.wheel.spin.fail');
 					}
-					startSpin();
+					if (!startSpin()) {
+						money.addCash(player, wheel.SPIN_PRICE, () => {}, `Возврат прокрутки колеса`);
+					}
 				},
 				`Платная прокрутка колеса удачи`,
 			);

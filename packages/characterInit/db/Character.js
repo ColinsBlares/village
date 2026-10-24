@@ -106,8 +106,8 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 0,
             allowNull: false,
             set(val) {
-                var oldVal = this.getDataValue('minutes');
-                if (val <= oldVal) return;
+                val = parseInt(val);
+                if (isNaN(val) || val < 0) return;
                 this.setDataValue('minutes', val);
             }
         },

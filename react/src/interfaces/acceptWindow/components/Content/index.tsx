@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './index.module.css';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import { useAcceptWindowStore } from '../../store';
 
 function Content() {
@@ -8,7 +9,7 @@ function Content() {
 	return (
 		<div
 			className={styles.content}
-			dangerouslySetInnerHTML={{ __html: text || '' }}
+			dangerouslySetInnerHTML={{ __html: sanitizeHtml(text || '') }}
 		/>
 	);
 }

@@ -40,8 +40,8 @@ module.exports = {
         return this.codes.shift();
     },
     generatePromocode(codes) {
-        var code = "";
         while (true) {
+            var code = "";
             for (var i = 0; i < this.codeLength; i++) {
                 var rand = utils.randomInteger(0, this.symbols.length - 1);
                 code += this.symbols[rand];

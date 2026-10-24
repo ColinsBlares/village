@@ -41,13 +41,7 @@ async function loadIndicators() {
 module.exports = {
     async init() {
         console.log("[ECONOMY] load economic indicators...");
-
-        let load = new Promise((resolve, reject) => {
-            loadIndicators();
-            resolve();
-        });
-        await load;
-
+        await loadIndicators();
         mp.events.call("economy.done");
         console.log("[ECONOMY] economic indicators loaded.");
     },
@@ -61,6 +55,7 @@ module.exports = {
     setByType(array) {
         array.forEach(element => {
             let economicIndicator = economicIndicators.find( x => x.type == element.type);
+            if (!economicIndicator) return;
             economicIndicator.value = element.value;
             let type = economicIndicator.type.split(".");
             let moduleEconomicIndicators = require('../' + type[0] + '/index');

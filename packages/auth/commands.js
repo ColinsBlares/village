@@ -4,7 +4,12 @@ module.exports = {
         description: "Регистрация",
         args: "[логин] [почта] [пароль]",
         handler: (player, args) => {
-            mp.events.call("auth.register", player, `{"login": "${args[0]}", "email": "${args[1]}", "password": "${args[2]}", "emailCode": -1}`);
+            mp.events.call("auth.register", player, JSON.stringify({
+                login: args[0],
+                email: args[1],
+                password: args[2],
+                emailCode: -1,
+            }));
         }
     },
     "/login": {
@@ -12,7 +17,10 @@ module.exports = {
         description: "Вход",
         args: "[логин|почта] [пароль]",
         handler: (player, args) => {
-            mp.events.call("auth.login", player, `{"loginOrEmail": "${args[0]}", "password": "${args[1]}"}`);
+            mp.events.call("auth.login", player, JSON.stringify({
+                loginOrEmail: args[0],
+                password: args[1],
+            }));
         }
     },
     "/getmail": {

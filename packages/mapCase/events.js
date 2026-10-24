@@ -9,6 +9,18 @@ let police = require('../police');
 let utils = require('../utils');
 let wedding = call('wedding');
 
+function rankLevel(character) {
+    if (!character || character.factionRank == null) return 0;
+    var rank = factions.getRankById(character.factionId, character.factionRank);
+    return rank ? rank.rank : 0;
+}
+
+function likeQuery(value) {
+    const text = String(value == null ? '' : value).replace(/[\\%_]/g, '\\$&').slice(0, 32);
+    if (!text) return null;
+    return `%${text}%`;
+}
+
 var out = {
     error(player, text) {
         player.call(`mapCase.message.red.show`, [text]);
@@ -44,16 +56,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя повысить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character) - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
         var max = factions.getMaxRank(rec.character.factionId);
-        if (rec.character.factionRank >= max.id) return out.error(player, `${rec.name} имеет макс. ранг`);
+        if (rankLevel(rec.character) >= max.rank) return out.error(player, `${rec.name} имеет макс. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank + 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) + 1);
+        if (!rank) return out.error(player, `Следующий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} повысил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был повышен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был повышен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.gover.rank.lower": (player, recId) => {
@@ -63,16 +76,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`, header);
         if (rec.id == player.id) return out.error(player, `Нельзя понизить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
         var min = factions.getMinRank(rec.character.factionId);
-        if (rec.character.factionRank <= min.id) return out.error(player, `${rec.name} имеет мин. ранг`);
+        if (rankLevel(rec.character) <= min.rank) return out.error(player, `${rec.name} имеет мин. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank - 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) - 1);
+        if (!rank) return out.error(player, `Предыдущий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} понизил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был понижен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был понижен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.gover.members.uval": (player, recId) => {
@@ -82,11 +96,11 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя уволить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
 
         factions.deleteMember(rec);
         notifs.info(rec, `${player.name} уволил вас`, header);
-        var text = `<span>${rec.name}</span><br /> был уволен`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был уволен`;
         out.success(player, text);
     },
     "mapCase.pd.init": (player) => {
@@ -114,7 +128,7 @@ module.exports = {
                     model: db.Models.Phone,
                     where: {
                         number: {
-                            [Op.like]: `%${number}%`
+                            [Op.like]: likeQuery(number) || '!'
                         }
                     },
                 },
@@ -131,7 +145,7 @@ module.exports = {
             attributes: ['id', 'name'],
             where: {
                 name: {
-                    [Op.like]: `%${name}%`
+                    [Op.like]: likeQuery(name) || '!'
                 }
             },
             limit: 20,
@@ -148,7 +162,7 @@ module.exports = {
             where: {
                 key: "private",
                 plate: {
-                    [Op.like]: `%${plate}%`
+                    [Op.like]: likeQuery(plate) || '!'
                 }
             },
             limit: 20
@@ -279,7 +293,7 @@ module.exports = {
         var accepted = mapCase.acceptPoliceCall(id);
         if (!accepted) return out.error(player, `Вызов #${id} принят другим полицейским`);
         notifs.success(rec, `${player.name} принял ваш вызов, оставайтесь на месте`, header);
-        var text = `Вы приняли вызов от <br/><span>${rec.name}</span>`;
+        var text = `Вы приняли вызов от <br/><span>${utils.escapeHtml(rec.name)}</span>`;
         out.success(player, text);
         player.call(`waypoint.set`, [rec.position.x, rec.position.y]);
 
@@ -298,16 +312,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя повысить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character) - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
         var max = factions.getMaxRank(rec.character.factionId);
-        if (rec.character.factionRank >= max.id) return out.error(player, `${rec.name} имеет макс. ранг`);
+        if (rankLevel(rec.character) >= max.rank) return out.error(player, `${rec.name} имеет макс. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank + 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) + 1);
+        if (!rank) return out.error(player, `Следующий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} повысил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был повышен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был повышен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.pd.rank.lower": (player, recId) => {
@@ -317,16 +332,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`, header);
         if (rec.id == player.id) return out.error(player, `Нельзя понизить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
         var min = factions.getMinRank(rec.character.factionId);
-        if (rec.character.factionRank <= min.id) return out.error(player, `${rec.name} имеет мин. ранг`);
+        if (rankLevel(rec.character) <= min.rank) return out.error(player, `${rec.name} имеет мин. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank - 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) - 1);
+        if (!rank) return out.error(player, `Предыдущий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} понизил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был понижен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был понижен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.pd.members.uval": (player, recId) => {
@@ -336,11 +352,11 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя уволить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
 
         factions.deleteMember(rec);
         notifs.info(rec, `${player.name} уволил вас`, header);
-        var text = `<span>${rec.name}</span><br /> был уволен`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был уволен`;
         out.success(player, text);
     },
     "mapCase.pd.emergency.call": (player) => {
@@ -372,16 +388,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя повысить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character) - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
         var max = factions.getMaxRank(rec.character.factionId);
-        if (rec.character.factionRank >= max.id) return out.error(player, `${rec.name} имеет макс. ранг`);
+        if (rankLevel(rec.character) >= max.rank) return out.error(player, `${rec.name} имеет макс. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank + 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) + 1);
+        if (!rank) return out.error(player, `Следующий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} повысил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был повышен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был повышен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.army.rank.lower": (player, recId) => {
@@ -391,16 +408,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`, header);
         if (rec.id == player.id) return out.error(player, `Нельзя понизить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
         var min = factions.getMinRank(rec.character.factionId);
-        if (rec.character.factionRank <= min.id) return out.error(player, `${rec.name} имеет мин. ранг`);
+        if (rankLevel(rec.character) <= min.rank) return out.error(player, `${rec.name} имеет мин. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank - 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) - 1);
+        if (!rank) return out.error(player, `Предыдущий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} понизил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был понижен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был понижен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.army.members.uval": (player, recId) => {
@@ -410,11 +428,11 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec || !rec.character) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя уволить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
 
         factions.deleteMember(rec);
         notifs.info(rec, `${player.name} уволил вас`, header);
-        var text = `<span>${rec.name}</span><br /> был уволен`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был уволен`;
         out.success(player, text);
     },
     "mapCase.fib.init": (player) => {
@@ -443,7 +461,7 @@ module.exports = {
                     model: db.Models.Phone,
                     where: {
                         number: {
-                            [Op.like]: `%${number}%`
+                            [Op.like]: likeQuery(number) || '!'
                         }
                     },
                 },
@@ -460,7 +478,7 @@ module.exports = {
             attributes: ['id', 'name'],
             where: {
                 name: {
-                    [Op.like]: `%${name}%`
+                    [Op.like]: likeQuery(name) || '!'
                 }
             },
             limit: 20,
@@ -477,7 +495,7 @@ module.exports = {
             where: {
                 key: "private",
                 plate: {
-                    [Op.like]: `%${plate}%`
+                    [Op.like]: likeQuery(plate) || '!'
                 }
             },
             limit: 20
@@ -593,7 +611,7 @@ module.exports = {
     //     var accepted = mapCase.acceptFibCall(id);
     //     if (!accepted) return out.error(player, `Вызов #${id} принят другим агентом`);
     //     notifs.success(rec, `${player.name} принял ваш вызов, оставайтесь на месте`, header);
-    //     var text = `Вы приняли вызов от <br/><span>${rec.name}</span>`;
+    //     var text = `Вы приняли вызов от <br/><span>${utils.escapeHtml(rec.name)}</span>`;
     //     out.success(player, text);
     //     player.call(`waypoint.set`, [rec.position.x, rec.position.y]);
     //
@@ -611,16 +629,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec || !rec.character) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя повысить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character) - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
         var max = factions.getMaxRank(rec.character.factionId);
-        if (rec.character.factionRank >= max.id) return out.error(player, `${rec.name} имеет макс. ранг`);
+        if (rankLevel(rec.character) >= max.rank) return out.error(player, `${rec.name} имеет макс. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank + 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) + 1);
+        if (!rank) return out.error(player, `Следующий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} повысил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был повышен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был повышен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.fib.rank.lower": (player, recId) => {
@@ -630,16 +649,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec || !rec.character) return out.error(player, `Игрок #${recId} оффлайн`, header);
         if (rec.id == player.id) return out.error(player, `Нельзя понизить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
         var min = factions.getMinRank(rec.character.factionId);
-        if (rec.character.factionRank <= min.id) return out.error(player, `${rec.name} имеет мин. ранг`);
+        if (rankLevel(rec.character) <= min.rank) return out.error(player, `${rec.name} имеет мин. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank - 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) - 1);
+        if (!rank) return out.error(player, `Предыдущий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} понизил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был понижен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был понижен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.fib.members.uval": (player, recId) => {
@@ -649,11 +669,11 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec || !rec.character) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя уволить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
 
         factions.deleteMember(rec);
         notifs.info(rec, `${player.name} уволил вас`, header);
-        var text = `<span>${rec.name}</span><br /> был уволен`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был уволен`;
         out.success(player, text);
     },
     "mapCase.fib.emergency.call": (player) => {
@@ -695,7 +715,7 @@ module.exports = {
         var accepted = mapCase.acceptHospitalCall(id);
         if (!accepted) return out.error(player, `Вызов #${id} принят другим медиком`);
         notifs.success(rec, `${player.name} принял ваш вызов, оставайтесь на месте`, header);
-        var text = `Вы приняли вызов от <br/><span>${rec.name}</span>`;
+        var text = `Вы приняли вызов от <br/><span>${utils.escapeHtml(rec.name)}</span>`;
         out.success(player, text);
         player.call(`waypoint.set`, [rec.position.x, rec.position.y]);
 
@@ -713,16 +733,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec || !rec.character) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя повысить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character) - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
         var max = factions.getMaxRank(rec.character.factionId);
-        if (rec.character.factionRank >= max.id) return out.error(player, `${rec.name} имеет макс. ранг`);
+        if (rankLevel(rec.character) >= max.rank) return out.error(player, `${rec.name} имеет макс. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank + 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) + 1);
+        if (!rank) return out.error(player, `Следующий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} повысил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был повышен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был повышен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.ems.rank.lower": (player, recId) => {
@@ -732,16 +753,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec || !rec.character) return out.error(player, `Игрок #${recId} оффлайн`, header);
         if (rec.id == player.id) return out.error(player, `Нельзя понизить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
         var min = factions.getMinRank(rec.character.factionId);
-        if (rec.character.factionRank <= min.id) return out.error(player, `${rec.name} имеет мин. ранг`);
+        if (rankLevel(rec.character) <= min.rank) return out.error(player, `${rec.name} имеет мин. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank - 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) - 1);
+        if (!rank) return out.error(player, `Предыдущий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} понизил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был понижен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был понижен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.ems.members.uval": (player, recId) => {
@@ -751,11 +773,11 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec || !rec.character) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя уволить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
 
         factions.deleteMember(rec);
         notifs.info(rec, `${player.name} уволил вас`, header);
-        var text = `<span>${rec.name}</span><br /> был уволен`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был уволен`;
         out.success(player, text);
     },
     "mapCase.news.init": (player) => {
@@ -815,16 +837,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec || !rec.character) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя повысить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character) - 1) return out.error(player, `Недостаточно прав для повышения ${rec.name}`);
         var max = factions.getMaxRank(rec.character.factionId);
-        if (rec.character.factionRank >= max.id) return out.error(player, `${rec.name} имеет макс. ранг`);
+        if (rankLevel(rec.character) >= max.rank) return out.error(player, `${rec.name} имеет макс. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank + 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) + 1);
+        if (!rank) return out.error(player, `Следующий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} повысил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был повышен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был повышен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.news.rank.lower": (player, recId) => {
@@ -834,16 +857,17 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`, header);
         if (rec.id == player.id) return out.error(player, `Нельзя понизить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для понижения ${rec.name}`);
         var min = factions.getMinRank(rec.character.factionId);
-        if (rec.character.factionRank <= min.id) return out.error(player, `${rec.name} имеет мин. ранг`);
+        if (rankLevel(rec.character) <= min.rank) return out.error(player, `${rec.name} имеет мин. ранг`);
 
-        var rank = factions.getRankById(rec.character.factionId, rec.character.factionRank - 1);
+        var rank = factions.getRank(rec.character.factionId, rankLevel(rec.character) - 1);
+        if (!rank) return out.error(player, `Предыдущий ранг не найден`);
         factions.setRank(rec, rank.rank);
         var rankName = factions.getRankById(rec.character.factionId, rec.character.factionRank).name;
 
         notifs.success(rec, `${player.name} понизил вас до ${rankName}`, header);
-        var text = `<span>${rec.name}</span><br /> был понижен до ранга ${rankName}`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был понижен до ранга ${rankName}`;
         out.success(player, text);
     },
     "mapCase.news.members.uval": (player, recId) => {
@@ -853,11 +877,11 @@ module.exports = {
         var rec = mp.players.getBySqlId(recId);
         if (!rec) return out.error(player, `Игрок #${recId} оффлайн`);
         if (rec.id == player.id) return out.error(player, `Нельзя уволить себя`, header);
-        if (rec.character.factionRank >= player.character.factionRank) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
+        if (rankLevel(rec.character) >= rankLevel(player.character)) return out.error(player, `Недостаточно прав для увольнения ${rec.name}`);
 
         factions.deleteMember(rec);
         notifs.info(rec, `${player.name} уволил вас`, header);
-        var text = `<span>${rec.name}</span><br /> был уволен`;
+        var text = `<span>${utils.escapeHtml(rec.name)}</span><br /> был уволен`;
         out.success(player, text);
     },
     "time.main.tick": () => {

@@ -128,7 +128,7 @@ mp.inventory = {
         mp.callCEFV(`inventory.setItemSqlId(${id}, ${sqlId})`);
     },
     setItemParam(sqlId, key, value) {
-        mp.callCEFV(`inventory.setItemParam(${sqlId}, \`${key}\`, \`${value}\`)`);
+        mp.callCEFV(`inventory.setItemParam(${Number(sqlId)}, ${JSON.stringify(String(key))}, ${JSON.stringify(value == null ? '' : String(value))})`);
     },
     setFoundItem(sqlId, enable) {
         mp.callCEFV(`inventory.setFoundItem(${sqlId}, ${enable})`);

@@ -1,223 +1,181 @@
-const webpack = require('webpack');
-const config = require('../webpack.config');
 const path = require('path');
 const fs = require('fs');
-const wrench = require('wrench');
 const rimraf = require('rimraf');
-const obfuscator = require('javascript-obfuscator');
 const PATHS = require('./paths');
-require('babel-polyfill');
+const files = require('./files');
+const viteConfig = require('../vite.config');
 
-let entry = {
-    babelPolyfill: 'babel-polyfill'
-};
-let buildDirectory;
+const srcRoot = path.resolve(__dirname, PATHS.basePath);
+const outRoot = path.resolve(__dirname, PATHS.finalPath);
+const ignoreModules = viteConfig.IGNORE_MODULES;
 
-let DATE_CHANGE = null;
-
-let ignoreModules = ['attaches', 'game_resources', 'browser'];
-let ignoreFiles = [ '.listcache', 'babelPolyfill.js' ];
-let changedFiles = [];
-
-function deleteUnusedFiles(currentPath) {
-    fs.readdirSync(currentPath).forEach(item => {
-        let updatePath = path.resolve(currentPath, item);
-        let baseCurrentPath = updatePath.replace('client_packages', 'client_files');
-
-        if (fs.existsSync(baseCurrentPath)) {
-            if (fs.lstatSync(updatePath).isDirectory()) {
-                deleteUnusedFiles(updatePath);
-            }
-        } else if (!ignoreFiles.includes(item)) {
-           rimraf.sync(updatePath);
-        }
-    });
+function toOut(abs) {
+    return path.join(outRoot, path.relative(srcRoot, abs));
 }
 
-function copyFile(copyPath) {
-    let finalFilePath = copyPath.toString().replace('client_files', 'client_packages');
-
-    if (fs.existsSync(finalFilePath)) {
-        fs.unlinkSync(finalFilePath);
-    }
-
-    fs.copyFileSync(copyPath, finalFilePath);
-}
-
-function obfuscateFile(filePath) {
-    let finalFilePath = filePath.toString().replace('client_files', 'client_packages');
-
-    let result = obfuscator.obfuscate(
-    fs.readFileSync(filePath, 'utf8').toString(),
-        {
-            compact: true,
-            controlFlowFlattening: true
-        }
-    );
-
-    fs.writeFileSync(finalFilePath, result.getObfuscatedCode());
-}
-
-function obfuscateBrowserScripts() {
-    const indexPath = path.resolve(__dirname, PATHS.basePath, 'browser', 'index.js');
-    if (fs.existsSync(indexPath) && fs.statSync(indexPath).mtime > DATE_CHANGE) {
-        changedFiles.push('browser/index.js');
-        obfuscateFile(indexPath);
-    }
-}
-
-
-function copyChangedBrowserFiles(currentPath) {
-    const browserRoot = path.resolve(__dirname, PATHS.basePath, 'browser');
-    fs.readdirSync(currentPath).forEach(item => {
-        if (currentPath === browserRoot && item === 'index.js') {
+function syncTree(fromDir, since, skipFile) {
+    files.walkFiles(fromDir, (abs, stat) => {
+        const rel = path.relative(fromDir, abs);
+        if (skipFile && skipFile(rel)) {
             return;
         }
-        if (item != 'index.js' || currentPath !== browserRoot) {
-            let updatedPath = path.resolve(currentPath, item);
-            if (fs.lstatSync(updatedPath).isDirectory()) {
-                let finalPathDir = updatedPath.replace('client_files', 'client_packages');
-                if (!fs.existsSync(finalPathDir)) {
-                    fs.mkdirSync(finalPathDir)
+        const dest = toOut(abs);
+        if (!files.needsUpdate(stat, dest, since)) {
+            return;
+        }
+        files.copyFile(abs, dest);
+    });
+}
+
+function syncObfuscated(from, to, since) {
+    if (!fs.existsSync(from)) {
+        return false;
+    }
+    const stat = fs.statSync(from);
+    if (!files.needsUpdate(stat, to, since)) {
+        return false;
+    }
+    files.obfuscateFile(from, to);
+    return true;
+}
+
+function deleteUnused(currentPath) {
+    fs.readdirSync(currentPath).forEach(item => {
+        const updatePath = path.resolve(currentPath, item);
+        const baseCurrentPath = updatePath.replace('client_packages', 'client_files');
+
+        if (fs.existsSync(baseCurrentPath)) {
+            if (fs.statSync(updatePath).isDirectory()) {
+                deleteUnused(updatePath);
+            }
+            return;
+        }
+
+        if (item !== '.listcache') {
+            rimraf.sync(updatePath);
+        }
+    });
+}
+
+function readSince() {
+    if (!fs.existsSync(outRoot)) {
+        fs.mkdirSync(outRoot, { recursive: true });
+        return new Date(0);
+    }
+
+    const cacheFile = path.join(outRoot, '.listcache');
+    if (!fs.existsSync(cacheFile)) {
+        console.log('.listcache не найден, перезапустите сервер');
+        return null;
+    }
+
+    return fs.statSync(cacheFile).mtime;
+}
+
+function collectModules(since) {
+    const modules = [];
+
+    fs.readdirSync(srcRoot).forEach(name => {
+        if (!name || name[0] === '.' || ignoreModules.indexOf(name) !== -1) {
+            return;
+        }
+
+        const dir = path.join(srcRoot, name);
+        if (!fs.statSync(dir).isDirectory()) {
+            return;
+        }
+
+        const indexFile = path.join(dir, 'index.js');
+        if (!fs.existsSync(indexFile)) {
+            syncTree(dir, since);
+            return;
+        }
+
+        let rebuild = !fs.existsSync(path.join(outRoot, name, 'index.js'));
+
+        files.walkFiles(dir, (abs, stat) => {
+            if (abs.endsWith('.js')) {
+                if (stat.mtime > since) {
+                    rebuild = true;
                 }
-                copyChangedBrowserFiles(updatedPath);
-            } else {
-                if (fs.statSync(updatedPath).mtime > DATE_CHANGE) {
-                    changedFiles.push(updatedPath);
-                    copyFile(updatedPath);
-                }
+                return;
             }
+            const dest = toOut(abs);
+            if (files.needsUpdate(stat, dest, since)) {
+                files.copyFile(abs, dest);
+            }
+        });
+
+        if (rebuild) {
+            modules.push(name);
         }
     });
+
+    return modules;
 }
 
-function copyFolderRecursive(folderPath) {
-    fs.readdirSync(folderPath).forEach(item => {
-        let updatedPath = path.resolve(folderPath, item);
-        if (fs.lstatSync(updatedPath).isDirectory()) {
-            let finalPahDir = updatedPath.replace('client_files', 'client_packages');
-            if (!fs.existsSync(finalPahDir)) {
-                fs.mkdirSync(finalPahDir)
-            }
-            copyFolderRecursive(updatedPath);
-        } else {
-            if (fs.statSync(updatedPath).mtime > DATE_CHANGE || !fs.existsSync(updatedPath.replace('client_files', 'client_packages'))) {
-                changedFiles.push(updatedPath);
-                copyFile(updatedPath);
-            }
-        }
-    });
-}
-
-function copyIgnoreModules() {
-    ignoreModules.forEach(module => {
-        if (!fs.existsSync(path.resolve(__dirname, PATHS.finalPath, module))) {
-            fs.mkdirSync(path.resolve(__dirname, PATHS.finalPath, module));
-        }
-        copyFolderRecursive(path.resolve(__dirname, PATHS.basePath, module));
-    });
-}
-
-function copyOnlyChangedFiles() {
-    if (!fs.existsSync(path.resolve(__dirname, PATHS.buildPath))) {
-        fs.mkdirSync(path.resolve(__dirname, PATHS.buildPath));
+async function main() {
+    if (!fs.existsSync(srcRoot)) {
+        console.error('не найдена папка client_files');
+        process.exit(1);
     }
 
-    if (fs.existsSync(path.resolve(__dirname, PATHS.finalPath))) {
-        if (fs.existsSync(path.resolve(__dirname, PATHS.finalPath, '.listcache'))) {
-            DATE_CHANGE = fs.statSync(path.resolve(__dirname, PATHS.finalPath, '.listcache')).mtime
-        } else {
-            return console.log('.listcache не найден, перезапустите сервер');
-        }
-    } else {
-        fs.mkdirSync(path.resolve(__dirname, PATHS.finalPath));
-        fs.mkdirSync(path.resolve(__dirname, PATHS.finalPath, 'browser'));
-        fs.mkdirSync(path.resolve(__dirname, PATHS.finalPath, 'browser', 'js'));
-        DATE_CHANGE = 0;
+    const since = readSince();
+    if (!since) {
+        return;
     }
 
-    wrench.copyDirSyncRecursive(path.resolve(__dirname, PATHS.basePath), path.resolve(__dirname, PATHS.buildPath), {
-        forceDelete: true
+    const buildDir = path.resolve(__dirname, '../client_build');
+    if (fs.existsSync(buildDir)) {
+        rimraf.sync(buildDir);
+    }
+
+    ignoreModules.forEach(name => {
+        const from = path.join(srcRoot, name);
+        if (!fs.existsSync(from)) {
+            return;
+        }
+        syncTree(from, since, rel => {
+            return name === 'browser' && rel === 'index.js';
+        });
     });
 
-    copyIgnoreModules();
+    const browserIndex = syncObfuscated(
+        path.join(srcRoot, 'browser', 'index.js'),
+        path.join(outRoot, 'browser', 'index.js'),
+        since
+    );
+    const rootIndex = syncObfuscated(
+        path.join(srcRoot, 'index.js'),
+        path.join(outRoot, 'index.js'),
+        since
+    );
 
-    copyChangedBrowserFiles(path.resolve(__dirname, PATHS.basePath, 'browser'));
-    obfuscateBrowserScripts();
-
-    if (fs.statSync(path.resolve(__dirname, PATHS.basePath, 'index.js')).mtime > DATE_CHANGE) {
-        obfuscateFile(path.resolve(__dirname, PATHS.basePath, 'index.js'));
-    }
-
-    deleteUnusedFiles(path.resolve(__dirname, PATHS.finalPath));
-
-    console.log('[WEBPACK] COPY DONE');
-}
-
-function rewriteFile(dir, file) {
-    let content = fs.readFileSync(path.resolve(__dirname, PATHS.buildPath, dir, file), 'utf8').toString();
-
-    let regImport = new RegExp(dir + '\/', 'g');
-    let regExport = new RegExp(`exports`, 'g');
-
-    content = content.replace(regImport, `./`);
-
-    buildDirectory.forEach(module => {
-        if (module !== dir) {
-            content = content.replace(`require('${module}`, `require('../${module}`);
+    fs.readdirSync(srcRoot).forEach(name => {
+        const abs = path.join(srcRoot, name);
+        if (name[0] === '.' || name === 'index.js' || !fs.statSync(abs).isFile()) {
+            return;
+        }
+        const dest = path.join(outRoot, name);
+        const stat = fs.statSync(abs);
+        if (files.needsUpdate(stat, dest, since)) {
+            files.copyFile(abs, dest);
         }
     });
 
-    content = content.replace(regExport, 'module.exports');
-
-    fs.writeFileSync(path.resolve(__dirname, PATHS.buildPath, dir, file), content);
-}
-
-function getEntry() {
-    buildDirectory = fs.readdirSync(path.resolve(__dirname, PATHS.buildPath));
-    
-    buildDirectory.forEach(dir => {
-        if (fs.lstatSync(path.resolve(__dirname, PATHS.buildPath, dir)).isDirectory() && !ignoreModules.includes(dir) && dir != 'browser') {
-            let directory = fs.readdirSync(path.resolve(__dirname, PATHS.buildPath, dir));
-            let isChange = false;
-
-            directory.forEach(file => {
-                if (fs.statSync(path.resolve(__dirname, PATHS.basePath, dir, file)).mtime > DATE_CHANGE) {
-                    isChange = true;
-                }
-            })
-
-            if (isChange) {
-                directory.forEach(file => {
-                    rewriteFile(dir, file);
-                });
-
-                changedFiles.push(`${dir}/index.js`);
-                entry[`${dir}/index`] = `./client_build/${dir}/index.js`;
-            }
-        }
-    });
-
-    console.log('[WEBPACK] ENTRIES CREATE');
-}
-
-copyOnlyChangedFiles();
-getEntry();
-
-if (Object.keys(entry).length > 0) {
-    config.entry = entry;
-    console.log(config);
-    let compiler = webpack(config);
-
-    compiler.run((err, stats) => {
-        if (err) console.log(err);
-
-        console.log('CHANGED FILES: ', changedFiles.length);
-    });
-} else {
-    if (fs.existsSync(path.resolve(__dirname, PATHS.buildPath))) {
-        rimraf.sync(path.resolve(__dirname, PATHS.buildPath));
+    const modules = collectModules(since);
+    if (modules.length) {
+        const ms = await viteConfig.bundleModules(modules);
+        console.log('[vite] модулей: ' + modules.length + ' за ' + ms + 'ms');
+    } else if (!browserIndex && !rootIndex) {
+        console.log('[vite] клиентские файлы не менялись');
     }
-    console.log('CHANGED FILES: ', changedFiles.length);
-    console.log('Webpack не был запущен, поскольку изменений в клиентских файлах, кроме браузера, нет');
+
+    deleteUnused(outRoot);
+    console.log('[vite] готово');
 }
+
+main().catch(err => {
+    console.error('[vite] ошибка:', err && err.stack ? err.stack : err);
+    process.exit(1);
+});

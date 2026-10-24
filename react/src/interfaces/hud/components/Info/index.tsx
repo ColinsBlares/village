@@ -3,6 +3,7 @@ import styles from './index.module.css';
 import { useHudStore } from '../../store';
 import { usePlayerMenuStore } from '../../../playerMenu/store';
 import logoImg from '@imgs/hud/logo.png';
+import QuestTracker from '../QuestTracker';
 
 function shortDate(date: string) {
 	const parts = date.split('.');
@@ -138,6 +139,7 @@ function Info() {
 			<StatusView />
 			<CashView />
 			<BankView />
+			<QuestTracker />
 		</div>
 	);
 }

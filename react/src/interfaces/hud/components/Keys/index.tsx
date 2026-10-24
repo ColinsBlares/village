@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import styles from './index.module.css';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import { useHudStore } from '../../store';
 
 function isKeyVisible(name: string, factionId: number) {
@@ -25,7 +26,7 @@ function Keys() {
 				item =>
 					isKeyVisible(item.name, factionId) && (
 						<div key={item.key}>
-							<span dangerouslySetInnerHTML={{ __html: item.key }} />
+							<span dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.key) }} />
 							{item.name}
 						</div>
 					),

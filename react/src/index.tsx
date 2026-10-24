@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import { loadScreens } from './utils/screens';
 import { events } from './utils/shared/events';
@@ -21,5 +21,8 @@ loadScreens().then(function (screens) {
 
 	return Promise.all(pending);
 }).then(function () {
-	ReactDOM.render(<App />, document.getElementById('root'));
+	const rootEl = document.getElementById('root');
+	if (rootEl) {
+		createRoot(rootEl).render(<App />);
+	}
 });

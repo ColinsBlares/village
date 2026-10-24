@@ -248,22 +248,23 @@ module.exports = {
         if (info.characterId !== seller.character.id) return seller.call("house.sell.ans", [0]);
         if (player.dist(new mp.Vector3(info.pickupX, info.pickupY, info.pickupZ)) > 10 ||
             seller.dist(new mp.Vector3(info.pickupX, info.pickupY, info.pickupZ)) > 10) return seller.call("house.sell.ans", [3]);
-        if (player.character.cash < info.price) return seller.call("house.sell.ans", [6]);
-        if (housesService.isHaveHouse(player.character.id)) return seller.call("house.sell.ans", [7]);
-        if (result === 2) return  seller.call("house.sell.ans", [2]);
-
-        housesService.sellHouse(house, seller.house.sellingHouseCost, seller, player, (ans) => {
-            if (ans) {
-                seller.call("house.sell.ans", [1]);
-                notifications.info(player, "Оплатите имущество в банке в течение 24 часов, иначе оно будет продано", "Внимание");
-            }
-            else {
-                seller.call("house.sell.ans", [0]);
-            }
+        const cost = seller.house.sellingHouseCost;
+        const finish = (code) => {
+            seller.call("house.sell.ans", [code]);
             seller.house.buyerId = null;
             seller.house.sellingHouseId = null;
             seller.house.sellingHouseCost = null;
             player.house.sellerId = null;
+        };
+        if (parseInt(result) !== 1) return finish(2);
+        if (player.character.cash < cost) return finish(6);
+        if (housesService.isHaveHouse(player.character.id)) return finish(7);
+
+        housesService.sellHouse(house, cost, seller, player, (ans) => {
+            if (ans) {
+                notifications.info(player, "Оплатите имущество в банке в течение 24 часов, иначе оно будет продано", "Внимание");
+            }
+            finish(ans ? 1 : 0);
         });
     },
     "house.sell.stop": (player) => {
@@ -287,9 +288,11 @@ module.exports = {
 
     /// События для работы с экземплярами домов
     "house.add": (player, houseInfo) => {
+        if (!player.character || player.character.admin < 5) return;
         housesService.createHouse(JSON.parse(houseInfo));
     },
     "house.add.carSpawn": async (player, i, garage) => {
+        if (!player.character || player.character.admin < 5) return;
         if (vehicles == null) return;
         if (carPlaceVehicle[i] != null) {
             timer.remove(carPlaceVehicle[i].fuelTimer);
@@ -319,18 +322,22 @@ module.exports = {
         if (garage) player.call("house.add.carSpawn.ans", [i]);
     },
     "house.add.removeFromVehicle": (player) => {
+        if (!player.character || player.character.admin < 5) return;
         player.removeFromVehicle();
     },
     "house.add.carDrop": (player, i) => {
+        if (!player.character || player.character.admin < 5) return;
         if (carPlaceVehicle[i] == null) return;
         timer.remove(carPlaceVehicle[i].fuelTimer);
         carPlaceVehicle[i].destroy();
         carPlaceVehicle[i] = null;
     },
     "house.add.interior": (player, interiorInfo) => {
+        if (!player.character || player.character.admin < 5) return;
         housesService.createInterior(player, JSON.parse(interiorInfo));
     },
     "house.add.garage": (player, garageInfo) => {
+        if (!player.character || player.character.admin < 5) return;
         housesService.createGarage(player, JSON.parse(garageInfo));
     },
 };

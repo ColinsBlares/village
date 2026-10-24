@@ -1,0 +1,123 @@
+.head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 12px;
+	margin-bottom: 14px;
+}
+
+.head h2,
+.group h3 {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.tools {
+	display: flex;
+	gap: 8px;
+}
+
+.btn,
+.primary,
+.tiny,
+.weather,
+.weatherOn {
+	border: 1px solid var(--line);
+	background: transparent;
+	color: var(--text);
+	font-family: inherit;
+	font-size: 13px;
+	padding: 7px 10px;
+	cursor: pointer;
+}
+
+.primary {
+	background: var(--signal);
+	color: #1a1204;
+	border-color: var(--signal);
+	font-weight: 650;
+}
+
+.group {
+	margin-bottom: 16px;
+}
+
+.group h3 {
+	color: var(--mist);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	margin-bottom: 8px;
+}
+
+.weathers {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.weatherOn {
+	border-color: var(--signal);
+	color: var(--signal);
+}
+
+.rows {
+	display: flex;
+	flex-direction: column;
+	border-top: 1px solid var(--line);
+}
+
+.row {
+	display: grid;
+	grid-template-columns: 8px 1.3fr 1fr auto auto auto;
+	gap: 12px;
+	align-items: center;
+	padding: 10px 0;
+	border: 0;
+	border-bottom: 1px solid var(--line);
+	background: transparent;
+	color: inherit;
+	font-family: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.swatch {
+	width: 8px;
+	height: 28px;
+}
+
+.name {
+	font-size: 14px;
+}
+
+.weatherName,
+.when,
+.count {
+	font-size: 13px;
+	color: var(--mist);
+}
+
+.temp {
+	font-family: bank-font, Montserrat, sans-serif;
+	font-size: 18px;
+}
+
+.banner {
+	margin-bottom: 14px;
+	padding: 10px 12px;
+	border: 1px solid var(--line);
+	color: var(--storm);
+	font-size: 13px;
+}
+
+.btn:focus-visible,
+.primary:focus-visible,
+.weather:focus-visible,
+.weatherOn:focus-visible,
+.row:focus-visible {
+	outline: 1px solid var(--signal);
+	outline-offset: 2px;
+}

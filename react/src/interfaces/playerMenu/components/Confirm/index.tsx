@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import styles from './index.module.css';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import { acceptConfirmation, closeConfirmation, setInputFocus, setPromoCode, usePlayerMenuStore } from '../../store';
 
 function Confirm() {
@@ -13,7 +14,7 @@ function Confirm() {
 		<div className={styles.blur}>
 			<div className={styles.confirmation}>
 				<div className={styles.head}>{confirmation.head}</div>
-				<div className={styles.description} dangerouslySetInnerHTML={{ __html: confirmation.description }} />
+				<div className={styles.description} dangerouslySetInnerHTML={{ __html: sanitizeHtml(confirmation.description || '') }} />
 				{codeMod ? (
 					<div>
 						<input

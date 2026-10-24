@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import { getFactionData } from '../../data';
 import { setMenuFocus, showLoad, useMapCaseStore } from '../../store';
 import styles from './index.module.css';
@@ -18,7 +19,7 @@ function Menu() {
 		<div className={styles.menu}>
 			<div className={styles.header}>
 				<div className={styles.menuTop}>
-					<div dangerouslySetInnerHTML={{ __html: data.menuHeader }} />
+					<div dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.menuHeader || '') }} />
 					{data.menuHeaderName ? (
 						<img className={styles.headerName} src={data.menuHeaderName} alt="" />
 					) : null}

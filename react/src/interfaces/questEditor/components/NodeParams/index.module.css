@@ -1,0 +1,102 @@
+.panel {
+	padding: 12px;
+	overflow-y: auto;
+}
+
+.hint {
+	opacity: 0.6;
+	font-size: 13px;
+}
+
+.heading {
+	font-weight: 700;
+	margin-bottom: 10px;
+	color: #f0c040;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-bottom: 10px;
+	font-size: 12px;
+}
+
+.field input,
+.field textarea {
+	background: #1a1f2a;
+	border: 1px solid #3d4658;
+	color: #eef0f4;
+	padding: 6px 8px;
+	border-radius: 4px;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 12px;
+}
+
+.selectBtn {
+	width: 100%;
+	text-align: left;
+	background: #1a1f2a;
+	border: 1px solid #3d4658;
+	color: #eef0f4;
+	padding: 6px 8px;
+	border-radius: 4px;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.selectMenu {
+	display: flex;
+	flex-direction: column;
+	margin-top: 4px;
+	border: 1px solid #3d4658;
+	background: #12161e;
+	max-height: 180px;
+	overflow-y: auto;
+}
+
+.selectItem {
+	text-align: left;
+	background: transparent;
+	border: none;
+	color: #eef0f4;
+	padding: 6px 8px;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.selectItem:hover,
+.selectItemOn {
+	background: rgba(240, 192, 64, 0.16);
+}
+
+.check {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	font-size: 13px;
+}
+
+.btn {
+	width: 100%;
+	padding: 8px;
+	margin-top: 8px;
+	background: #2d384d;
+	border: 1px solid #4a5670;
+	color: #eef0f4;
+	border-radius: 4px;
+	cursor: pointer;
+	font: inherit;
+}
+
+.btn:hover {
+	background: #3a4860;
+}
+
+.questMeta {
+	padding: 12px;
+	border-bottom: 1px solid #2a3140;
+}

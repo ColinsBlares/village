@@ -1,0 +1,90 @@
+.note {
+	margin: 0 0 14px;
+	color: var(--mist);
+	font-size: 13px;
+	max-width: 640px;
+}
+
+.hold {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 14px;
+	font-size: 13px;
+	color: var(--mist);
+}
+
+.hold input {
+	width: 72px;
+	background: var(--ink);
+	border: 1px solid var(--line);
+	color: var(--text);
+	font-family: inherit;
+	padding: 6px 8px;
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.card,
+.cardOn {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 8px 16px;
+	padding: 12px;
+	border: 1px solid var(--line);
+	background: transparent;
+}
+
+.cardOn {
+	border-color: var(--storm);
+}
+
+.card h3,
+.cardOn h3 {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.card p,
+.cardOn p {
+	margin: 4px 0 0;
+	grid-column: 1;
+	color: var(--mist);
+	font-size: 13px;
+}
+
+.actions {
+	display: flex;
+	gap: 8px;
+	align-items: start;
+}
+
+.btn,
+.primary {
+	border: 1px solid var(--line);
+	background: transparent;
+	color: var(--text);
+	font-family: inherit;
+	font-size: 13px;
+	padding: 7px 10px;
+	cursor: pointer;
+}
+
+.primary {
+	background: var(--signal);
+	border-color: var(--signal);
+	color: #1a1204;
+	font-weight: 650;
+}
+
+.btn:focus-visible,
+.primary:focus-visible,
+.hold input:focus-visible {
+	outline: 1px solid var(--signal);
+	outline-offset: 2px;
+}

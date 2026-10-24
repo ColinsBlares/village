@@ -23,6 +23,7 @@ module.exports = {
         if (!player.character) return;
         if (!shape.isBank) return;
 
+        player.atBank = true;
         player.call('prompt.show', ['Нажмите <span>E</span> для того, чтобы взаимодействовать с банковским счетом']);
         player.call('bank.shape', [true]);
     },
@@ -30,16 +31,19 @@ module.exports = {
         if (!player.character) return;
         if (!shape.isBank) return;
 
+        player.atBank = false;
         player.call('prompt.hide');
         player.call('bank.shape', [false]);
         player.call("bank.close", [true]);
     },
     "bank.entering": (player) => {
+        if (!player.atBank) return;
         let info = bank.getInfo(player);
         if (info == null) return;
         player.call("bank.show", [info]);
     },
     "bank.push": (player, number) => {
+        if (!player.atBank) return player.call("bank.push.ans", [0]);
         if (!anticheat.guard(player, 'bank.push')) return;
         if (player.character == null) return player.call("bank.push.ans", [0]);
         number = parseInt(number);
@@ -50,13 +54,17 @@ module.exports = {
             if (!resultCash) return player.call("bank.push.ans", [0]);
 
             money.addMoney(player, number, (resultMoney) => {
-                if (!resultMoney) return player.call("bank.push.ans", [0]);
+                if (!resultMoney) {
+                    money.addCash(player, number, () => {}, `Возврат пополнения счета`);
+                    return player.call("bank.push.ans", [0]);
+                }
                 player.call("bank.push.ans", [1]);
             }, `Пополнение счета`);
 
         }, `Пополнение счета`);
     },
     "bank.pop": (player, number) => {
+        if (!player.atBank) return player.call("bank.pop.ans", [0]);
         if (!anticheat.guard(player, 'bank.pop')) return;
         if (player.character == null) return player.call("bank.pop.ans", [0]);
         number = parseInt(number);
@@ -67,13 +75,17 @@ module.exports = {
             if (!resultMoney) return player.call("bank.pop.ans", [0]);
 
             money.addCash(player, number, (resultCash) => {
-                if (!resultCash) return player.call("bank.pop.ans", [0]);
+                if (!resultCash) {
+                    money.addMoney(player, number, () => {}, `Возврат снятия со счета`);
+                    return player.call("bank.pop.ans", [0]);
+                }
                 player.call("bank.pop.ans", [1]);
             }, `Снятие со счета`);
 
         }, `Снятие со счета`);
     },
     "bank.transfer.ask": async (player, accountNumber) => {
+        if (!player.atBank) return player.call("bank.transfer.ask.ans", [null]);
         if (!anticheat.guard(player, 'bank.transfer.ask')) return;
         if (player.character == null) return player.call("bank.transfer.ask.ans", [null]);
         accountNumber = parseInt(accountNumber);
@@ -88,6 +100,7 @@ module.exports = {
         player.call("bank.transfer.ask.ans", [character.name]);
     },
     "bank.transfer": (player, number, accountNumber) => {
+        if (!player.atBank) return player.call("bank.transfer.ans", [0]);
         if (!anticheat.guard(player, 'bank.transfer')) return;
         if (player.character == null) return player.call("bank.transfer.ans", [0]);
         accountNumber = parseInt(accountNumber);
@@ -110,8 +123,11 @@ module.exports = {
         number = parseInt(number);
         if (isNaN(number) || number <= 0) return player.call("bank.phone.push.ans", [0]);
         if (player.character.bank < number) return player.call("bank.phone.push.ans", [2]);
+        if (player.phone._lock) return player.call("bank.phone.push.ans", [0]);
+        player.phone._lock = true;
 
         money.removeMoney(player, number, (resultMoney) => {
+            player.phone._lock = false;
             if (!resultMoney) return player.call("bank.phone.push.ans", [0]);
 
             player.phone.money += number;
@@ -171,15 +187,16 @@ module.exports = {
         let biz = bizService.getBizById(id);
         if (biz == null || biz.info.characterId != player.character.id) return player.call("bank.biz.cashbox.push.ans", [0]);
         if (player.character.bank < number) return player.call("bank.biz.cashbox.push.ans", [2]);
-        biz.info.cashBox += number;
+        if (biz._cashLock) return player.call("bank.biz.cashbox.push.ans", [0]);
+        biz._cashLock = true;
 
         money.removeMoney(player, number, (resultMoney) => {
+            biz._cashLock = false;
             if (!resultMoney) return player.call("bank.biz.cashbox.push.ans", [0]);
-
+            biz.info.cashBox += number;
+            biz.info.save();
             player.call("bank.biz.cashbox.push.ans", [1]);
         }, `Пополнение кассы бизнеса`);
-
-        biz.info.save();
     },
     "bank.biz.cashbox.pop": (player, id, number) => {
         if (!anticheat.guard(player, 'bank.biz.cashbox.pop')) return;
@@ -190,14 +207,18 @@ module.exports = {
         let biz = bizService.getBizById(id);
         if (biz == null || biz.info.characterId != player.character.id) return player.call("bank.biz.cashbox.pop.ans", [0]);
         if (biz.info.cashBox < number) return player.call("bank.biz.cashbox.pop.ans", [4]);
+        if (biz._cashLock) return player.call("bank.biz.cashbox.pop.ans", [0]);
+        biz._cashLock = true;
         biz.info.cashBox -= number;
 
         money.addMoney(player, number, (resultMoney) => {
-            if (!resultMoney) return player.call("bank.biz.cashbox.pop.ans", [0]);
-
+            biz._cashLock = false;
+            if (!resultMoney) {
+                biz.info.cashBox += number;
+                return player.call("bank.biz.cashbox.pop.ans", [0]);
+            }
+            biz.info.save();
             player.call("bank.biz.cashbox.pop.ans", [1]);
         }, `Снятие из кассы бизнеса`);
-
-        biz.info.save();
     }
 };

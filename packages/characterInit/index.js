@@ -227,21 +227,112 @@ module.exports = {
         this.applyCharacter(player);
         this.sendToCreator(player);
     },
+    clampInt(value, min, max, fallback) {
+        const n = parseInt(value);
+        if (isNaN(n)) return fallback;
+        return Math.max(min, Math.min(max, n));
+    },
+    clampFloat(value, min, max, fallback) {
+        const n = parseFloat(value);
+        if (isNaN(n)) return fallback;
+        return Math.max(min, Math.min(max, n));
+    },
+    sanitizeCreatorData(raw, fullname, accountId) {
+        const src = raw && typeof raw === 'object' ? raw : {};
+        const features = [];
+        const srcFeatures = Array.isArray(src.Features) ? src.Features : [];
+        for (let i = 0; i < 20; i++) {
+            const f = srcFeatures[i] || {};
+            features.push({
+                value: this.clampFloat(f.value, -1, 1, 0),
+                order: i,
+            });
+        }
+        const appearances = [];
+        const srcAppearances = Array.isArray(src.Appearances) ? src.Appearances : [];
+        for (let i = 0; i < 11; i++) {
+            const a = srcAppearances[i] || {};
+            appearances.push({
+                value: this.clampInt(a.value, 0, 255, 255),
+                opacity: this.clampFloat(a.opacity, 0, 1, 1),
+                order: i,
+            });
+        }
+        const gender = src.gender === 1 || src.gender === true ? 1 : 0;
+        return {
+            accountId,
+            name: fullname,
+            gender,
+            father: this.clampInt(src.father, 0, 45, 0),
+            mother: this.clampInt(src.mother, 0, 45, 21),
+            similarity: this.clampFloat(src.similarity, 0, 1, 1),
+            skin: this.clampInt(src.skin, 0, 45, 0),
+            hair: this.clampInt(src.hair, 0, 73, 0),
+            hairColor: this.clampInt(src.hairColor, 0, 63, 0),
+            hairHighlightColor: this.clampInt(src.hairHighlightColor, 0, 63, 0),
+            eyebrowColor: this.clampInt(src.eyebrowColor, 0, 63, 0),
+            beardColor: this.clampInt(src.beardColor, 0, 63, 0),
+            eyeColor: this.clampInt(src.eyeColor, 0, 31, 0),
+            blushColor: this.clampInt(src.blushColor, 0, 63, 0),
+            lipstickColor: this.clampInt(src.lipstickColor, 0, 63, 0),
+            chestHairColor: this.clampInt(src.chestHairColor, 0, 63, 0),
+            cash: 300,
+            bank: 0,
+            admin: 0,
+            minutes: 0,
+            Features: features,
+            Appearances: appearances,
+            Fines: [],
+            Promocode: {
+                PromocodeReward: {},
+            },
+            settings: {},
+        };
+    },
+    isValidCharacterName(fullname) {
+        return /^[A-Z][a-z]{1,14} [A-Z][a-z]{1,14}$/.test(fullname);
+    },
     async save(player, fullname, charData) {
-        let characters = await db.Models.Character.findAll({
-            where: {
-                name: fullname
-            }
+        if (!player.account || !player.characterInit || player.character) {
+            return player.call('characterInit.create.check.ans', [0]);
+        }
+        if (player.characterInit && player.characterInit.creating) {
+            return player.call('characterInit.create.check.ans', [0]);
+        }
+        if (!this.isValidCharacterName(fullname)) {
+            return player.call('characterInit.create.check.ans', [0]);
+        }
+        const slots = player.account.slots || 1;
+        const owned = await db.Models.Character.count({
+            where: { accountId: player.account.id },
         });
-        if (characters.length !== 0) return player.call('characterInit.create.check.ans', [0]);
-        player.characterInfo = JSON.parse(charData);
-        player.characterInfo.name = fullname;
+        if (owned >= slots) {
+            return player.call('characterInit.create.check.ans', [0]);
+        }
+
+        let parsed;
+        try {
+            parsed = typeof charData === 'string' ? JSON.parse(charData) : charData;
+        } catch (e) {
+            return player.call('characterInit.create.check.ans', [0]);
+        }
+
+        player.characterInit.creating = true;
+        try {
+        player.characterInfo = this.sanitizeCreatorData(parsed, fullname, player.account.id);
         let pos = this.getSpawn();
         player.characterInfo.x = pos[0];
         player.characterInfo.y = pos[1];
         player.characterInfo.z = pos[2];
         player.characterInfo.cash = 300;
         player.characterInfo.Promocode.promocode = await promocodes.getPromocode();
+
+        const exists = await db.Models.Character.findOne({
+            where: { name: fullname },
+        });
+        if (exists) {
+            return player.call('characterInit.create.check.ans', [0]);
+        }
 
         player.character = await db.Models.Character.create(player.characterInfo, {
             include: [{
@@ -273,6 +364,12 @@ module.exports = {
             mp.events.call('characterInit.done', player);
         } finally {
             mp.network.endBatch();
+        }
+        } catch (e) {
+            player.character = null;
+            player.call('characterInit.create.check.ans', [0]);
+        } finally {
+            if (player.characterInit) player.characterInit.creating = false;
         }
     },
     sendToCreator(player) {

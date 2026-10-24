@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import { hideVerification, useMapCaseStore } from '../../store';
 import styles from './index.module.css';
 
@@ -10,7 +11,7 @@ function Verification() {
 		<div className={styles.box}>
 			<div
 				className={styles.message}
-				dangerouslySetInnerHTML={{ __html: verification.message }}
+				dangerouslySetInnerHTML={{ __html: sanitizeHtml(verification.message || '') }}
 			/>
 			<div className={styles.btns}>
 				<div className={styles.btn} onClick={verification.accept}>

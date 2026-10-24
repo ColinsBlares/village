@@ -30,10 +30,21 @@ module.exports = {
 	},
 
 	playerQuit: player => {
-		if (!player.character || !player.mute) return;
-
+		if (!player.character || !player.mute || player._muteQuitPending) return;
+		const before = player.character.muteTime;
+		const id = player.id;
+		const characterId = player.character.id;
+		player._muteQuitPending = true;
 		player.character.muteTime -= Date.now() - player.mute.startTime;
 		player.character.save();
+		if (player._keepQuit) return;
+		setTimeout(() => {
+			const still = mp.players.at(id);
+			if (!still || !still.character || still.character.id !== characterId) return;
+			still.character.muteTime = before;
+			still.character.save();
+			still._muteQuitPending = false;
+		}, 1000);
 	},
 
 	// "player.joined": (player) => {
@@ -127,12 +138,9 @@ module.exports = {
 			case '/dice':
 			case '/wheeldebug':
 			case '/wheeltestcar':
-				if (command == '/wheeldebug') {
-					mp.events.call('/wheeldebug', player);
-					break;
-				}
-				if (command == '/wheeltestcar') {
-					mp.events.call('/wheeltestcar', player);
+				if (command == '/wheeldebug' || command == '/wheeltestcar') {
+					if (!player.character.admin || player.character.admin < 3) return;
+					mp.events.call(command, player);
 					break;
 				}
 				if (!/\S/.test(args.join(' '))) return;

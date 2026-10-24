@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import styles from './index.module.css';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 
 function Message({ type, text }: { type: string; text: string }) {
 	const typeClass = styles[type] || '';
@@ -7,7 +8,7 @@ function Message({ type, text }: { type: string; text: string }) {
 
 	return (
 		<div className={className}>
-			<p dangerouslySetInnerHTML={{ __html: text }} />
+			<p dangerouslySetInnerHTML={{ __html: sanitizeHtml(text) }} />
 		</div>
 	);
 }

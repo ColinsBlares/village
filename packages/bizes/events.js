@@ -225,22 +225,23 @@ module.exports = {
         if (info.characterId != seller.character.id) return seller.call("biz.sell.ans", [0]);
         if (player.dist(new mp.Vector3(info.x, info.y, info.z)) > 10 ||
             seller.dist(new mp.Vector3(info.x, info.y, info.z)) > 10) return seller.call("biz.sell.ans", [3]);
-        if (player.character.cash < info.price) return seller.call("biz.sell.ans", [5]);
-        if (bizService.isHaveBiz(player.character.id)) return seller.call("biz.sell.ans", [6]);
-        if (result == 2) return  seller.call("biz.sell.ans", [2]);
-
-        bizService.sellBiz(biz, seller.biz.sellingBizCost, seller, player, function(ans) {
-            if (ans) {
-                seller.call("biz.sell.ans", [1]);
-                notifications.info(player, "Оплатите имущество в банке в течение 24 часов, иначе оно будет продано", "Внимание");
-            }
-            else {
-                seller.call("biz.sell.ans", [0]);
-            }
+        const cost = seller.biz.sellingBizCost;
+        const finish = (code) => {
+            seller.call("biz.sell.ans", [code]);
             seller.biz.buyerId = null;
             seller.biz.sellingBizId = null;
             seller.biz.sellingBizCost = null;
             player.biz.sellerId = null;
+        };
+        if (parseInt(result) !== 1) return finish(2);
+        if (player.character.cash < cost) return finish(5);
+        if (bizService.isHaveBiz(player.character.id)) return finish(6);
+
+        bizService.sellBiz(biz, cost, seller, player, function(ans) {
+            if (ans) {
+                notifications.info(player, "Оплатите имущество в банке в течение 24 часов, иначе оно будет продано", "Внимание");
+            }
+            finish(ans ? 1 : 0);
         });
     },
     "biz.sell.stop": (player) => {
@@ -255,10 +256,11 @@ module.exports = {
     },
     "biz.order.add": async (player, id, productCount, productPrice, isFaction) => {
         productCount = parseInt(productCount);
-        productPrice = parseFloat(productPrice);
-        if (isNaN(productCount) || isNaN(productPrice)) return player.call("biz.order.ans", [0, isFaction]);
-        if (productCount < 1 || productPrice < 0) return player.call("biz.order.ans", [0, isFaction]);
+        productPrice = Math.round(Number(productPrice));
+        if (isNaN(productCount) || !Number.isInteger(productPrice)) return player.call("biz.order.ans", [0, isFaction]);
+        if (productCount < 1 || productPrice < 1) return player.call("biz.order.ans", [0, isFaction]);
         let biz = bizService.getBizById(id);
+        if (biz == null) return player.call("biz.order.ans", [0, isFaction]);
         if (!bizService.bizesModules[biz.info.type].business.isFactionOwner) {
             if (biz.info.characterId !== player.character.id) return player.call("biz.order.ans", [0, isFaction]);
             if (biz.info.cashBox < parseInt(productPrice * productCount)) return player.call("biz.order.ans", [2, isFaction]);
@@ -272,6 +274,13 @@ module.exports = {
     },
     "biz.order.cancel": async (player, id) => {
         id = parseInt(id);
+        if (!player.character) return;
+        const biz = bizService.getBizById(id);
+        if (biz == null) return;
+        const factionOwner = bizService.bizesModules[biz.info.type].business.isFactionOwner;
+        if (factionOwner) {
+            if (player.character.factionId != biz.info.factionId || !factions.isLeader(player)) return;
+        } else if (biz.info.characterId !== player.character.id) return;
         await bizService.destroyOrder(id);
     },
     "biz.actions": (player, action) => {
@@ -286,7 +295,14 @@ module.exports = {
     },
     "biz.finance.save": (player, bizParameters) => {
         if (player.biz.at == null) return notifications != null && notifications.error(player, "Вы находитесь не рядом с бизнесом", "Ошибка");
-        if (bizService.setBizParameters(player.character.id, JSON.parse(bizParameters))) {
+        let parsed;
+        try {
+            parsed = JSON.parse(bizParameters);
+        } catch (e) {
+            return notifications != null && notifications.error(player, "Экономические параметры бизнеса недоступны", "Ошибка");
+        }
+        parsed.bizId = player.biz.at;
+        if (bizService.setBizParameters(player.character.id, parsed)) {
             notifications != null && notifications.success(player, "Экономические параметры успешно изменены", "Успешно");
         }
         else {

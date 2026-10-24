@@ -1,0 +1,81 @@
+.root {
+	position: fixed;
+	inset: 0;
+	z-index: 180;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.35);
+	pointer-events: auto;
+	font-family: 'Montserrat', sans-serif;
+	color: #eef0f4;
+}
+
+.panel {
+	width: 420px;
+	max-height: 70vh;
+	overflow-y: auto;
+	background: #141820;
+	border: 1px solid #2a3140;
+	border-radius: 8px;
+	padding: 16px;
+}
+
+.head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-weight: 700;
+	margin-bottom: 12px;
+}
+
+.close,
+.btn,
+.btnOn {
+	border: 1px solid #3d4658;
+	background: #1e2430;
+	color: #eef0f4;
+	border-radius: 4px;
+	padding: 6px 10px;
+	font-family: inherit;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.btnOn {
+	border-color: #f0c040;
+	color: #f0c040;
+}
+
+.section {
+	margin: 14px 0 8px;
+	font-size: 11px;
+	text-transform: uppercase;
+	color: #34c759;
+}
+
+.row {
+	padding: 10px 0;
+	border-top: 1px solid #222830;
+}
+
+.name {
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.objective {
+	font-size: 13px;
+	opacity: 0.85;
+}
+
+.actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.empty {
+	opacity: 0.5;
+	font-size: 13px;
+}

@@ -8,5 +8,5 @@ export default defineScreen({
 	},
 	eager: true,
 	global: 'hud',
-	events: ['hud.show', 'hud.setData'],
+	events: ['hud.show', 'hud.setData', 'hud.quest.set'],
 });

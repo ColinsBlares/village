@@ -10,7 +10,15 @@ module.exports = {
         inited(__dirname);
     },
     "economy.change": (player, data) => {
-        economy.setByType(JSON.parse(data));
+        if (!player.character || player.character.admin < 6) return;
+        let parsed;
+        try {
+            parsed = JSON.parse(data);
+        } catch (e) {
+            return;
+        }
+        if (!Array.isArray(parsed)) return;
+        economy.setByType(parsed);
         notifs != null && notifs.success(player, "Успешно обновлено", "Успешно");
     },
 }

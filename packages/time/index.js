@@ -89,8 +89,9 @@ module.exports = {
             farm.save();
         });
     },
-    setCustomTime(hours) {
+    setCustomTime(hours, minutes) {
         mp.world.time.hour = hours;
+        if (minutes != null && !isNaN(minutes)) mp.world.time.minute = minutes;
         CUSTOM_TIME = hours;
     },
     resetCustomTime() {

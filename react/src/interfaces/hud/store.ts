@@ -44,6 +44,25 @@ export interface HudState {
 	factionId: number;
 	selectMenuShow: boolean;
 	promptText: string | null;
+	questVisible: boolean;
+	questLabel: string;
+	questTitle: string;
+	questObjective: string;
+	questProgressCurrent: number;
+	questProgressTarget: number;
+	questProgressUnit: string;
+}
+
+export interface QuestHudPayload {
+	questKey?: string;
+	title?: string;
+	label?: string;
+	objective?: string;
+	progress?: {
+		current: number;
+		target: number;
+		unit?: string;
+	} | null;
 }
 
 export function convertToMoscowDate(date: Date): Date {
@@ -116,7 +135,38 @@ export const useHudStore = create<HudState>(() => ({
 	factionId: 0,
 	selectMenuShow: false,
 	promptText: null,
+	questVisible: false,
+	questLabel: 'Текущее задание',
+	questTitle: '',
+	questObjective: '',
+	questProgressCurrent: 0,
+	questProgressTarget: 0,
+	questProgressUnit: '',
 }));
+
+export function setQuestHud(data: QuestHudPayload | null) {
+	if (!data) {
+		useHudStore.setState({
+			questVisible: false,
+			questTitle: '',
+			questObjective: '',
+			questProgressCurrent: 0,
+			questProgressTarget: 0,
+			questProgressUnit: '',
+		});
+		return;
+	}
+	const progress = data.progress;
+	useHudStore.setState({
+		questVisible: true,
+		questLabel: data.label || 'Текущее задание',
+		questTitle: data.title || '',
+		questObjective: data.objective || '',
+		questProgressCurrent: progress ? progress.current : 0,
+		questProgressTarget: progress ? progress.target : 0,
+		questProgressUnit: progress && progress.unit ? progress.unit : '',
+	});
+}
 
 let coldTimer: number | null = null;
 let heatTimer: number | null = null;

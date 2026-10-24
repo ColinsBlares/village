@@ -24,8 +24,14 @@ module.exports = {
 					idle: 10000
 				},
 			});
-			this.loadModels();
-			callback();
+			this.loadModels()
+				.then(function () {
+					console.log("[DATABASE] tables ready.");
+					callback();
+				})
+				.catch(function (err) {
+					console.log("[DATABASE] sync error:", err && err.stack ? err.stack : err);
+				});
 		}, 5000);
     },
     /// Загрузка моделей таблиц из папки 'db' в каждом из модулей, кроме игнорируемого
@@ -45,7 +51,8 @@ module.exports = {
             var model = this.Models[name];
             if (model.associate) model.associate(this.Models);
         }
-        this.sequelize.sync();
-        console.log("[DATABASE] models loaded.");
+        return this.sequelize.sync().then(function () {
+            console.log("[DATABASE] models loaded.");
+        });
     }
 };

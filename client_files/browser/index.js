@@ -9,7 +9,7 @@ mp.callCEFR = function (eventName, args) { // showChat
     args.forEach(arg => {
         switch(typeof arg) {
             case 'string': {
-                argumentsString += `, \`${arg}\``;
+                argumentsString += `, ${JSON.stringify(arg)}`;
                 newArgs = arg;
                 break;
             }
@@ -30,7 +30,7 @@ mp.callCEFR = function (eventName, args) { // showChat
             }
         }
     });
-    browser.execute(`mp.event.call(\`${eventName}\` ${argumentsString});`); //test12
+    browser.execute(`mp.event.call(${JSON.stringify(String(eventName))}${argumentsString});`);
 
 
     //browser.call(eventName, newArgs);

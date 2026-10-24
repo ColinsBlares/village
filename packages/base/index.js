@@ -80,10 +80,13 @@ function writeCrashLog(label, err) {
 	console.log(label, err && err.stack ? err.stack : err);
 }
 
+require('./eventsGuard').install(mp, writeCrashLog);
+
 if (typeof process !== 'undefined' && process.on) {
-	process.on('uncaughtException', err =>
-		writeCrashLog('uncaughtException', err),
-	);
+	process.on('uncaughtException', err => {
+		writeCrashLog('uncaughtException', err);
+		process.exit(1);
+	});
 	process.on('unhandledRejection', err =>
 		writeCrashLog('unhandledRejection', err),
 	);

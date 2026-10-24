@@ -8,15 +8,26 @@ module.exports = {
         settings.apply(player, player.character.settings);
     },
     "settings.set": (player, modified) => {
-        modified = JSON.parse(modified);
-        for (var key in modified) {
-            player.character.settings[key] = modified[key];
+        try {
+            modified = typeof modified === 'string' ? JSON.parse(modified) : modified;
+        } catch (e) {
+            return;
         }
+        if (!modified || !player.character || !player.character.settings) return;
+        const keys = ['spawn', 'chatTimestamp', 'chatSize', 'nicknames', 'hudKeys', 'ghetto', 'walking', 'mood'];
+        keys.forEach(key => {
+            if (modified[key] != null) player.character.settings[key] = modified[key];
+        });
         player.character.settings.save();
         settings.apply(player, modified);
     },
     "settings.password.set": (player, data) => {
-        data = JSON.parse(data);
+        try {
+            data = typeof data === 'string' ? JSON.parse(data) : data;
+        } catch (e) {
+            return;
+        }
+        if (!data) return;
         var header = `Смена пароля`;
         if (!data.newPass || data.newPass.length < 6 || data.newPass.length > 20) return notifs.error(player, `Пароль должен состоять из 6-20 символов`, header);
         if (!auth.comparePassword(data.oldPass, player.account.password)) return notifs.error(player, `Старый пароль не совпадает`, header);
@@ -45,37 +56,44 @@ module.exports = {
         });
         if (exists != null) return notifs.error(player, `Email ${email} занят`, header);
 
-        player.account.email = email;
-        player.account.confirmEmail = 0;
-        player.account.save();
-
-        notifs.success(player, `Email успешно изменен`, header);
-        mp.events.call("player.email.changed", player);
+        player.pendingEmail = email;
+        notifs.success(player, `Подтвердите ${email} кодом из письма`, header);
     },
     "settings.email.confirm": async (player) => {
         var header = `Подтверждение почты`;
-        if (player.account.confirmEmail) return notifs.error(player, `Email уже подтвержден`, header);
+        if (player.account.confirmEmail && !player.pendingEmail) return notifs.error(player, `Email уже подтвержден`, header);
 
+        const targetEmail = player.pendingEmail || player.account.email;
         var exists = await db.Models.Account.findOne({
             attributes: ['id'],
             where: {
-                email: player.account.email,
+                email: targetEmail,
                 confirmEmail: 1
             }
         });
-        if (exists != null) return notifs.error(player, `Email ${email} занят`, header);
+        if (exists != null) return notifs.error(player, `Email ${targetEmail} занят`, header);
 
         let code = utils.randomInteger(100000, 999999);
-        utils.sendMail(player.account.email, `Подтверждение электронной почты`, `Код подтверждения: <b>${code}</b>`);
+        utils.sendMail(targetEmail, `Подтверждение электронной почты`, `Код подтверждения: <b>${code}</b>`);
 
-        player.confirmCode = code;
-        notifs.success(player, `Код подтверждения отправлен на ${player.account.email}`, header);
+        player.confirmCode = String(code);
+        player.confirmTries = 0;
+        notifs.success(player, `Код подтверждения отправлен на ${targetEmail}`, header);
     },
     "settings.email.code.check": (player, code) => {
         var header = `Подтверждение почты`;
-        if (player.account.confirmEmail) return notifs.error(player, `Email уже подтвержден`, header);
+        if (player.account.confirmEmail && !player.pendingEmail) return notifs.error(player, `Email уже подтвержден`, header);
         if (!player.confirmCode) return notifs.error(player, `Код подтверждения не найден`, header);
-        if (!code || code != player.confirmCode) return notifs.error(player, `Неверный код подтверждения`, header);
+        player.confirmTries = (player.confirmTries || 0) + 1;
+        if (player.confirmTries > 5) {
+            delete player.confirmCode;
+            return notifs.error(player, `Превышено число попыток`, header);
+        }
+        if (String(code) !== String(player.confirmCode)) return notifs.error(player, `Неверный код подтверждения`, header);
+        if (player.pendingEmail) {
+            player.account.email = player.pendingEmail;
+            delete player.pendingEmail;
+        }
 
         player.account.confirmEmail = 1;
         player.account.save();

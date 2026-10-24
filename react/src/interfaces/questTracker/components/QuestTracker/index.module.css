@@ -1,0 +1,34 @@
+.root {
+	position: fixed;
+	right: 24px;
+	top: 28%;
+	max-width: 280px;
+	padding: 12px 14px;
+	background: rgba(12, 14, 18, 0.82);
+	border-left: 3px solid #f0c040;
+	border-radius: 4px;
+	color: #eef0f4;
+	font-family: inherit;
+	pointer-events: none;
+	z-index: 50;
+}
+
+.title {
+	font-size: 13px;
+	font-weight: 700;
+	margin-bottom: 6px;
+	color: #f0c040;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.objective {
+	font-size: 14px;
+	line-height: 1.35;
+}
+
+.progress {
+	margin-top: 8px;
+	font-size: 12px;
+	opacity: 0.85;
+}

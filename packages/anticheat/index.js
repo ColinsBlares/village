@@ -504,11 +504,7 @@ module.exports = {
         if (!player.noclip && !ac.noclip) return;
         player.noclip = false;
         ac.noclip = false;
-        if ([x, y, z].every(function (n) { return Number.isFinite(Number(n)); })) {
-            this.moveTo(player, { x: Number(x), y: Number(y), z: Number(z) });
-        } else {
-            this.allowMove(player, 3000);
-        }
+        this.allowMove(player, 3000);
     },
     internalCall(fn) {
         var prev = this.internal;
@@ -742,12 +738,8 @@ module.exports = {
         if (!this.canShoot(player, ac, now)) return this.refundHit(target, damage);
         var group = this.weaponGroup(hash);
         if (group != 'special' && hash != UNARMED && !this.isLegalWeapon(player, hash)) {
-            // Оружие транспорта и неизвестный урон из машины не считаем оружием в руках
-            if (player.vehicle && group == 'other') group = 'special';
-            else {
-                if (this.isEnabled('weapon')) this.trigger(player, 'weapon', `попадание из ${hash}, которого нет в руках`);
-                return this.refundHit(target, damage);
-            }
+            if (this.isEnabled('weapon')) this.trigger(player, 'weapon', `попадание из ${hash}, которого нет в руках`);
+            return this.refundHit(target, damage);
         }
         if (player.dimension != target.dimension) return this.refundHit(target, damage);
 
@@ -1150,7 +1142,7 @@ module.exports = {
         if (name == 'jail') return this.checkJail(player, ac);
         if (name == 'godmode' && player.godmode) return;
         if (['spectate', 'invisible', 'freecam'].includes(name) && (ac.noclip || player.isVanished)) return;
-        this.trigger(player, name, 'сигнал клиента', SOFT_REPORTS.includes(name));
+        this.trigger(player, name, 'сигнал клиента', true);
     },
     pong(player, nonce) {
         var ac = player.ac;

@@ -1,0 +1,61 @@
+.wrap {
+	max-width: 640px;
+}
+
+.clock {
+	margin: 0 0 8px;
+	font-family: bank-font, Montserrat, sans-serif;
+	font-size: 42px;
+	letter-spacing: 0.04em;
+}
+
+.note {
+	margin: 0 0 16px;
+	color: var(--mist);
+	font-size: 13px;
+}
+
+.presets,
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.btn,
+.btnOn {
+	border: 1px solid var(--line);
+	background: transparent;
+	color: var(--text);
+	font-family: inherit;
+	font-size: 13px;
+	padding: 8px 12px;
+	cursor: pointer;
+}
+
+.btnOn {
+	border-color: var(--signal);
+	color: var(--signal);
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-bottom: 14px;
+	font-size: 13px;
+	color: var(--mist);
+}
+
+.field input[type='range'] {
+	width: 100%;
+	accent-color: var(--signal);
+}
+
+.btn:focus-visible,
+.btnOn:focus-visible,
+.field input:focus-visible {
+	outline: 1px solid var(--signal);
+	outline-offset: 2px;
+}

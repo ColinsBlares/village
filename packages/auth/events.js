@@ -5,6 +5,30 @@ let utils;
 let notifs;
 let whitelist;
 
+const loginAttempts = new Map();
+const recoveryCooldown = new Map();
+
+function takeLoginAttempt(key) {
+	const now = Date.now();
+	let rec = loginAttempts.get(key);
+	if (!rec || now > rec.resetAt) {
+		rec = { count: 0, resetAt: now + 10 * 60 * 1000 };
+	}
+	rec.count++;
+	loginAttempts.set(key, rec);
+	return rec.count <= 10;
+}
+
+function parseEventJson(data) {
+	if (data && typeof data === 'object') return data;
+	if (typeof data !== 'string') return null;
+	try {
+		return JSON.parse(data);
+	} catch (e) {
+		return null;
+	}
+}
+
 module.exports = {
 	init: () => {
 		utils = call('utils');
@@ -53,8 +77,12 @@ module.exports = {
 		player.call('auth.init', []);
 	},
 	'auth.login': async (player, data) => {
-		//  data = '{"loginOrEmail":"Carter", "password":"123123"}';
-		data = JSON.parse(data);
+		if (player.account) return player.call('auth.login.result', [6]);
+		if (!takeLoginAttempt(player.ip || player.rgscId)) {
+			return player.call('auth.login.result', [4]);
+		}
+		data = parseEventJson(data);
+		if (!data) return player.call('auth.login.result', [0]);
 		data.loginOrEmail = data.loginOrEmail.toLowerCase();
 		if (!data.loginOrEmail || data.loginOrEmail.length == 0) {
 			/// Заполните поле логина или почты!
@@ -100,7 +128,7 @@ module.exports = {
 			/// Неверный Social Club
 			return player.call('auth.login.result', [5]);
 
-		if (auth.accountIsOnline(account.id))
+		if (auth.accountIsOnline(account.id, player))
 			/// Аккаунт уже авторизован
 			return player.call('auth.login.result', [6]);
 
@@ -129,8 +157,8 @@ module.exports = {
 		mp.events.call('auth.done', player);
 	},
 	'auth.register': async (player, data) => {
-		// data = '{"login":"Carter","email":"test@mail.ru","password":"123123","emailCode":-1}';
-		data = JSON.parse(data);
+		data = parseEventJson(data);
+		if (!data) return player.call('auth.register.result', [1]);
 		data.login = data.login.toLowerCase();
 
 		/// Вы уже зарегистрировали учетную запись!
@@ -193,7 +221,12 @@ module.exports = {
 			player.call('auth.register.result', [9]);
 		}
 	},
+	'auth.done': player => {
+		if (player._authDone) return;
+		player._authDone = true;
+	},
 	'auth.email.confirm': (player, state) => {
+		if (!player.account) return;
 		if (!state) return mp.events.call('auth.done', player);
 		/// На данный момент подтвердить почту невозможно
 		if (utils == null) return player.call('auth.email.confirm.result', [2]);
@@ -251,13 +284,19 @@ module.exports = {
 			},
 		});
 
-		if (!account) {
+		if (!account || account.socialClub != player.rgscId) {
 			/// Неверный логин или пароль
 			return player.call('auth.recovery.result', [2]);
 		}
 
+		const cooldownKey = player.ip || loginOrEmail;
+		const last = recoveryCooldown.get(cooldownKey) || 0;
+		if (Date.now() - last < 60000) {
+			return player.call('auth.recovery.result', [0]);
+		}
+		recoveryCooldown.set(cooldownKey, Date.now());
+
 		let code = utils.randomInteger(100000, 999999);
-		console.log(`[AUTH] Код восстановления: ${code}`);
 		utils.sendMail(
 			account.email,
 			`Восстановление аккаунта`,
@@ -275,8 +314,11 @@ module.exports = {
 		player.call('auth.recovery.result', [3]);
 	},
 	'auth.recovery.confirm': (player, code) => {
+		if (!player.recovery || player.recovery.code == null) {
+			return player.call('auth.recovery.result', [4]);
+		}
 		code = parseInt(code);
-		if (player.recovery.code != code) {
+		if (player.recovery.code !== code) {
 			player.recovery.attempts++;
 			if (player.recovery.attempts >= player.recovery.attemptsMax) {
 				// Превышено количество попыток
@@ -297,7 +339,7 @@ module.exports = {
 		/// Пароль должен состоять из 6-20 символов!
 		if (!password || password.length < 6 || password.length > 20)
 			return player.call('auth.recovery.result', [6]);
-		if (!player.recovery.access) {
+		if (!player.recovery || !player.recovery.access) {
 			// Подтвердите код
 			return player.call('auth.recovery.result', [7]);
 		}

@@ -12,8 +12,10 @@ module.exports = {
         inited(__dirname);
     },
     "auth.done": (player) => {
+        if (player.characterInit && player.characterInit.started) return;
         player.characterInit = {
             created: false,
+            started: true,
         };
         mp.events.call('characterInit.start', player);
         player.call('characterInit.start', []);
@@ -33,8 +35,13 @@ module.exports = {
         }]);
     },
     "characterInit.choose": (player, charnumber) => {
+        if (player.character) return player.call('characterInit.choose.ans', [0]);
+        if (!player.characters) return player.call('characterInit.choose.ans', [0]);
         if (charnumber == null || isNaN(charnumber)) return player.call('characterInit.choose.ans', [0]);
         if (charnumber < 0 || charnumber > 2) return player.call('characterInit.choose.ans', [0]);
+        if (charnumber >= (player.account && player.account.slots ? player.account.slots : 1) && !player.characters[charnumber]) {
+            return player.call('characterInit.choose.ans', [0]);
+        }
 
         if (player.characters[charnumber]) {
             player.character = player.characters[charnumber];
@@ -74,6 +81,8 @@ module.exports = {
     },
     /// Разморозка игрока после выбора персоонажа
     "characterInit.done": (player) => {
+        if (player._charInitDone) return;
+        player._charInitDone = true;
         player.call('characterInit.done');
         player.authTime = Date.now();
         logger.log(`Авторизовал персонажа (IP: ${player.ip})`, "characterInit", player);
@@ -89,10 +98,22 @@ module.exports = {
         player.characterInit.created && characterInit.setStartClothes(player);
     },
     "playerQuit": (player) => {
-        if (!player.character) return;
-
-        var minutes = parseInt((Date.now() - player.authTime) / 1000 / 60);
-        player.character.minutes += minutes;
+        if (!player.character || player._quitPending || !player.authTime) return;
+        const id = player.id;
+        const characterId = player.character.id;
+        const rgscId = player.rgscId;
+        const authTime = player.authTime;
+        const minutesBefore = player.character.minutes;
+        const pos = {
+            x: player.character.x,
+            y: player.character.y,
+            z: player.character.z,
+            h: player.character.h,
+        };
+        player._quitPending = true;
+        const added = parseInt((Date.now() - authTime) / 1000 / 60);
+        player.authTime = 0;
+        player.character.minutes += added;
         if (!player.dimension && !player.character.arrestTime) {
             player.character.x = player.position.x;
             player.character.y = player.position.y;
@@ -100,10 +121,24 @@ module.exports = {
             player.character.h = player.heading;
         }
         player.character.save();
-
-        player.account.lastIp = player.ip;
-        player.account.lastDate = new Date();
-        player.account.save();
+        if (player.account) {
+            player.account.lastIp = player.ip;
+            player.account.lastDate = new Date();
+            player.account.save();
+        }
         logger.log(`Деавторизовал персонажа`, "characterInit", player);
+        if (player._keepQuit) return;
+        setTimeout(() => {
+            const still = mp.players.at(id);
+            if (!still || still.rgscId !== rgscId || !still.character || still.character.id !== characterId) return;
+            still.authTime = authTime;
+            still.character.minutes = minutesBefore;
+            still.character.x = pos.x;
+            still.character.y = pos.y;
+            still.character.z = pos.z;
+            still.character.h = pos.h;
+            still.character.save();
+            still._quitPending = false;
+        }, 1000);
     },
 };

@@ -190,6 +190,7 @@ module.exports = {
         handler: (player, args) => {
             mp.players.forEach((current) => {
                 current.call('chat.message.push', [`!{#edffc2}${player.name} запустил рестарт сервера через ${20000 / 1000} сек.`]);
+                current._keepQuit = true;
                 mp.events.call("playerQuit", current);
             });
             timer.add(() => {
@@ -203,11 +204,16 @@ module.exports = {
         args: "[ветка]",
         handler: (player, args, out) => {
 
-            var exec = require("exec");
-            exec(`cd ${__dirname} && git clean -d -f && git stash && git checkout ${args[0]}`, (error, stdout, stderr) => {
-                if (error) out.error(stderr, player);
+            const { execFile } = require("child_process");
+            const branch = String(args[0] || "");
+            if (!/^[A-Za-z0-9._/-]{1,64}$/.test(branch) || branch.includes("..")) {
+                return out.error(`Некорректное имя ветки`, player);
+            }
+            const cwd = require("path").resolve(__dirname, "../..");
+            execFile("git", ["checkout", branch], { cwd }, (error, stdout, stderr) => {
+                if (error) return out.error(String(stderr || error.message), player);
                 out.log(stdout, player);
-                out.info(`${player.name} переключился на ветку ${args[0]}`);
+                out.info(`${player.name} переключился на ветку ${branch}`);
             });
         }
     },

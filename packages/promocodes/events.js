@@ -14,26 +14,43 @@ module.exports = {
     },
     "promocodes.activate": (player, code) => {
         // TODO: Временное решение
+        if (typeof code !== 'string') return;
         if (code.toLowerCase() == 'winter') {
             var notifs = call("notifications");
             var utils = call("utils");
             var winter = call("winter");
             var header = `Промокод Winter`;
-            if (tempWinters.find(x => x.characterId == player.character.id)) return notifs.error(player, `Награда уже получена`, header);
+            if (player._winterLock || tempWinters.find(x => x.characterId == player.character.id)) return notifs.error(player, `Награда уже получена`, header);
+            player._winterLock = true;
+            tempWinters.push({ characterId: player.character.id });
+            const releaseWinter = () => {
+                player._winterLock = false;
+                const pending = tempWinters.findIndex(x => x.characterId == player.character.id && !x.id);
+                if (pending !== -1) tempWinters.splice(pending, 1);
+            };
 
             var inventory = call('inventory');
             var params = {
                 pockets: '[6,10,6,10]'
             };
             var cantAdd = inventory.cantAdd(player, 65, params);
-            if (cantAdd) return notifs.error(player, cantAdd, header);
+            if (cantAdd) {
+                releaseWinter();
+                return notifs.error(player, cantAdd, header);
+            }
 
             var nextWeight = inventory.getCommonWeight(player) + inventory.getInventoryItem(6).weight + inventory.getInventoryItem(7).weight +
                 inventory.getInventoryItem(8).weight + inventory.getInventoryItem(9).weight + inventory.getInventoryItem(65).weight;
-            if (nextWeight > inventory.maxPlayerWeight) return notifs.error(player, `Превышение по весу (${nextWeight.toFixed(2)} из ${inventory.maxPlayerWeight} кг)`, header);
+            if (nextWeight > inventory.maxPlayerWeight) {
+                releaseWinter();
+                return notifs.error(player, `Превышение по весу (${nextWeight.toFixed(2)} из ${inventory.maxPlayerWeight} кг)`, header);
+            }
 
             inventory.addItem(player, 65, params, (e) => {
-                if (e) return notifs.error(player, e, header);
+                if (e) {
+                    releaseWinter();
+                    return notifs.error(player, e, header);
+                }
 
                 var hatList = winter.clothes[player.character.gender][0];
                 var topList = winter.clothes[player.character.gender][1];
@@ -47,18 +64,23 @@ module.exports = {
 
 
                 call("money").addCash(player, 5000, (res) => {
-                    if (!res) return notifs.error(player, `Ошибка начисления наличных`);;
+                    if (!res) {
+                        releaseWinter();
+                        return notifs.error(player, `Ошибка начисления наличных`);
+                    }
                     inventory.addItem(player, hat.itemId, hat.params);
                     inventory.addItem(player, top.itemId, top.params);
                     inventory.addItem(player, pants.itemId, pants.params);
                     inventory.addItem(player, shoes.itemId, shoes.params);
 
                     notifs.success(player, `Получен зимний комплект и кейс!`, header);
-                    var tempWinter = db.Models.TempWinter.build({
+                    db.Models.TempWinter.create({
                         characterId: player.character.id
+                    }).then(tempWinter => {
+                        const pending = tempWinters.findIndex(x => x.characterId == player.character.id && !x.id);
+                        if (pending !== -1) tempWinters.splice(pending, 1);
+                        tempWinters.push(tempWinter);
                     });
-                    tempWinters.push(tempWinter);
-                    tempWinter.save();
                 }, `Использование промокода Winter`);
             });
 

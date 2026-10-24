@@ -12,6 +12,52 @@ let bank;
 /// target - цель к котрой применена операция(to - на текущего игрока/from - текущим игроком)
 /// reason - причина
 
+const moneyLocks = new Map();
+
+function withLock(id, fn) {
+    const prev = moneyLocks.get(id) || Promise.resolve();
+    let release;
+    const gate = new Promise(resolve => {
+        release = resolve;
+    });
+    moneyLocks.set(id, prev.then(() => gate, () => gate));
+    return prev.then(fn, fn).finally(release);
+}
+
+function withLocks(ids, fn) {
+    const sorted = [...new Set(ids)].filter(id => id != null).sort((a, b) => a - b);
+    return sorted.reduceRight((next, id) => () => withLock(id, next), fn)();
+}
+
+function affectedRows(result, meta) {
+    if (result && typeof result.affectedRows === 'number') return result.affectedRows;
+    if (meta && typeof meta.affectedRows === 'number') return meta.affectedRows;
+    return 0;
+}
+
+async function deltaColumn(id, field, delta, transaction) {
+    const need = delta < 0 ? -delta : 0;
+    const guard = delta < 0 ? 'AND `' + field + '` >= :need' : '';
+    const [result, meta] = await db.sequelize.query(
+        'UPDATE characters SET `' + field + '` = `' + field + '` + :delta WHERE id = :id ' + guard + ' AND `' + field + '` + :delta >= 0 AND `' + field + '` + :delta <= 1000000000',
+        { replacements: { delta, id, need }, transaction }
+    );
+    if (!affectedRows(result, meta)) throw new Error('money');
+    const rows = await db.sequelize.query(
+        'SELECT `' + field + '` AS value FROM characters WHERE id = :id',
+        { replacements: { id }, transaction, type: db.sequelize.QueryTypes.SELECT }
+    );
+    return rows[0].value;
+}
+
+function findOnline(id) {
+    return mp.players.toArray().find(player => player.character && player.character.id == id) || null;
+}
+
+function remember(player, field, value) {
+    if (player && player.character) player.character.setDataValue(field, value);
+}
+
 /// Функции модуля системы финансов игрока
 module.exports = {
     init() {
@@ -38,18 +84,14 @@ module.exports = {
         if (player == null) return callback(false);
         if (player.character == null) return callback(false);
 
-        let cash = player.character.cash;
-        db.sequelize.transaction(t => {
-            player.character.cash = player.character.cash + number;
-            return player.character.save({transaction: t});
-        }).then(result => {
+        withLock(player.character.id, () => db.sequelize.transaction(async t => {
+            remember(player, 'cash', await deltaColumn(player.character.id, 'cash', number, t));
+        })).then(() => {
             this.changing(player);
             logger.log(`+${number}$ CASH | ${reason}`, "money", player);
+            mp.events.call("money.add", player, number, reason);
             callback(true);
-        }).catch(err => {
-            if (cash != null) {
-                player.character.cash = cash;
-            }
+        }).catch(() => {
             callback(false);
         });
     },
@@ -80,15 +122,13 @@ module.exports = {
             }
         });
         if (player == null) {
-            db.sequelize.transaction(t => {
-                return db.Models.Character.findOne({ where: {id: id} , transaction: t}).then( character => {
-                    character.cash = character.cash + number;
-                    return character.save({transaction: t});
-                });
-            }).then(result => {
+            withLock(id, () => db.sequelize.transaction(async t => {
+                const value = await deltaColumn(id, 'cash', number, t);
+                remember(findOnline(id), 'cash', value);
+            })).then(() => {
                 logger.log(`+${number}$ CASH | ${reason}`, "money", id);
                 callback(true);
-            }).catch(err => {
+            }).catch(() => {
                 callback(false);
             });
         }
@@ -113,18 +153,13 @@ module.exports = {
         if (player == null) return callback(false);
         if (player.character == null) return callback(false);
 
-        let bank = player.character.bank;
-        db.sequelize.transaction(t => {
-            player.character.bank = player.character.bank + number;
-            return player.character.save({transaction: t});
-        }).then(result => {
+        withLock(player.character.id, () => db.sequelize.transaction(async t => {
+            remember(player, 'bank', await deltaColumn(player.character.id, 'bank', number, t));
+        })).then(() => {
             this.changing(player);
             logger.log(`+${number}$ BANK | ${reason}`, "money", player);
             callback(true);
-        }).catch(err => {
-            if (bank != null) {
-                player.character.bank = bank;
-            }
+        }).catch(() => {
             callback(false);
         });
     },
@@ -152,15 +187,13 @@ module.exports = {
             }
         });
         if (player == null) {
-            db.sequelize.transaction(t => {
-                return db.Models.Character.findOne({ where: {id: id} , transaction: t}).then( character => {
-                    character.bank = character.bank + number;
-                    return character.save({transaction: t});
-                });
-            }).then(result => {
+            withLock(id, () => db.sequelize.transaction(async t => {
+                const value = await deltaColumn(id, 'bank', number, t);
+                remember(findOnline(id), 'bank', value);
+            })).then(() => {
                 logger.log(`+${number}$ BANK | ${reason}`, "money", id);
                 callback(true);
-            }).catch(err => {
+            }).catch(() => {
                 callback(false);
             });
         }
@@ -185,19 +218,14 @@ module.exports = {
         if (player == null) return callback(false);
         if (player.character == null) return callback(false);
 
-        let cash = player.character.cash;
-        db.sequelize.transaction(t => {
-            if (player.character.cash < number) throw new Error();
-            player.character.cash = player.character.cash - number;
-            return player.character.save({transaction: t});
-        }).then(result => {
+        withLock(player.character.id, () => db.sequelize.transaction(async t => {
+            remember(player, 'cash', await deltaColumn(player.character.id, 'cash', -number, t));
+        })).then(() => {
             this.changing(player);
             logger.log(`-${number}$ CASH | ${reason}`, "money", player);
+            mp.events.call("money.remove", player, number, reason);
             callback(true);
-        }).catch(err => {
-            if (cash != null) {
-                player.character.cash = cash;
-            }
+        }).catch(() => {
             callback(false);
         });
     },
@@ -225,16 +253,13 @@ module.exports = {
             }
         });
         if (player == null) {
-            db.sequelize.transaction(t => {
-                return db.Models.Character.findOne({ where: {id: id} , transaction: t}).then( character => {
-                    if (character.cash < number) throw new Error();
-                    character.cash = character.cash - number;
-                    return character.save({transaction: t});
-                });
-            }).then(result => {
+            withLock(id, () => db.sequelize.transaction(async t => {
+                const value = await deltaColumn(id, 'cash', -number, t);
+                remember(findOnline(id), 'cash', value);
+            })).then(() => {
                 logger.log(`-${number}$ CASH | ${reason}`, "money", id);
                 callback(true);
-            }).catch(err => {
+            }).catch(() => {
                 callback(false);
             });
         }
@@ -259,19 +284,13 @@ module.exports = {
         if (player == null) return callback(false);
         if (player.character == null) return callback(false);
 
-        let bank = player.character.bank;
-        db.sequelize.transaction(t => {
-            if (player.character.bank < number) throw new Error();
-            player.character.bank = player.character.bank - number;
-            return player.character.save({transaction: t});
-        }).then(result => {
+        withLock(player.character.id, () => db.sequelize.transaction(async t => {
+            remember(player, 'bank', await deltaColumn(player.character.id, 'bank', -number, t));
+        })).then(() => {
             this.changing(player);
             logger.log(`-${number}$ BANK | ${reason}`, "money", player);
             callback(true);
-        }).catch(err => {
-            if (bank != null) {
-                player.character.bank = bank;
-            }
+        }).catch(() => {
             callback(false);
         });
     },
@@ -299,16 +318,13 @@ module.exports = {
             }
         });
         if (player == null) {
-            db.sequelize.transaction(t => {
-                return db.Models.Character.findOne({ where: {id: id} , transaction: t}).then(character => {
-                    if (character.bank < number) throw new Error();
-                    character.bank = character.bank - number;
-                    return character.save({transaction: t});
-                });
-            }).then(result => {
+            withLock(id, () => db.sequelize.transaction(async t => {
+                const value = await deltaColumn(id, 'bank', -number, t);
+                remember(findOnline(id), 'bank', value);
+            })).then(() => {
                 logger.log(`-${number}$ BANK | ${reason}`, "money", id);
                 callback(true);
-            }).catch(err => {
+            }).catch(() => {
                 callback(false);
             });
         }
@@ -333,29 +349,16 @@ module.exports = {
         if (playerFrom == null || playerTo == null) return callback(false);
         if (playerFrom.character == null || playerTo.character == null) return callback(false);
 
-        let cashFrom = playerFrom.character.cash;
-        let cashTo = playerTo.character.cash;
-        db.sequelize.transaction(t => {
-            if (playerFrom.character.cash < number) throw new Error();
-            playerFrom.character.cash = playerFrom.character.cash - number;
-            playerTo.character.cash = playerTo.character.cash + number;
-            return Promise.all([
-                playerTo.character.save({transaction: t}),
-                playerFrom.character.save({transaction: t})
-            ]);
-        }).then(result => {
+        withLocks([playerFrom.character.id, playerTo.character.id], () => db.sequelize.transaction(async t => {
+            remember(playerFrom, 'cash', await deltaColumn(playerFrom.character.id, 'cash', -number, t));
+            remember(playerTo, 'cash', await deltaColumn(playerTo.character.id, 'cash', number, t));
+        })).then(() => {
             this.changing(playerFrom);
             this.changing(playerTo);
             logger.log(`-${number}$ CASH | ${reasonFrom}`, "money", playerFrom);
             logger.log(`+${number}$ CASH | ${reasonTo}`, "money", playerTo);
             callback(true);
-        }).catch(err => {
-            if (cashFrom != null) {
-                playerFrom.character.cash = cashFrom;
-            }
-            if (cashTo != null) {
-                playerTo.character.cash = cashTo;
-            }
+        }).catch(() => {
             callback(false);
         });
     },
@@ -376,96 +379,20 @@ module.exports = {
         if (isNaN(number) || isNaN(idFrom) || isNaN(idTo)) return callback(false);
         if (number < 0 || number > 1000000000 || idFrom < 0 || idFrom > 100000000 || idTo < 0 || idTo > 100000000) return callback(false);
 
-        let playerFrom = mp.players.toArray().find(player => {
-            if (player.character) {
-                return player.character.id == idFrom;
-            }
-            else {
-                return false;
-            }
-        });
-        let playerTo = mp.players.toArray().find(player => {
-            if (player.character) {
-                return player.character.id == idTo;
-            }
-            else {
-                return false;
-            }
-        });
-        let bankFrom = null;
-        if (playerFrom != null && playerFrom.character != null) bankFrom = playerFrom.character.bank;
-        let bankTo = null;
-        if (playerTo != null && playerTo.character != null) bankTo = playerTo.character.bank;
-
-        db.sequelize.transaction(t => {
-            if ((playerFrom != null && playerFrom.character != null) && (playerTo != null && playerTo.character != null)) {
-                if (playerFrom.character.bank < number) throw new Error();
-                playerFrom.character.bank = playerFrom.character.bank - number;
-                playerTo.character.bank = playerTo.character.bank + number;
-                return Promise.all([
-                    playerFrom.character.save({transaction: t}),
-                    playerTo.character.save({transaction: t})
-                ]);
-            }
-            if ((playerFrom != null && playerFrom.character != null) && (playerTo == null || playerTo.character == null)) {
-                if (playerFrom.character.bank < number) throw new Error();
-                playerFrom.character.bank = playerFrom.character.bank - number;
-                return Promise.all([
-                    playerFrom.character.save({transaction: t}),
-                    db.Models.Character.findOne({ where: {id: idTo} , transaction: t}).then(character => {
-                        character.bank = character.bank + number;
-                        return character.save({transaction: t});
-                    })
-                ]);
-            }
-            if ((playerFrom == null || playerFrom.character == null) && (playerTo != null && playerTo.character != null)) {
-                playerTo.character.bank = playerTo.character.bank + number;
-                return Promise.all([
-                    db.Models.Character.findOne({ where: {id: idFrom} , transaction: t}).then(character => {
-                        if (character.bank < number) throw new Error();
-                        character.bank = character.bank - number;
-                        return character.save({transaction: t});
-                    }),
-                    playerTo.character.save({transaction: t})
-                ]);
-            }
-            if ((playerFrom == null || playerFrom.character == null) && (playerTo == null || playerTo.character == null)) {
-                return Promise.all([
-                    db.Models.Character.findOne({ where: {id: idFrom} , transaction: t}).then(character => {
-                        if (character.bank < number) throw new Error();
-                        character.bank = character.bank - number;
-                        return character.save({transaction: t});
-                    }),
-                    db.Models.Character.findOne({ where: {id: idTo} , transaction: t}).then(character => {
-                        character.bank = character.bank + number;
-                        return character.save({transaction: t});
-                    })
-                ]);
-            }
-            throw new Error();
-        }).then(result => {
-            playerFrom != null && playerFrom.character != null && this.changing(playerFrom);
-            playerTo != null && playerTo.character != null && this.changing(playerTo);
-            if (playerFrom != null && playerFrom.character != null) {
-                logger.log(`-${number}$ BANK | ${reasonFrom}`, "money", playerFrom);
-            }
-            else {
-                logger.log(`-${number}$ BANK | ${reasonFrom}`, "money", idFrom);
-            } 
-            if(playerTo != null && playerTo.character != null) {
-                logger.log(`+${number}$ BANK | ${reasonTo}`, "money", playerTo);
-            }
-            else {
-                logger.log(`+${number}$ BANK | ${reasonTo}`, "money", idTo);
-            }
+        withLocks([idFrom, idTo], () => db.sequelize.transaction(async t => {
+            const fromValue = await deltaColumn(idFrom, 'bank', -number, t);
+            const toValue = await deltaColumn(idTo, 'bank', number, t);
+            remember(findOnline(idFrom), 'bank', fromValue);
+            remember(findOnline(idTo), 'bank', toValue);
+        })).then(() => {
+            const playerFrom = findOnline(idFrom);
+            const playerTo = findOnline(idTo);
+            playerFrom && this.changing(playerFrom);
+            playerTo && this.changing(playerTo);
+            logger.log(`-${number}$ BANK | ${reasonFrom}`, "money", playerFrom || idFrom);
+            logger.log(`+${number}$ BANK | ${reasonTo}`, "money", playerTo || idTo);
             callback(true);
-        }).catch(err => {
-            if (bankFrom != null) {
-                playerFrom.character.bank = bankFrom;
-            }
-            if (bankTo != null) {
-                playerTo.character.bank = bankTo;
-            }
+        }).catch(() => {
             callback(false);
         });
     },

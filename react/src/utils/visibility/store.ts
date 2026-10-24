@@ -51,6 +51,11 @@ export const useVisibilityStore = create<VisibilityState>(() => ({
 	mapCase: false,
 	selectMenu: false,
 	changelist: false,
+	questTracker: false,
+	questEditor: false,
+	questLog: false,
+	questDialog: false,
+	npcEditor: false,
 }));
 
 export function setScreenOpen(id: keyof VisibilityState, value: boolean) {

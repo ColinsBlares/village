@@ -1,0 +1,50 @@
+.node {
+	min-width: 140px;
+	padding: 8px 10px;
+	background: #1e2430;
+	border: 1px solid #3d4658;
+	border-radius: 6px;
+	color: #e8ecf2;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 12px;
+}
+
+.selected {
+	border-color: #f0c040;
+	box-shadow: 0 0 0 1px #f0c040;
+}
+
+.title {
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.type {
+	opacity: 0.55;
+	font-size: 10px;
+	text-transform: uppercase;
+}
+
+.handle {
+	background: #8892a4;
+	width: 8px;
+	height: 8px;
+}
+
+.handleExec {
+	background: #6eb5ff;
+	width: 8px;
+	height: 8px;
+}
+
+.handleTrue {
+	background: #5fd67a;
+	width: 8px;
+	height: 8px;
+}
+
+.handleFalse {
+	background: #e86a6a;
+	width: 8px;
+	height: 8px;
+}

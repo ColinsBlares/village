@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './index.module.css';
+import { sanitizeHtml } from '@utils/sanitizeHtml';
 import { usePromptStore } from '../../store';
 
 function Text() {
@@ -8,7 +9,7 @@ function Text() {
 	return (
 		<div
 			className={styles.text}
-			dangerouslySetInnerHTML={{ __html: text || '' }}
+			dangerouslySetInnerHTML={{ __html: sanitizeHtml(text || '') }}
 		/>
 	);
 }

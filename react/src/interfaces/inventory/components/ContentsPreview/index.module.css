@@ -1,0 +1,81 @@
+.root {
+	margin-top: 0.7vh;
+}
+
+.hint,
+.hintOn {
+	align-items: center;
+	background: rgba(255, 255, 255, 0.06);
+	border-radius: 0.6vh;
+	color: #b9b9b9;
+	display: flex;
+	flex-wrap: wrap;
+	font-size: 1.2vh;
+	font-weight: 500;
+	gap: 0.4vh;
+	padding: 0.55vh 0.7vh;
+}
+
+.hintOn {
+	background: rgba(255, 223, 41, 0.14);
+	color: #fff;
+}
+
+.key {
+	background: #ffdf29;
+	border-radius: 0.35vh;
+	color: #111;
+	font-size: 1.15vh;
+	font-weight: 700;
+	line-height: 1;
+	padding: 0.35vh 0.55vh;
+}
+
+.hintOn .key {
+	box-shadow: inset 0 0.15vh 0 rgba(0, 0, 0, 0.28);
+}
+
+.pockets {
+	display: flex;
+	flex-flow: wrap;
+	gap: 0.7vh;
+	margin-top: 0.8vh;
+	max-height: 28vh;
+	overflow: auto;
+}
+
+.grid {
+	display: grid;
+	gap: 1px;
+	position: relative;
+	width: fit-content;
+}
+
+.cell {
+	background: rgba(255, 255, 255, 0.2);
+	border-radius: 0.35vh;
+}
+
+.child {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	border-radius: 0.35vh;
+	pointer-events: none;
+	position: absolute;
+	z-index: 1;
+}
+
+.count {
+	background: rgba(12, 12, 12, 0.5);
+	border-radius: 0.4vh;
+	color: #ffdf29;
+	font-size: 1.1vh;
+	font-weight: bold;
+	height: 1.5vh;
+	left: 0.15vh;
+	line-height: 1.5vh;
+	padding: 0 0.25vh;
+	position: absolute;
+	top: 0.15vh;
+}
