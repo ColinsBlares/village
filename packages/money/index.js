@@ -224,6 +224,7 @@ module.exports = {
             this.changing(player);
             logger.log(`-${number}$ CASH | ${reason}`, "money", player);
             mp.events.call("money.remove", player, number, reason);
+            mp.events.call("battlePass.cash.spent", player, number);
             callback(true);
         }).catch(() => {
             callback(false);

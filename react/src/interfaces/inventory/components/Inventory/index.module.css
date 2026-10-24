@@ -1,7 +1,7 @@
 .root {
-	color: #ddd;
+	color: #e8edf1;
 	display: grid;
-	grid-gap: 0.4vh;
+	grid-gap: 0.75vh;
 	grid-template-columns: 57.5vh repeat(2, 46.4vh);
 	grid-template-rows: 58.7vh 13.1vh 1fr;
 	height: 81.8vh;
@@ -10,7 +10,7 @@
 	position: absolute;
 	top: 50%;
 	transform: translate(-50%, -50%);
-	font-family: Ubuntu, sans-serif;
+	font-family: Ubuntu, 'Segoe UI', sans-serif;
 	z-index: 100;
 }
 
@@ -23,18 +23,24 @@
 }
 
 .root *::-webkit-scrollbar {
-	width: 1.1vh;
+	width: 0.55vh;
 }
 
 .root *::-webkit-scrollbar-track {
 	box-shadow: none;
-	background-color: rgba(255, 255, 255, 0.1);
+	background-color: rgba(255, 255, 255, 0.035);
 	border-radius: 2vh;
 }
 
 .root *::-webkit-scrollbar-thumb {
 	border-radius: 2vh;
-	background-color: #ffdf29;
+	background-color: rgba(176, 196, 180, 0.38);
+	border: 0.12vh solid transparent;
+	background-clip: padding-box;
+}
+
+.root *::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(176, 196, 180, 0.65);
 }
 
 @keyframes inventory-spin {

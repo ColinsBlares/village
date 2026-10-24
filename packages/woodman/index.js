@@ -232,23 +232,36 @@ module.exports = {
 
         notifs.success(player, `Продано ${items.length} ед. дерева`, header);
     },
-    hitTree(player, colshape) {
+    getTreeChopDamage(player) {
+        return Math.max(1, Math.ceil(this.treeDamage * 2 * this.getInventoryDamageBoost(player.inventory.items)));
+    },
+    hitTree(player, colshape, damageOverride) {
         var header = `Лесоруб`;
         var out = (text) => {
             notifs.error(player, text, header);
         };
         var ax = inventory.getHandsItem(player);
-        if (!this.isAx(ax)) return out(`Возьмите в руки топор`);
+        if (!this.isAx(ax)) {
+            out(`Возьмите в руки топор`);
+            return false;
+        }
 
         var health = inventory.getParam(ax, 'health');
-        if (!health || health.value <= 0) return out(`Топор сломан`);
-        if (colshape.health <= 0) return out(`Дерево исчерпало свой ресурс`);
+        if (!health || health.value <= 0) {
+            out(`Топор сломан`);
+            return false;
+        }
+        if (colshape.health <= 0) {
+            out(`Дерево исчерпало свой ресурс`);
+            return false;
+        }
 
         health.value = Math.clamp(health.value - this.axDamage, 0, 100);
         inventory.updateParam(player, ax, 'health', health.value);
 
-
-        var damage = parseInt(this.treeDamage * this.getInventoryDamageBoost(player.inventory.items));
+        var damage = damageOverride == null
+            ? parseInt(this.treeDamage * this.getInventoryDamageBoost(player.inventory.items))
+            : damageOverride;
 
         colshape.health = Math.clamp(colshape.health - damage, 0, 100);
 
@@ -262,6 +275,7 @@ module.exports = {
             player.call(`woodman.log.request`);
             this.addJobExp(player);
         }
+        return true;
     },
     addLogObject(colshape, slot) {
         var obj = mp.objects.new('prop_fence_log_02', slot.pos, {

@@ -1,0 +1,22 @@
+.bin {
+	background: #0000;
+	height: 10vh;
+	width: 10vh;
+	position: absolute;
+	bottom: -9.6vh;
+	left: 50%;
+	transform: translate(-50%);
+	padding: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 2;
+}
+
+.bin svg {
+	height: 5vh;
+}
+
+.bin:hover svg path {
+	fill: #f03636;
+}

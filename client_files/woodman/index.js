@@ -8,40 +8,45 @@
 
 mp.woodman = {
     treeHealthBar: {
-        width: 0.1,
-        height: 0.015,
-        border: 0.0005,
+        width: 0.14,
+        height: 0.018,
+        border: 0.0007,
         textColor: [255, 255, 255, 255],
-        textScale: [0.2, 0.2],
+        textScale: [0.22, 0.22],
         getProgressColor() {
             var player = mp.players.local;
-            return (player.isInMeleeCombat()) ? [255, 0, 0, 200] : [0, 0, 0, 200];
+            return (player.isInMeleeCombat()) ? [255, 76, 76, 150] : [12, 30, 38, 180];
         },
         getFillColor(health) {
-            if (health > 50) return [52, 222, 59, 200];
-            if (health > 15) return [255, 187, 0, 200];
+            if (health > 50) return [82, 220, 120, 220];
+            if (health > 15) return [255, 189, 59, 220];
 
-            return [187, 68, 68, 200];
+            return [238, 92, 92, 220];
         },
     },
     logHealthBar: {
-        width: 0.05,
-        height: 0.012,
-        border: 0.0004,
-        textColor: [255, 255, 255, 200],
+        width: 0.065,
+        height: 0.0135,
+        border: 0.0005,
+        textColor: [255, 255, 255, 220],
         textScale: [0.17, 0.17],
         getProgressColor() {
-            return [0, 0, 0, 50];
+            return [10, 22, 31, 120];
         },
         getFillColor(health) {
-            if (health > 50) return [52, 222, 59, 50];
-            if (health > 15) return [255, 187, 0, 50];
+            if (health > 50) return [82, 220, 120, 160];
+            if (health > 15) return [255, 189, 59, 160];
 
-            return [187, 68, 68, 50];
+            return [238, 92, 92, 160];
         },
     },
     treeHealth: 0,
     treePos: null,
+    treeChop: {
+        active: false,
+        required: 0,
+        progress: 0
+    },
     logSquats: [],
     logObj: null,
     logFocusSlotI: -1,
@@ -55,6 +60,11 @@ mp.woodman = {
     logTimer: null,
 
 
+    drawBarBackground(x, y, width, height, color) {
+        mp.game.graphics.drawRect(x, y, width + 0.004, height + 0.006, 0, 0, 0, 100);
+        mp.game.graphics.drawRect(x, y, width + 0.004, height + 0.006, color[0], color[1], color[2], color[3]);
+        mp.game.graphics.drawRect(x, y + height * 0.1, width + 0.004, height * 0.8, 255, 255, 255, 12);
+    },
     drawTreeHealthBar(x, y) {
         var info = this.treeHealthBar;
         var color = info.getProgressColor();
@@ -62,15 +72,28 @@ mp.woodman = {
         var fillColor = info.getFillColor(this.treeHealth);
         var textColor = info.textColor;
         var textScale = info.textScale;
-        mp.game.graphics.drawRect(x, y, info.width + border * 2, info.height + border * 5, color[0], color[1], color[2], color[3]);
-        mp.game.graphics.drawRect(x - (100 - this.treeHealth) * 0.0005, y,
-            info.width * this.treeHealth / 100, info.height,
+        var barWidth = info.width;
+        var barX = x - barWidth / 2;
+        var barY = y;
+        var fillWidth = Math.max(0, barWidth * this.treeHealth / 100);
+
+        this.drawBarBackground(barX, barY, barWidth, info.height, color, [255, 255, 255, 90]);
+        mp.game.graphics.drawRect(barX + border, barY + border, fillWidth, info.height - border * 2,
             fillColor[0], fillColor[1], fillColor[2], fillColor[3]);
-        mp.game.graphics.drawText(`${this.treeHealth}%`, [x, y - 0.04 * textScale[0]], {
+        mp.game.graphics.drawRect(barX + fillWidth - 0.003, barY + border * 0.7, 0.003, info.height - border * 1.4,
+            255, 255, 255, 210);
+        mp.game.graphics.drawText('Дерево', [x - barWidth / 2 - 0.02, y - 0.04], {
+            font: 0,
+            color: [210, 235, 245, 210],
+            scale: [0.16, 0.16],
+            outline: false
+        });
+        mp.game.graphics.drawText(`${this.treeHealth}%`, [x + barWidth / 2 + 0.016, y - 0.04 * textScale[0]], {
             font: 0,
             color: textColor,
             scale: textScale,
-            outline: false
+            outline: false,
+            alignment: 0
         });
     },
     drawLogHealthBar(x, y, index) {
@@ -81,19 +104,85 @@ mp.woodman = {
         var fillColor = info.getFillColor(health);
         var textColor = info.textColor;
         var textScale = info.textScale;
+        var barWidth = info.width;
+        var barX = x - barWidth / 2;
+        var barY = y;
+        var fillWidth = Math.max(0, barWidth * health / 100);
+
         if (this.logFocusSlotI == index) {
-            color[3] = fillColor[3] = 200;
+            color[3] = fillColor[3] = 210;
+            mp.game.graphics.drawRect(barX - 0.005, barY - 0.004, barWidth + 0.01, info.height + 0.01, 90, 225, 200, 70);
         }
-        mp.game.graphics.drawRect(x, y, info.width + border * 2, info.height + border * 5, color[0], color[1], color[2], color[3]);
-        mp.game.graphics.drawRect(x - (100 - health) * 0.00025, y,
-            info.width * health / 100, info.height,
+
+        this.drawBarBackground(barX, barY, barWidth, info.height, color, [255, 255, 255, 90]);
+        mp.game.graphics.drawRect(barX + border, barY + border, fillWidth, info.height - border * 2,
             fillColor[0], fillColor[1], fillColor[2], fillColor[3]);
-        mp.game.graphics.drawText(`${health}%`, [x, y - 0.045 * textScale[0]], {
+        mp.game.graphics.drawText(`${health}%`, [x, y - 0.042 * textScale[0]], {
             font: 0,
             color: textColor,
             scale: textScale,
-            outline: false
+            outline: false,
+            alignment: 0
         });
+    },
+    drawTreeChopGame() {
+        var progress = this.treeChop.required
+            ? Math.min(this.treeChop.progress / this.treeChop.required, 1)
+            : 0;
+        var x = 0.5;
+        var y = 0.84;
+        var width = 0.34;
+        var height = 0.115;
+
+        mp.game.graphics.drawRect(x, y, width, height, 7, 20, 25, 220);
+        mp.game.graphics.drawRect(x, y - 0.043, width - 0.006, 0.003, 67, 125, 105, 180);
+        mp.game.graphics.drawText('РУБКА ДЕРЕВА', [x, y - 0.035], {
+            font: 4,
+            color: [220, 241, 225, 255],
+            scale: [0.32, 0.32],
+            outline: true,
+            centre: true
+        });
+        mp.game.graphics.drawText('Кликайте ЛКМ по стволу', [x, y - 0.006], {
+            font: 0,
+            color: [201, 220, 210, 255],
+            scale: [0.27, 0.27],
+            outline: true,
+            centre: true
+        });
+        mp.game.graphics.drawRect(x, y + 0.027, width - 0.045, 0.012, 3, 12, 16, 220);
+        if (progress > 0) {
+            mp.game.graphics.drawRect(x - (width - 0.045) * (1 - progress) / 2, y + 0.027,
+                (width - 0.045) * progress, 0.008, 102, 205, 130, 255);
+        }
+        mp.game.graphics.drawText(`${this.treeChop.progress} / ${this.treeChop.required}`, [x, y + 0.043], {
+            font: 0,
+            color: [245, 250, 245, 255],
+            scale: [0.23, 0.23],
+            outline: true,
+            centre: true
+        });
+    },
+    startTreeChop(required, health) {
+        this.treeChop.active = true;
+        this.treeChop.required = required;
+        this.treeChop.progress = 0;
+        this.treeHealth = health;
+        this.lastStartMelee = 0;
+        mp.prompt.hide();
+    },
+    stopTreeChop(notifyServer) {
+        if (!this.treeChop.active) return;
+        this.treeChop.active = false;
+        this.treeChop.required = 0;
+        this.treeChop.progress = 0;
+        this.lastStartMelee = 0;
+        if (notifyServer) mp.events.callRemote(`woodman.trees.chop.cancel`);
+
+        if (this.treePos && this.treeHealth > 0) {
+            if (this.isAxInHands()) mp.prompt.showByName('woodman_start_ax');
+            else mp.prompt.showByName('woodman_take_ax');
+        }
     },
     isAxInHands(player) {
         if (!player) player = mp.players.local;
@@ -133,12 +222,16 @@ mp.woodman = {
     },
     setTreeInside(pos, health) {
         if (pos) {
-            if (this.isAxInHands()) mp.prompt.showByName('woodman_start_ax');
-            else mp.prompt.showByName('woodman_take_ax');
-
             this.treePos = pos;
             this.treeHealth = health;
+            if (health > 0) {
+                if (this.isAxInHands()) mp.prompt.showByName('woodman_start_ax');
+                else mp.prompt.showByName('woodman_take_ax');
+            } else {
+                mp.prompt.hide();
+            }
         } else {
+            this.stopTreeChop(true);
             mp.prompt.hide();
 
             this.treePos = null;
@@ -230,6 +323,20 @@ mp.events.add({
     "render": () => {
         var start = Date.now();
         var player = mp.players.local;
+        if (mp.woodman.treeChop.active) {
+            mp.woodman.lastStartMelee = 0;
+            mp.game.controls.disableControlAction(0, 25, true);
+            mp.game.controls.disableControlAction(0, 140, true);
+            mp.game.controls.disableControlAction(0, 257, true);
+
+            if (!mp.woodman.isAxInHands(player) || !mp.woodman.treePos
+                || mp.vdist(player.position, mp.woodman.treePos) > 4) {
+                mp.woodman.stopTreeChop(true);
+            } else {
+                mp.woodman.drawTreeChopGame();
+                return;
+            }
+        }
         if (!mp.woodman.isAxInHands(player)) return;
         if (mp.woodman.treePos) {
             var startPos = player.getOffsetFromInWorldCoords(0, 0, 0);
@@ -300,6 +407,19 @@ mp.events.add({
     },
     "woodman.tree.health": (health) => {
         mp.woodman.treeHealth = health;
+        if (health <= 0) mp.woodman.stopTreeChop(true);
+    },
+    "woodman.tree.chop.start": (required, health) => {
+        mp.woodman.startTreeChop(required, health);
+    },
+    "woodman.tree.chop.progress": (progress) => {
+        if (mp.woodman.treeChop.active) mp.woodman.treeChop.progress = progress;
+    },
+    "woodman.tree.chop.end": (success) => {
+        mp.woodman.stopTreeChop(false);
+        if (!success && mp.woodman.treePos && mp.woodman.treeHealth > 0) {
+            mp.notify.error(`Рубка прервана`, `Лесоруб`);
+        }
     },
     "woodman.log.request": () => {
         var slot = mp.woodman.getFreeTreeSlot();
@@ -324,14 +444,19 @@ mp.events.add({
     },
     "playerWeaponChanged": (weapon) => {
         if (mp.woodman.treePos) {
-            if (mp.woodman.isAxInHands()) mp.prompt.showByName('woodman_start_ax');
-            else mp.prompt.showByName('woodman_take_ax');
+            if (mp.woodman.treeChop.active && !mp.woodman.isAxInHands()) {
+                mp.woodman.stopTreeChop(true);
+            } else if (mp.woodman.treeHealth > 0) {
+                if (mp.woodman.isAxInHands()) mp.prompt.showByName('woodman_start_ax');
+                else mp.prompt.showByName('woodman_take_ax');
+            }
         } else if (mp.woodman.logObj) {
             if (mp.woodman.isAxInHands()) mp.prompt.showByName('woodman_log_start_ax');
             else mp.prompt.showByName('woodman_log_take_ax');
         }
     },
     "playerStartMeleeCombat": () => {
+        if (mp.woodman.treeChop.active) return;
         if (!mp.woodman.isAxInHands()) return;
         if (!mp.woodman.treePos) return;
         if (!mp.woodman.isFocusTree()) return;
@@ -343,6 +468,12 @@ mp.events.add({
         if (upOrDown != 'down' || leftOrRight != 'left') return;
 
         if (mp.game.ui.isPauseMenuActive()) return;
+        if (mp.woodman.treeChop.active) {
+            if (!mp.woodman.isAxInHands() || !mp.woodman.treePos
+                || mp.vdist(mp.players.local.position, mp.woodman.treePos) > 4) return;
+            mp.events.callRemote(`woodman.trees.chop.click`);
+            return;
+        }
         if (mp.busy.includes()) return;
         mp.woodman.hitLogHandler();
     },

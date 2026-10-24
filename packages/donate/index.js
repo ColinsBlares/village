@@ -15,6 +15,26 @@ module.exports = {
     slotPrice: 500,
     // Макс. кол-во слотов
     slotsMax: 3,
+    cases: [
+        {
+            id: "bronze",
+            name: "Бронзовый кейс",
+            price: 100,
+            prizes: [5000, 10000, 15000, 25000]
+        },
+        {
+            id: "silver",
+            name: "Серебряный кейс",
+            price: 300,
+            prizes: [25000, 50000, 75000, 100000]
+        },
+        {
+            id: "gold",
+            name: "Золотой кейс",
+            price: 700,
+            prizes: [50000, 100000, 200000, 500000]
+        }
+    ],
 
     setDonate(player, donate, reason = "") {
         donate = parseInt(donate);
@@ -52,6 +72,33 @@ module.exports = {
             player._donateLock = false;
         });
         return true;
+    },
+    async openCase(player, caseId) {
+        const caseInfo = this.cases.find(item => item.id === caseId);
+        if (!caseInfo) return { error: "Неизвестный кейс." };
+        if (!player.account || player.account.donate < caseInfo.price) {
+            return { error: `Для покупки кейса необходимо ${caseInfo.price} CC.` };
+        }
+        if (player._donateLock) return { error: "Подождите завершения прошлой операции." };
+
+        const prize = caseInfo.prizes[Math.floor(Math.random() * caseInfo.prizes.length)];
+        const granted = await new Promise(resolve => {
+            const started = this.spend(player, caseInfo.price, `Покупка ${caseInfo.name}`, done => {
+                money.addCash(player, prize, res => {
+                    done(!!res);
+                    resolve(!!res);
+                }, `Награда из донат-кейса «${caseInfo.name}»`);
+            });
+            if (!started) resolve(false);
+        });
+        if (!granted) return { error: "Не удалось выдать награду. Покупка отменена." };
+
+        return {
+            caseId: caseInfo.id,
+            caseName: caseInfo.name,
+            price: caseInfo.price,
+            prize
+        };
     },
     convert(player, donate) {
         donate = parseInt(donate);

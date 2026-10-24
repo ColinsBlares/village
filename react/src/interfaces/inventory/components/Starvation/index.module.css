@@ -18,7 +18,8 @@
 
 .percent {
 	grid-column: 3/4;
-	font-size: 1.3vh;
+	color: #aab7b9;
+	font-size: 1.15vh;
 	margin-top: -0.1vh;
 }
 
@@ -36,21 +37,28 @@
 
 .progress {
 	height: 0.9vh;
-	border-radius: 0.2vh;
+	border-radius: 1vh;
 	overflow: hidden;
-	background-color: rgba(255, 255, 255, 0.2);
+	background-color: rgba(255, 255, 255, 0.08);
 	grid-row: 2/3;
 	grid-column: 2/4;
+}
+
+.progress div {
+	border-radius: inherit;
+	box-shadow: 0 0 0.7vh currentColor;
 }
 
 .satiety .progress div {
 	width: 50%;
 	height: 100%;
-	background-color: #ffb72b;
+	background-color: #c4ad74;
+	color: #c4ad74;
 }
 
 .thirst .progress div {
 	width: 50%;
 	height: 100%;
-	background-color: #2bc6c6;
+	background-color: #78b9b6;
+	color: #78b9b6;
 }

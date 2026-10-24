@@ -71,6 +71,11 @@ export interface PlayerMenuState {
 	slotPrice: number;
 	amountSlots: number;
 	maxSlots: number;
+	donateLicenses: any[];
+	donateBundles: any[];
+	donateCaseOpening: boolean;
+	donateCaseResult: { caseName: string; price: number; prize: number } | null;
+	licenses: { [key: string]: number };
 	promocode: string;
 	amountInvitees: number;
 	amountCompleted: number;
@@ -218,6 +223,11 @@ export const usePlayerMenuStore = create<PlayerMenuState>(() => ({
 	slotPrice: 120,
 	amountSlots: 2,
 	maxSlots: 5,
+	donateLicenses: [],
+	donateBundles: [],
+	donateCaseOpening: false,
+	donateCaseResult: null,
+	licenses: {},
 	promocode: 'LDLSF3',
 	amountInvitees: 4,
 	amountCompleted: 0,
@@ -768,6 +778,9 @@ export function initPlayerMenu(raw: any) {
 		factionId: data.factionId,
 		familyId: data.familyId || 0,
 		maxSlots: data.slotsMax,
+		donateLicenses: data.donateCatalog ? data.donateCatalog.licenses || [] : [],
+		donateBundles: data.donateCatalog ? data.donateCatalog.bundles || [] : [],
+		licenses: data.licenses || {},
 	});
 	setBiz(data.biz);
 	setHouse(data.house);
@@ -781,6 +794,15 @@ export function initPlayerMenu(raw: any) {
 	setPasswordDate(data.passwordDate);
 	setSettings(data.settings);
 	setEmail(data.email, data.confirmEmail);
+}
+
+export function setDonateCatalog(raw: any) {
+	const data = parseMaybe(raw);
+	usePlayerMenuStore.setState({
+		donateLicenses: data.donateCatalog ? data.donateCatalog.licenses || [] : [],
+		donateBundles: data.donateCatalog ? data.donateCatalog.bundles || [] : [],
+		licenses: data.licenses || {},
+	});
 }
 
 export function acceptConvert(amount: any) {
@@ -806,6 +828,43 @@ export function takeoffWarn() {
 
 export function addSlot() {
 	mp.trigger('callRemote', 'donate.slots.add');
+}
+
+export function buyDonateLicense(key: string) {
+	mp.trigger('callRemote', 'donate.license.buy', key);
+}
+
+export function buyDonateBundle(id: string) {
+	mp.trigger('callRemote', 'donate.bundle.buy', id);
+}
+
+export function buyDonateCase(caseId: string) {
+	if (usePlayerMenuStore.getState().donateCaseOpening) return;
+	usePlayerMenuStore.setState({ donateCaseOpening: true, donateCaseResult: null });
+	mp.trigger('callRemote', 'donate.case.open', caseId);
+}
+
+export function setDonateCaseResult(raw: any) {
+	const result = parseMaybe(raw);
+	if (!result || typeof result.caseName !== 'string' || !Number.isFinite(Number(result.prize))) {
+		throw new Error('Некорректный ответ донат-кейса');
+	}
+	usePlayerMenuStore.setState({
+		donateCaseOpening: false,
+		donateCaseResult: {
+			caseName: result.caseName,
+			price: Number(result.price),
+			prize: Number(result.prize),
+		},
+	});
+}
+
+export function setDonateCaseFailed() {
+	usePlayerMenuStore.setState({ donateCaseOpening: false });
+}
+
+export function clearDonateCaseResult() {
+	usePlayerMenuStore.setState({ donateCaseResult: null });
 }
 
 export function saveSettings(modified: { [key: string]: number }) {
@@ -947,6 +1006,9 @@ export function initPlayerMenuBridge() {
 	target.setSkill = setSkill;
 	target.setCash = setCash;
 	target.setDonate = setDonate;
+	target.setDonateCatalog = setDonateCatalog;
+	target.setDonateCaseResult = setDonateCaseResult;
+	target.setDonateCaseFailed = setDonateCaseFailed;
 	target.setWarns = setWarns;
 	target.setSlots = setSlots;
 	target.setPromocode = setPromocode;

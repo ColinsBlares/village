@@ -1,0 +1,80 @@
+.root {
+	text-align: center;
+	height: 100%;
+	overflow: auto;
+}
+
+.hidden {
+	display: none;
+}
+
+.head {
+	color: #ffdf29;
+	font-size: 2.2vh;
+	font-weight: bold;
+}
+
+.description {
+	margin: 0.8vh auto 2vh;
+	max-width: 90%;
+	font-size: 1.35vh;
+	color: rgba(255, 255, 255, 0.72);
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: 1vh;
+	text-align: left;
+}
+
+.item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 2vh;
+	padding: 1.2vh 1.5vh;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 0.6vh;
+	background: rgba(0, 0, 0, 0.16);
+}
+
+.item strong {
+	font-size: 1.5vh;
+}
+
+.item p,
+.item small {
+	display: block;
+	margin: 0.5vh 0 0;
+	font-size: 1.2vh;
+	color: rgba(255, 255, 255, 0.7);
+}
+
+.buyArea {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.8vh;
+	min-width: 14vh;
+}
+
+.buyArea span {
+	color: #ffdf29;
+	font-weight: bold;
+}
+
+.buyArea button {
+	border: 0;
+	border-radius: 1.2vh;
+	padding: 0.7vh 1.6vh;
+	background: #ffdf29;
+	color: #151515;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.buyArea button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}

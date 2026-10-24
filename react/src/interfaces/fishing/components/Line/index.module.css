@@ -1,34 +1,84 @@
 .line {
-	background: rgba(12, 12, 12, 0.6);
-	height: 11%;
-	width: 60%;
-	margin-left: 20%;
 	position: relative;
-	border-radius: 10px;
-	animation: fishing-show 0.1s ease-in-out;
+	width: calc(100% - 56px);
+	height: 12px;
+	margin: 20px 28px 0;
+	border: 1px solid rgba(183, 224, 235, 0.12);
+	border-radius: 999px;
+	background: rgba(2, 17, 29, 0.74);
+	box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
+	animation: appear 180ms ease-out;
 }
 
 .zone {
-	background: #ffdf29;
-	border-radius: 10px;
-	height: 90%;
-	top: 5%;
 	position: absolute;
+	top: 1px;
+	height: 8px;
+	border-radius: 999px;
+	background: linear-gradient(90deg, rgba(73, 202, 188, 0.64), #77edc9, rgba(73, 202, 188, 0.64));
+	box-shadow: 0 0 17px rgba(83, 225, 192, 0.38);
+	transition: box-shadow 160ms ease;
+}
+
+.lineActive .zone {
+	background: linear-gradient(90deg, #62e9be, #d0ffe8, #62e9be);
+	box-shadow: 0 0 22px rgba(99, 255, 200, 0.8);
+}
+
+.tick {
+	position: absolute;
+	top: 3px;
+	z-index: 1;
+	width: 1px;
+	height: 4px;
+	background: rgba(218, 241, 247, 0.4);
 }
 
 .cursor {
-	width: 6%;
-	margin-top: -1%;
-	height: 100%;
 	position: absolute;
-	border-radius: 20px;
+	top: 50%;
+	z-index: 2;
+	width: 14px;
+	height: 25px;
+	transform: translate(-50%, -50%);
+	transition: filter 120ms ease;
 }
 
-@keyframes fishing-show {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
+.bobber {
+	position: absolute;
+	top: 0;
+	left: 5px;
+	width: 5px;
+	height: 15px;
+	border: 1px solid rgba(255, 255, 255, 0.76);
+	border-radius: 5px 5px 3px 3px;
+	background: linear-gradient(180deg, #fff 0 36%, #ff8d79 37% 100%);
+	box-shadow: 0 0 13px rgba(255, 141, 121, 0.6);
+}
+
+.bobber::after {
+	position: absolute;
+	top: 13px;
+	left: 1px;
+	width: 1px;
+	height: 9px;
+	background: #d3edf2;
+	content: '';
+}
+
+.lineActive .cursor {
+	filter: drop-shadow(0 0 7px rgba(123, 255, 210, 0.9));
+}
+
+@keyframes appear {
+	from { opacity: 0; transform: translateY(3px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 560px) {
+	.line {
+		width: calc(100% - 36px);
+		margin-right: 18px;
+		margin-left: 18px;
 	}
 }

@@ -11,6 +11,8 @@ import DonateConvert from '../DonateConvert';
 import DonateChangeName from '../DonateChangeName';
 import DonateWarn from '../DonateWarn';
 import DonateAddSlot from '../DonateAddSlot';
+import DonateCatalog from '../DonateCatalog';
+import DonateCases from '../DonateCases';
 
 const PATHS = playerMenuSvgPaths as { [key: string]: string[] };
 
@@ -73,6 +75,9 @@ function Sidebar(props: { kind: 'settings' | 'donate' }) {
 				{props.kind === 'settings' ? <SettingsProtection /> : <DonateChangeName />}
 				{props.kind === 'donate' ? <DonateWarn /> : null}
 				{props.kind === 'donate' ? <DonateAddSlot /> : null}
+				{props.kind === 'donate' ? <DonateCatalog kind="licenses" /> : null}
+				{props.kind === 'donate' ? <DonateCatalog kind="bundles" /> : null}
+				{props.kind === 'donate' ? <DonateCases /> : null}
 			</div>
 		</div>
 	);

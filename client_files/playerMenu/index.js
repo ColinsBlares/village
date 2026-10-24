@@ -51,6 +51,12 @@ mp.playerMenu = {
     setDonate(donate) {
         mp.callCEFV(`playerMenu.setDonate(${donate})`);
     },
+    setDonateCaseResult(data) {
+        mp.callCEFV(`playerMenu.setDonateCaseResult(${JSON.stringify(data)})`);
+    },
+    setDonateCaseFailed() {
+        mp.callCEFV("playerMenu.setDonateCaseFailed()");
+    },
     setWarns(warns) {
         mp.callCEFV(`playerMenu.setWarns(${warns})`);
     },
@@ -131,6 +137,12 @@ mp.events.add({
     },
     "playerMenu.setDonate": (data) => {
         mp.playerMenu.setDonate(data.donate);
+    },
+    "donate.case.opened": (data) => {
+        mp.playerMenu.setDonateCaseResult(data);
+    },
+    "donate.case.failed": () => {
+        mp.playerMenu.setDonateCaseFailed();
     },
     "playerMenu.setWarns": (data) => {
         mp.playerMenu.setWarns(data.warns);

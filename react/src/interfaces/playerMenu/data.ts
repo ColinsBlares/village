@@ -14,6 +14,23 @@ export interface HelpMessage {
 	answer: string;
 }
 
+export interface DonateLicense {
+	key: string;
+	name: string;
+	cashPrice: number;
+	donatePrice: number;
+}
+
+export interface DonateBundle {
+	id: string;
+	name: string;
+	price: number;
+	cash: number;
+	modelName: string;
+	licenses: string[];
+	description: string;
+}
+
 export const MENU_ITEMS: MenuItem[] = [
 	{ head: 'Персонаж', window: 'character' },
 	{ head: 'Настройки', window: 'settings' },
@@ -33,6 +50,9 @@ export const DONATE_ITEMS: SideItem[] = [
 	{ head: 'Смена никнейма', icon: 'idCard', window: 'donate-changename' },
 	{ head: 'Снятие варна', icon: 'postcard', window: 'donate-warn' },
 	{ head: 'Добавление слота', icon: 'expansion', window: 'donate-addslot' },
+	{ head: 'Лицензии', icon: 'postcard', window: 'donate-licenses' },
+	{ head: 'Готовые наборы', icon: 'expansion', window: 'donate-bundles' },
+	{ head: 'Кейсы', icon: 'expansion', window: 'donate-cases' },
 ];
 
 export const SETTINGS_ORDER = [

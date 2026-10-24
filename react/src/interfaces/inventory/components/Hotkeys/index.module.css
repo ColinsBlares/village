@@ -3,25 +3,35 @@
 	grid-column-end: span 2;
 	grid-template-columns: repeat(9, 1fr);
 	grid-template-rows: repeat(1, 1fr);
-	padding: 1.8vh 3vh;
+	padding: 1.35vh 2vh;
 	grid-gap: 4.6vh;
-	background-color: rgba(12, 12, 12, 0.8);
-	border-radius: 1.2vh;
+	background: linear-gradient(145deg, rgba(18, 24, 29, 0.94), rgba(11, 16, 20, 0.92));
+	border: 1px solid rgba(222, 232, 235, 0.09);
+	border-radius: 1.4vh;
+	box-shadow: 0 1vh 2.5vh rgba(0, 0, 0, 0.2), inset 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .key {
-	background-color: rgba(255, 255, 255, 0.2);
-	border-radius: 1.2vh;
+	background-color: rgba(255, 255, 255, 0.045);
+	border: 1px solid rgba(215, 229, 232, 0.055);
+	border-radius: 0.9vh;
 	position: relative;
+	transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.key:hover {
+	background-color: rgba(255, 255, 255, 0.08);
+	border-color: rgba(215, 229, 232, 0.12);
 }
 
 .focus {
-	background-color: rgba(106, 201, 61, 0.2);
+	background-color: rgba(106, 180, 125, 0.16);
+	border-color: rgba(134, 216, 157, 0.28);
 	background-size: 70%;
 }
 
 .has {
-	background-color: rgba(255, 255, 255, 0.4);
+	background-color: rgba(255, 255, 255, 0.075);
 }
 
 .key :global(.inv-item) {
@@ -34,7 +44,9 @@
 
 .hotkey {
 	position: absolute;
-	bottom: 0.4vh;
-	right: 0.4vh;
-	opacity: 0.3;
+	bottom: 0.35vh;
+	right: 0.45vh;
+	color: #b8c5c7;
+	font-size: 1.05vh;
+	opacity: 0.55;
 }

@@ -24,6 +24,7 @@ export const useFishingStore = create<FishingState>(() => ({
 
 let intervalFishingB: number | null = null;
 let synced = false;
+let isEnding = false;
 
 function stopInterval() {
 	if (intervalFishingB !== null) {
@@ -50,6 +51,7 @@ export function moveCursor() {
 		if (useFishingStore.getState().direction === 'left') {
 			useFishingStore.setState({ isEnd: true });
 			stopInterval();
+			isEnding = true;
 			mp.trigger('fishing.game.end', false);
 			return;
 		}
@@ -58,6 +60,8 @@ export function moveCursor() {
 }
 
 export function fishFetch(speed: number, zone: number, weight: number) {
+	stopInterval();
+	isEnding = false;
 	useFishingStore.setState({
 		isFetch: true,
 		zone: zone,
@@ -67,6 +71,8 @@ export function fishFetch(speed: number, zone: number, weight: number) {
 }
 
 export function endFishing() {
+	if (isEnding) return;
+	isEnding = true;
 	stopInterval();
 	const state = useFishingStore.getState();
 	const zone = state.zone == null ? 0 : state.zone;
@@ -75,6 +81,8 @@ export function endFishing() {
 }
 
 export function clearFishingData() {
+	stopInterval();
+	isEnding = false;
 	useFishingStore.setState({
 		position: 0,
 		weight: null,
@@ -139,6 +147,7 @@ export function initFishingLegacyBridge() {
 		useFishingStore.setState({ isEnd: next });
 		if (next && !prev) {
 			stopInterval();
+			isEnding = true;
 			mp.trigger('fishing.game.end', false);
 		}
 	});

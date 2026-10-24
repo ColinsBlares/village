@@ -1,6 +1,6 @@
 maps
 dotnet
-bin
+/bin/
 node_modules
 plugins
 conf.json

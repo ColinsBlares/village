@@ -1,6 +1,7 @@
 let notifs = call('notifications');
 let woodman = call('woodman');
 let anticheat = call('anticheat');
+let inventory = call('inventory');
 
 // Слоты от клиента только рядом с игроком
 let nearSlots = (player, slots, max) => Array.isArray(slots) && slots.length <= max &&
@@ -30,12 +31,58 @@ module.exports = {
             notifs.error(player, text, header);
         };
         if (!player.tree) return out(`Вы не у дерева`);
-        if (!anticheat.jobCooldown(player, 'woodman.trees.hit', 400)) return;
+        if (player.woodmanChop) return;
+        if (!anticheat.jobCooldown(player, 'woodman.trees.hit', 1000)) return;
         var tree = player.tree;
-        var before = tree.health;
-        woodman.hitTree(player, tree);
-        // Бревно положено только за дерево, срубленное этим ударом
-        if (before > 0 && !tree.health) player.woodmanLogPending = tree;
+        if (tree.health <= 0) return out(`Дерево исчерпало свой ресурс`);
+
+        var axe = inventory.getHandsItem(player);
+        var axeHealth = axe && inventory.getParam(axe, 'health');
+        if (!woodman.isAx(axe)) return out(`Возьмите в руки топор`);
+        if (!axeHealth || axeHealth.value <= 0) return out(`Топор сломан`);
+
+        var damage = woodman.getTreeChopDamage(player);
+        player.woodmanChop = {
+            tree: tree,
+            clicks: 0,
+            lastClickAt: 0,
+            damage: damage,
+            startedAt: Date.now()
+        };
+        player.call(`woodman.tree.chop.start`, [Math.ceil(tree.health / damage), tree.health]);
+    },
+    "woodman.trees.chop.click": (player) => {
+        if (!player.character) return;
+        var session = player.woodmanChop;
+        if (!session || !player.tree || session.tree !== player.tree) return;
+        if (Date.now() - session.startedAt > 30000) {
+            delete player.woodmanChop;
+            player.call(`woodman.tree.chop.end`, [false]);
+            return;
+        }
+        if (!anticheat.isNearXY(player, session.tree.db.pos, 4)) return;
+        if (Date.now() - session.lastClickAt < 180) return;
+
+        session.lastClickAt = Date.now();
+        var before = session.tree.health;
+        if (!woodman.hitTree(player, session.tree, session.damage)) {
+            delete player.woodmanChop;
+            player.call(`woodman.tree.chop.end`, [false]);
+            return;
+        }
+
+        session.clicks++;
+        if (before > 0 && !session.tree.health) {
+            player.woodmanLogPending = session.tree;
+            delete player.woodmanChop;
+            player.call(`woodman.tree.chop.end`, [true]);
+            return;
+        }
+
+        player.call(`woodman.tree.chop.progress`, [session.clicks]);
+    },
+    "woodman.trees.chop.cancel": (player) => {
+        delete player.woodmanChop;
     },
     "woodman.logs.add": (player, slot) => {
         if (!player.character) return;
@@ -91,6 +138,7 @@ module.exports = {
     },
     "playerExitWorldObject": (player, obj) => {
         if (!player.tree) return;
+        delete player.woodmanChop;
         delete player.tree;
         player.call(`woodman.tree.inside`);
     },

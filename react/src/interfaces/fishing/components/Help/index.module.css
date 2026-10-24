@@ -1,33 +1,56 @@
 .help {
-	background: rgb(0, 0, 0, 0.6);
-	color: white;
-	font-family: 'Chalet-LondonNineteenSixty';
-	position: absolute;
-	right: 2vh;
-	top: 20vh;
-	width: 25vh;
-	word-break: break-word;
-	padding: 1% 2%;
-	border-radius: 5px;
-	text-align: left;
-	font-size: 120%;
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 14px;
+	pointer-events: auto;
 }
 
-.help div {
-	margin-bottom: 7%;
-	margin-top: 7%;
-	text-align: center;
-}
-
-.help table {
-	text-align: center;
-	border-spacing: 10px 20px;
+.action {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	color: #d8eaf0;
+	font-size: 12px;
+	white-space: nowrap;
 }
 
 .button {
-	background: #fffd;
-	border-radius: 5px;
-	color: #000;
-	font-weight: bold;
-	padding: 0.2vh 0.5vh;
+	font-family: inherit;
+	padding: 5px 8px;
+	border: 1px solid rgba(195, 226, 235, 0.22);
+	border-bottom-width: 2px;
+	border-radius: 7px;
+	background: rgba(229, 247, 250, 0.1);
+	color: #f2fbff;
+	cursor: pointer;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.button:hover {
+	border-color: rgba(128, 231, 214, 0.62);
+	background: rgba(95, 213, 196, 0.2);
+}
+
+.button:active {
+	transform: translateY(1px);
+}
+
+.button:focus-visible {
+	outline: 2px solid #7debd2;
+	outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+	.help {
+		gap: 9px;
+	}
+
+	.action {
+		gap: 5px;
+		font-size: 11px;
+	}
 }
