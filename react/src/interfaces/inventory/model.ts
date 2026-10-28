@@ -2,6 +2,13 @@ import React from 'react';
 import { urlItemImg } from './images';
 import { notifyError, notifyInfo, triggerMp } from './mp';
 import { createAccess, useInventoryStore } from './store';
+import { TRADE_GIVE, TRADE_TAKE, tradePlaces } from '../trade/grids';
+import {
+	cancelTrade,
+	localAdd,
+	localRemove,
+	useTradeStore,
+} from '../trade/store';
 
 let searchTimer: number | null = null;
 let hotkeyUnbind: any = null;
@@ -26,6 +33,77 @@ function clamp(value: number, min: number, max: number) {
 	return Math.max(min, Math.min(max, value));
 }
 
+function tradeOffered(sqlId: any) {
+	if (!useTradeStore.getState().show) return false;
+	const list = useTradeStore.getState().offerItems;
+	for (let i = 0; i < list.length; i++) {
+		if (list[i].sqlId == sqlId) return true;
+	}
+	return false;
+}
+
+function tradeTaken(sqlId: any) {
+	const list = useTradeStore.getState().theirItems;
+	for (let i = 0; i < list.length; i++) {
+		if (list[i].sqlId == sqlId) return true;
+	}
+	return false;
+}
+
+function isWorn(item: any) {
+	const equipment = state().equipment;
+	for (const key in equipment) {
+		if (equipment[key] && equipment[key].sqlId == item.sqlId) return true;
+	}
+	return false;
+}
+
+function markPlace(cols: any, place: any, itemsInfo: any) {
+	cols[place.sqlId] = {};
+	for (const j in place.pockets) {
+		const pocket = place.pockets[j];
+		cols[place.sqlId][j] = {};
+		for (const itemIndex in pocket.items) {
+			const item = pocket.items[itemIndex];
+			const info = itemsInfo[item.itemId];
+			if (!info) continue;
+			const coord = indexToXY(pocket.rows, pocket.cols, itemIndex);
+			if (!coord) continue;
+			for (let x = 0; x < info.width; x++) {
+				for (let y = 0; y < info.height; y++) {
+					const cell = xyToIndex(pocket.rows, pocket.cols, {
+						x: coord.x + x,
+						y: coord.y + y,
+					});
+					cols[place.sqlId][j][cell] = item.sqlId;
+				}
+			}
+		}
+	}
+}
+
+function handleTradeDrop(item: any, access: any) {
+	if (!useTradeStore.getState().show) return false;
+	const inOffer = tradeOffered(item.sqlId);
+	const place = access.placeSqlId;
+	if (tradeTaken(item.sqlId) || place === TRADE_TAKE) return true;
+	if (place === TRADE_GIVE) {
+		if (!inOffer && !isWorn(item) && getItem(item.sqlId) && !access.deny) {
+			localAdd(item);
+			triggerMp('trade.item.add', item.sqlId);
+		}
+		return true;
+	}
+	if (inOffer) {
+		if (place > 0 && !access.deny) {
+			localRemove(item.sqlId);
+			triggerMp('trade.item.remove', item.sqlId);
+		}
+		return true;
+	}
+	return false;
+}
+
 export function touchEquipment() {
 	const equipment = state().equipment;
 	useInventoryStore.setState({ equipment: Object.assign({}, equipment) });
@@ -48,6 +126,10 @@ export function notify(message: string) {
 }
 
 export function setShow(val: boolean) {
+	if (!val && useTradeStore.getState().show) {
+		cancelTrade();
+		return;
+	}
 	const current = state();
 	if (current.show === val) return;
 	triggerMp('blur', val, 300);
@@ -86,7 +168,11 @@ export function indexToXY(rows: number, cols: number, index: any) {
 	return { x: x, y: y };
 }
 
-export function xyToIndex(rows: number, cols: number, coord: { x: number; y: number }) {
+export function xyToIndex(
+	rows: number,
+	cols: number,
+	coord: { x: number; y: number },
+) {
 	if (!rows || !cols) return -1;
 	return coord.y * cols + coord.x;
 }
@@ -135,7 +221,11 @@ export function getItemByParams(keys: any, values: any, items?: any): any {
 		if (isFind) return item;
 		if (item.pockets) {
 			for (const key in item.pockets) {
-				const found = getItemByParams(keyList, valueList, item.pockets[key].items);
+				const found = getItemByParams(
+					keyList,
+					valueList,
+					item.pockets[key].items,
+				);
 				if (found) return found;
 			}
 		}
@@ -179,17 +269,22 @@ export function getItemWeight(items: any, weight?: number) {
 		if (!info) continue;
 		total += info.weight;
 		if (item.params && item.params.weight) total += item.params.weight;
-		if (item.params && item.params.count) total += (item.params.count - 1) * info.weight;
+		if (item.params && item.params.count)
+			total += (item.params.count - 1) * info.weight;
 		if (item.params && item.params.litres) total += item.params.litres;
 		if (item.params && item.params.weaponHash && item.params.ammo) {
 			const ammoId = getAmmoItemId(item.itemId);
-			if (ammoId && infoMap[ammoId]) total += infoMap[ammoId].weight * item.params.ammo;
+			if (ammoId && infoMap[ammoId])
+				total += infoMap[ammoId].weight * item.params.ammo;
 		}
 		if (item.pockets) {
 			for (const key in item.pockets) {
-				total += getItemWeight(Object.keys(item.pockets[key].items).map(function (itemIndex) {
-					return item.pockets[key].items[itemIndex];
-				}), 0);
+				total += getItemWeight(
+					Object.keys(item.pockets[key].items).map(function (itemIndex) {
+						return item.pockets[key].items[itemIndex];
+					}),
+					0,
+				);
 			}
 		}
 	}
@@ -218,18 +313,32 @@ export function getPlaceWeight(place: any) {
 export function getItemName(item: any) {
 	if (!item) return null;
 	const info = state().itemsInfo[item.itemId];
-	if (item.pockets && item.pockets.findIndex(function (pocket: any) {
-		if (pocket.search) return true;
-		const values = [];
-		for (const key in pocket.items) values.push(pocket.items[key]);
-		return values.findIndex(function (child: any) {
-			return child && child.search;
-		}) !== -1;
-	}) !== -1) return 'Обыск...';
-	if ([6, 7, 8, 9, 15, 133, 134].indexOf(item.itemId) !== -1 && item.params && item.params.name) return '' + item.params.name;
-	if (item.itemId == 16 && item.params && item.params.name && info) return info.name + ' ' + item.params.name;
-	if (item.itemId == 33 && item.params && item.params.vehName) return 'Ключи от ' + item.params.vehName;
-	if (item.itemId == 131 && item.params && item.params.name) return '' + item.params.name;
+	if (
+		item.pockets &&
+		item.pockets.findIndex(function (pocket: any) {
+			if (pocket.search) return true;
+			const values = [];
+			for (const key in pocket.items) values.push(pocket.items[key]);
+			return (
+				values.findIndex(function (child: any) {
+					return child && child.search;
+				}) !== -1
+			);
+		}) !== -1
+	)
+		return 'Обыск...';
+	if (
+		[6, 7, 8, 9, 15, 133, 134].indexOf(item.itemId) !== -1 &&
+		item.params &&
+		item.params.name
+	)
+		return '' + item.params.name;
+	if (item.itemId == 16 && item.params && item.params.name && info)
+		return info.name + ' ' + item.params.name;
+	if (item.itemId == 33 && item.params && item.params.vehName)
+		return 'Ключи от ' + item.params.vehName;
+	if (item.itemId == 131 && item.params && item.params.name)
+		return '' + item.params.name;
 	if (!info) return '';
 	return info.name;
 }
@@ -242,37 +351,66 @@ export function getPrettyParams(itemId: any, params: any) {
 		{ name: 'Занимает', value: info.width + 'x' + info.height + ' ячейки' },
 		{ name: 'Обнаружение', value: info.chance + '%' },
 	];
-	if (safeParams.health != null) result.push({ name: 'Прочность', value: +Number(safeParams.health).toFixed(2) + '%' });
-	if (safeParams.count) result.push({ name: 'Количество', value: safeParams.count + ' ед.' });
-	if (safeParams.clime) result.push({ name: 'Климат', value: 'от ' + safeParams.clime[0] + '° до ' + safeParams.clime[1] + '°' });
-	if (safeParams.satiety) result.push({ name: 'Сытость', value: safeParams.satiety + '%' });
-	if (safeParams.thirst) result.push({ name: 'Жажда', value: safeParams.thirst + '%' });
+	if (safeParams.health != null)
+		result.push({
+			name: 'Прочность',
+			value: +Number(safeParams.health).toFixed(2) + '%',
+		});
+	if (safeParams.count)
+		result.push({ name: 'Количество', value: safeParams.count + ' ед.' });
+	if (safeParams.clime)
+		result.push({
+			name: 'Климат',
+			value: 'от ' + safeParams.clime[0] + '° до ' + safeParams.clime[1] + '°',
+		});
+	if (safeParams.satiety)
+		result.push({ name: 'Сытость', value: safeParams.satiety + '%' });
+	if (safeParams.thirst)
+		result.push({ name: 'Жажда', value: safeParams.thirst + '%' });
 	if (safeParams.weaponHash) {
 		const ammoId = getAmmoItemId(itemId);
-		if (ammoId && state().itemsInfo[ammoId]) result.push({ name: 'Калибр', value: state().itemsInfo[ammoId].name });
+		if (ammoId && state().itemsInfo[ammoId])
+			result.push({ name: 'Калибр', value: state().itemsInfo[ammoId].name });
 	}
-	if (safeParams.ammo != null) result.push({ name: 'Патроны', value: safeParams.ammo + ' ед.' });
-	if (safeParams.owner) result.push({ name: 'Владелец', value: '#' + safeParams.owner });
-	if (safeParams.faction) result.push({ name: 'Организация', value: '#' + safeParams.faction });
-	if (safeParams.litres != null) result.push({ name: 'Топливо', value: safeParams.litres + ' л.' });
-	if (safeParams.max) result.push({ name: 'Вместимость', value: safeParams.max + ' л.' });
-	if (safeParams.treeDamage) result.push({ name: 'Урон по дереву', value: safeParams.treeDamage + '%' });
-	if (safeParams.alcohol) result.push({ name: 'Алкоголь', value: safeParams.alcohol + '%' });
-	if (safeParams.sex != null) result.push({ name: 'Пол', value: safeParams.sex ? 'Мужской' : 'Женский' });
+	if (safeParams.ammo != null)
+		result.push({ name: 'Патроны', value: safeParams.ammo + ' ед.' });
+	if (safeParams.owner)
+		result.push({ name: 'Владелец', value: '#' + safeParams.owner });
+	if (safeParams.faction)
+		result.push({ name: 'Организация', value: '#' + safeParams.faction });
+	if (safeParams.litres != null)
+		result.push({ name: 'Топливо', value: safeParams.litres + ' л.' });
+	if (safeParams.max)
+		result.push({ name: 'Вместимость', value: safeParams.max + ' л.' });
+	if (safeParams.treeDamage)
+		result.push({ name: 'Урон по дереву', value: safeParams.treeDamage + '%' });
+	if (safeParams.alcohol)
+		result.push({ name: 'Алкоголь', value: safeParams.alcohol + '%' });
+	if (safeParams.sex != null)
+		result.push({ name: 'Пол', value: safeParams.sex ? 'Мужской' : 'Женский' });
 	return result;
 }
 
 export function getDescParams(item: any) {
 	if (!item) return [];
-	const params = [{ name: 'Вес', value: (parseInt(String(getItemWeight(item) * 1000), 10) / 1000) + ' кг' }];
+	const params = [
+		{
+			name: 'Вес',
+			value: parseInt(String(getItemWeight(item) * 1000), 10) / 1000 + ' кг',
+		},
+	];
 	if (item.pockets) {
 		params.push({
 			name: 'Карманы',
-			value: item.pockets.filter(function (pocket: any) {
-				return !pocket.search;
-			}).length + ' ед.',
+			value:
+				item.pockets.filter(function (pocket: any) {
+					return !pocket.search;
+				}).length + ' ед.',
 		});
-		params.push({ name: 'Содержит', value: getItemsCount(item) + ' предметов' });
+		params.push({
+			name: 'Содержит',
+			value: getItemsCount(item) + ' предметов',
+		});
 	}
 	return params.concat(getPrettyParams(item.itemId, item.params));
 }
@@ -299,9 +437,25 @@ export function valueColor(value: number) {
 export function itemGradient(item: any, transparent?: boolean) {
 	if (item && item.params && item.params.health && !item.search) {
 		const alpha = transparent ? 0 : 0.3;
-		return 'linear-gradient(0deg, ' + valueColor(item.params.health) + ' ' + item.params.health + '%, rgba(255,255,255,' + alpha + ') ' + item.params.health + '%)';
+		return (
+			'linear-gradient(0deg, ' +
+			valueColor(item.params.health) +
+			' ' +
+			item.params.health +
+			'%, rgba(255,255,255,' +
+			alpha +
+			') ' +
+			item.params.health +
+			'%)'
+		);
 	}
 	return '';
+}
+
+function itemSpan(cells: number) {
+	const count = Number(cells) || 1;
+	const seams = count - 1;
+	return 'calc(' + count + ' * 2.35vh + ' + seams + ' * 0.22vh + ' + seams + ' * 2px)';
 }
 
 export function itemStyle(item: any) {
@@ -312,15 +466,15 @@ export function itemStyle(item: any) {
 	if (!info) {
 		return {
 			backgroundImage: 'url(' + url + ')',
-			width: '2.45vh',
-			height: '2.45vh',
+			width: '2.35vh',
+			height: '2.35vh',
 			pointerEvents: current.dragItem ? 'none' : '',
 		};
 	}
 	const style: any = {
 		backgroundImage: 'url(' + url + ')',
-		height: 'calc(' + info.height * 2.45 + 'vh + ' + (info.height - 1) + 'px)',
-		width: 'calc(' + info.width * 2.45 + 'vh + ' + (info.width - 1) + 'px)',
+		height: itemSpan(info.height),
+		width: itemSpan(info.width),
 		pointerEvents: current.dragItem ? 'none' : '',
 	};
 	if (item.params && item.params.health && !dragging && !item.found) {
@@ -354,7 +508,8 @@ export function genMatrix(item: any, pocketIndex: number) {
 		if (!info) continue;
 		for (let x = 0; x < info.width; x++) {
 			for (let y = 0; y < info.height; y++) {
-				if (matrix[coord.y + y] && matrix[coord.y + y][coord.x + x] != null) matrix[coord.y + y][coord.x + x] = 1;
+				if (matrix[coord.y + y] && matrix[coord.y + y][coord.x + x] != null)
+					matrix[coord.y + y][coord.x + x] = 1;
 			}
 		}
 	}
@@ -378,7 +533,8 @@ export function findFreeIndexMatrix(matrix: number[][], itemId: any) {
 				}
 				if (doBreak) break;
 			}
-			if (!doBreak) return xyToIndex(matrix.length, matrix[0].length, { x: j, y: i });
+			if (!doBreak)
+				return xyToIndex(matrix.length, matrix[0].length, { x: j, y: i });
 		}
 	}
 	return -1;
@@ -418,7 +574,8 @@ export function deleteItem(sqlId: any, items?: any, quiet?: boolean) {
 		if (!item) continue;
 		if (item.sqlId == sqlId) vueDelete(target, index);
 		if (item.pockets) {
-			for (const key in item.pockets) deleteItem(sqlId, item.pockets[key].items, true);
+			for (const key in item.pockets)
+				deleteItem(sqlId, item.pockets[key].items, true);
 		}
 	}
 	if (top && !quiet) touchEquipment();
@@ -455,7 +612,8 @@ export function deleteEnvironmentItem(sqlId: any, quiet?: boolean) {
 				if (!item) continue;
 				if (item.sqlId == sqlId) vueDelete(items, index);
 				if (item.pockets) {
-					for (const key in item.pockets) deleteItem(sqlId, item.pockets[key].items, true);
+					for (const key in item.pockets)
+						deleteItem(sqlId, item.pockets[key].items, true);
 				}
 			}
 		}
@@ -483,7 +641,12 @@ export function initItems(items: any) {
 	for (const index in items) addItem(items[index], null, index);
 }
 
-export function addEnvironmentItem(item: any, pocket: any, index: any, placeSqlId: any) {
+export function addEnvironmentItem(
+	item: any,
+	pocket: any,
+	index: any,
+	placeSqlId: any,
+) {
 	deleteEnvironmentItem(item.sqlId, true);
 	deleteItem(item.sqlId, undefined, true);
 	const place = getEnvironmentPlace(placeSqlId);
@@ -557,14 +720,16 @@ export function setItemParam(item: any, key: any, value: any) {
 
 export function setEnvironmentItemSqlId(item: any, sqlId: any) {
 	if (typeof item === 'number') item = getEnvironmentItem(item);
-	if (!item) return notify('setEnvironmentItemParam: Предмет ' + item + ' не найден');
+	if (!item)
+		return notify('setEnvironmentItemParam: Предмет ' + item + ' не найден');
 	vueSet(item, 'sqlId', parseInt(sqlId, 10));
 	setWaitItem(item, false);
 }
 
 export function setEnvironmentItemParam(item: any, key: any, value: any) {
 	if (typeof item === 'number') item = getEnvironmentItem(item);
-	if (!item) return notify('setEnvironmentItemParam: Предмет ' + item + ' не найден');
+	if (!item)
+		return notify('setEnvironmentItemParam: Предмет ' + item + ' не найден');
 	let next = value;
 	if (!isNaN(next)) next = parseFloat(next);
 	if (!item.params) item.params = {};
@@ -584,7 +749,8 @@ export function setAmmo(weaponHash: any, ammo: any) {
 	const item = getItemByParams('weaponHash', hash);
 	if (!item) return;
 	const current = state();
-	if (current.weaponsList.indexOf(item.itemId) !== -1) setItemParam(item, 'ammo', ammo);
+	if (current.weaponsList.indexOf(item.itemId) !== -1)
+		setItemParam(item, 'ammo', ammo);
 	else if (current.throwableWeaponsList.indexOf(item.itemId) !== -1) {
 		setItemParam(item, 'ammo', ammo);
 		if (ammo <= 0) {
@@ -699,10 +865,17 @@ export function onUseHandsItem() {
 
 function eatHandler(item: any) {
 	const current = state();
-	if (current.equipment[13] != item) return notifyError('Еда не в руках', getItemName(item));
+	if (current.equipment[13] != item)
+		return notifyError('Еда не в руках', getItemName(item));
 	const diff = Date.now() - current.lastUseEat;
 	const wait = current.eatWaitTime;
-	if (diff < wait) return notifyError('Повторная трапеза доступно через ' + parseInt(String((wait - diff) / 1000), 10) + ' сек.', getItemName(item));
+	if (diff < wait)
+		return notifyError(
+			'Повторная трапеза доступно через ' +
+				parseInt(String((wait - diff) / 1000), 10) +
+				' сек.',
+			getItemName(item),
+		);
 	useInventoryStore.setState({ lastUseEat: Date.now() });
 	triggerMp('inventory.setHandsBlock', true, true);
 	deleteItem(item.sqlId);
@@ -711,10 +884,17 @@ function eatHandler(item: any) {
 
 function drinkHandler(item: any) {
 	const current = state();
-	if (current.equipment[13] != item) return notifyError('Напиток не в руках', getItemName(item));
+	if (current.equipment[13] != item)
+		return notifyError('Напиток не в руках', getItemName(item));
 	const diff = Date.now() - current.lastUseDrink;
 	const wait = current.drinkWaitTime;
-	if (diff < wait) return notifyError('Повторное выпивание доступно через ' + parseInt(String((wait - diff) / 1000), 10) + ' сек.', getItemName(item));
+	if (diff < wait)
+		return notifyError(
+			'Повторное выпивание доступно через ' +
+				parseInt(String((wait - diff) / 1000), 10) +
+				' сек.',
+			getItemName(item),
+		);
 	useInventoryStore.setState({ lastUseDrink: Date.now() });
 	triggerMp('inventory.setHandsBlock', true, true);
 	deleteItem(item.sqlId);
@@ -753,7 +933,11 @@ export function setItemsInfo(itemsInfo: any) {
 		}
 		menu['Выкинуть'] = { handler: putGroundHandler };
 	}
-	useInventoryStore.setState({ itemsInfo: nextInfo, itemsMenu: nextMenu, hotkeysList: nextHotkeys });
+	useInventoryStore.setState({
+		itemsInfo: nextInfo,
+		itemsMenu: nextMenu,
+		hotkeysList: nextHotkeys,
+	});
 }
 
 export function setItemInfo(itemId: any, info: any) {
@@ -786,7 +970,13 @@ export function setBodyList(index: any, list: any) {
 
 export function getItemInfoHash(itemId: any) {
 	const info = state().itemsInfo[itemId];
-	return info.name.length + info.description.length + info.height + info.width + info.weight * 1000;
+	return (
+		info.name.length +
+		info.description.length +
+		info.height +
+		info.width +
+		info.weight * 1000
+	);
 }
 
 export function getItemsInfoHashes(chunk?: number) {
@@ -859,7 +1049,11 @@ export function setSearchItems(items: any[], enable: boolean) {
 		}
 		vueSet(el, 'search', false);
 		touchEquipment();
-		if (el.itemId) callRemote('police.inventory.search.found', { sqlId: el.sqlId, itemId: el.itemId });
+		if (el.itemId)
+			callRemote('police.inventory.search.found', {
+				sqlId: el.sqlId,
+				itemId: el.itemId,
+			});
 	}, state().searchWait);
 }
 
@@ -902,7 +1096,7 @@ export function getItemsMenu(itemId: any) {
 	const current = state();
 	if (!current.searchMode) return current.itemsMenu[itemId];
 	return {
-		'Выкинуть': {
+		Выкинуть: {
 			handler: function (item: any) {
 				deleteItem(item.sqlId);
 				triggerMp('police.inventory.search.item.putGround', item.sqlId);
@@ -926,13 +1120,17 @@ function equipmentBusyColumns() {
 			cols[equip.sqlId][j] = {};
 			for (const itemIndex in pocket.items) {
 				const item = pocket.items[itemIndex];
+				if (tradeOffered(item.sqlId)) continue;
 				const info = current.itemsInfo[item.itemId];
 				if (!info) continue;
 				const coord = indexToXY(pocket.rows, pocket.cols, itemIndex);
 				if (!coord) continue;
 				for (let x = 0; x < info.width; x++) {
 					for (let y = 0; y < info.height; y++) {
-						const cell = xyToIndex(pocket.rows, pocket.cols, { x: coord.x + x, y: coord.y + y });
+						const cell = xyToIndex(pocket.rows, pocket.cols, {
+							x: coord.x + x,
+							y: coord.y + y,
+						});
 						cols[equip.sqlId][j][cell] = item.sqlId;
 					}
 				}
@@ -959,7 +1157,10 @@ function environmentBusyColumns() {
 				if (!coord) continue;
 				for (let x = 0; x < info.width; x++) {
 					for (let y = 0; y < info.height; y++) {
-						const cell = xyToIndex(pocket.rows, pocket.cols, { x: coord.x + x, y: coord.y + y });
+						const cell = xyToIndex(pocket.rows, pocket.cols, {
+							x: coord.x + x,
+							y: coord.y + y,
+						});
 						cols[env.sqlId][j][cell] = item.sqlId;
 					}
 				}
@@ -969,16 +1170,36 @@ function environmentBusyColumns() {
 	return cols;
 }
 
-export function isColumnBusy(place: any, pocketI: any, index: any, item: any, cols?: any) {
-	const map = cols || (place.sqlId > 0 ? equipmentBusyColumns() : environmentBusyColumns());
+export function isColumnBusy(
+	place: any,
+	pocketI: any,
+	index: any,
+	item: any,
+	cols?: any,
+) {
+	const map =
+		cols ||
+		(place.sqlId > 0 ? equipmentBusyColumns() : environmentBusyColumns());
 	if (!map[place.sqlId] || !map[place.sqlId][pocketI]) return false;
 	if (!map[place.sqlId][pocketI][index]) return false;
 	return map[place.sqlId][pocketI][index] != item.sqlId;
 }
 
-export function getItemInColumn(place: any, pocketI: any, index: any, cols?: any) {
-	const map = cols || (place.sqlId > 0 ? equipmentBusyColumns() : environmentBusyColumns());
-	if (!map[place.sqlId] || !map[place.sqlId][pocketI] || !map[place.sqlId][pocketI][index]) return null;
+export function getItemInColumn(
+	place: any,
+	pocketI: any,
+	index: any,
+	cols?: any,
+) {
+	const map =
+		cols ||
+		(place.sqlId > 0 ? equipmentBusyColumns() : environmentBusyColumns());
+	if (
+		!map[place.sqlId] ||
+		!map[place.sqlId][pocketI] ||
+		!map[place.sqlId][pocketI][index]
+	)
+		return null;
 	const sqlId = map[place.sqlId][pocketI][index];
 	return place.sqlId > 0 ? getItem(sqlId) : getEnvironmentItem(sqlId);
 }
@@ -1003,22 +1224,32 @@ function inventoryRect() {
 function placeDesc(item: any, e: MouseEvent) {
 	const rect = inventoryRect();
 	if (!rect) return;
-	const descEl = document.getElementsByClassName('inv-item-desc')[0] as HTMLElement;
+	const descEl = document.getElementsByClassName(
+		'inv-item-desc',
+	)[0] as HTMLElement;
 	const descRect = descEl ? descEl.getBoundingClientRect() : null;
 	let x = e.screenX + 15;
 	let y = e.screenY + 15;
-	if (descRect && x + descRect.width > window.innerWidth) x = window.innerWidth - descRect.width;
-	if (descRect && y + descRect.height > window.innerHeight) y = window.innerHeight - descRect.height;
+	if (descRect && x + descRect.width > window.innerWidth)
+		x = window.innerWidth - descRect.width;
+	if (descRect && y + descRect.height > window.innerHeight)
+		y = window.innerHeight - descRect.height;
 	useInventoryStore.setState({
 		itemDesc: { item: item, x: x - rect.left, y: y - rect.top },
 	});
 }
 
-export function onItemMouseEnter(item: any, e: React.MouseEvent<HTMLDivElement>) {
+export function onItemMouseEnter(
+	item: any,
+	e: React.MouseEvent<HTMLDivElement>,
+) {
 	placeDesc(item, e.nativeEvent);
 }
 
-export function onItemMouseMove(item: any, e: React.MouseEvent<HTMLDivElement>) {
+export function onItemMouseMove(
+	item: any,
+	e: React.MouseEvent<HTMLDivElement>,
+) {
 	placeDesc(item, e.nativeEvent);
 }
 
@@ -1026,10 +1257,14 @@ export function onItemMouseLeave() {
 	useInventoryStore.setState({ itemDesc: { item: null, x: 0, y: 0 } });
 }
 
-export function onItemContextMenu(item: any, e: React.MouseEvent<HTMLDivElement>) {
+export function onItemContextMenu(
+	item: any,
+	e: React.MouseEvent<HTMLDivElement>,
+) {
 	e.preventDefault();
 	const current = state();
-	if (current.searchMode && current.takeSearchList.indexOf(item.itemId) === -1) return;
+	if (current.searchMode && current.takeSearchList.indexOf(item.itemId) === -1)
+		return;
 	if (!current.controlEnable) return;
 	const rect = inventoryRect();
 	if (!rect) return;
@@ -1042,7 +1277,10 @@ export function onItemContextMenu(item: any, e: React.MouseEvent<HTMLDivElement>
 	});
 }
 
-export function onItemMouseDown(item: any, e: React.MouseEvent<HTMLDivElement>) {
+export function onItemMouseDown(
+	item: any,
+	e: React.MouseEvent<HTMLDivElement>,
+) {
 	if (e.button !== 0) return;
 	const current = state();
 	if (item.wait) return;
@@ -1051,7 +1289,8 @@ export function onItemMouseDown(item: any, e: React.MouseEvent<HTMLDivElement>) 
 	const rect = inventoryRect();
 	if (!rect) return;
 	hotkeyUnbind = null;
-	if (current.hotkeyFocus && current.hotkeys[current.hotkeyFocus] == item) hotkeyUnbind = current.hotkeyFocus;
+	if (current.hotkeyFocus && current.hotkeys[current.hotkeyFocus] == item)
+		hotkeyUnbind = current.hotkeyFocus;
 	useInventoryStore.setState({
 		dragItem: item,
 		dragX: e.screenX - rect.left,
@@ -1067,7 +1306,8 @@ export function onBodyItemEnter(index: number) {
 	const info = current.itemsInfo[current.dragItem.itemId];
 	if (!info) return;
 	const nextWeight = getCommonWeight() + info.weight;
-	if (nextWeight > current.maxPlayerWeight && !getItem(current.dragItem.sqlId)) return;
+	if (nextWeight > current.maxPlayerWeight && !getItem(current.dragItem.sqlId))
+		return;
 	if (index == 13 && current.handsBlock) return;
 	useInventoryStore.setState({
 		access: Object.assign({}, current.access, { bodyFocus: index }),
@@ -1089,7 +1329,11 @@ export function onHotkeyItemEnter(key: number) {
 	useInventoryStore.setState({ hotkeyFocus: key });
 	if (!item || !getItem(item.sqlId)) return;
 	if (current.hotkeys[key] && getItem(current.hotkeys[key].sqlId)) return;
-	if (!current.hotkeysList[item.itemId] && !(item.params && item.params.weaponHash)) return;
+	if (
+		!current.hotkeysList[item.itemId] &&
+		!(item.params && item.params.weaponHash)
+	)
+		return;
 	hotkeyFocus = key;
 	useInventoryStore.setState({
 		access: Object.assign({}, state().access, { hotkeyFocus: hotkeyFocus }),
@@ -1104,7 +1348,12 @@ export function onHotkeyItemLeave() {
 	});
 }
 
-export function onColumnMouse(place: any, pocket: any, index: number, type: string) {
+export function onColumnMouse(
+	place: any,
+	pocket: any,
+	index: number,
+	type: string,
+) {
 	const current = state();
 	if (!current.controlEnable) return;
 	if (!current.dragItem) return;
@@ -1128,32 +1377,78 @@ export function onColumnMouse(place: any, pocket: any, index: number, type: stri
 	const pocketI = place.pockets.indexOf(pocket);
 	const coord = indexToXY(pocket.rows, pocket.cols, index);
 	if (!coord) return;
-	coord.x = clamp(coord.x - parseInt(String(info.width / 2), 10), 0, pocket.cols - info.width);
-	coord.y = clamp(coord.y - parseInt(String(info.height / 2), 10), 0, pocket.rows - info.height);
+	coord.x = clamp(
+		coord.x - parseInt(String(info.width / 2), 10),
+		0,
+		pocket.cols - info.width,
+	);
+	coord.y = clamp(
+		coord.y - parseInt(String(info.height / 2), 10),
+		0,
+		pocket.rows - info.height,
+	);
 	const black = current.blackList[place.itemId];
-	let deny = place.sqlId == item.sqlId || place.itemId == item.itemId || (place.sqlId > 0 && nextWeight > current.maxPlayerWeight && !getItem(item.sqlId)) || (black && black.indexOf(item.itemId) !== -1);
+	let deny =
+		place.sqlId == item.sqlId ||
+		place.itemId == item.itemId ||
+		(place.sqlId > 0 &&
+			nextWeight > current.maxPlayerWeight &&
+			!getItem(item.sqlId)) ||
+		(black && black.indexOf(item.itemId) !== -1);
 	let text: string | null = null;
-	if (place.sqlId == item.sqlId) text = 'Предмет не может быть размещен в своем кармане';
-	else if (place.itemId == item.itemId) text = 'Предмет не может быть размещен в предмете такого же типа';
-	else if (place.sqlId > 0 && nextWeight > current.maxPlayerWeight && !getItem(item.sqlId)) text = 'Превышение по весу ' + nextWeight + ' из ' + current.maxPlayerWeight + ' кг';
+	if (place.sqlId == item.sqlId)
+		text = 'Предмет не может быть размещен в своем кармане';
+	else if (place.itemId == item.itemId)
+		text = 'Предмет не может быть размещен в предмете такого же типа';
+	else if (
+		place.sqlId > 0 &&
+		nextWeight > current.maxPlayerWeight &&
+		!getItem(item.sqlId)
+	)
+		text =
+			'Превышение по весу ' +
+			nextWeight +
+			' из ' +
+			current.maxPlayerWeight +
+			' кг';
 	else if (black && black.indexOf(item.itemId) !== -1) {
 		const itemInfo = current.itemsInfo[item.itemId];
 		const placeInfo = current.itemsInfo[place.itemId];
-		text = 'Нельзя положить ' + (itemInfo ? itemInfo.name : '') + ' в ' + (placeInfo ? placeInfo.name : '');
+		text =
+			'Нельзя положить ' +
+			(itemInfo ? itemInfo.name : '') +
+			' в ' +
+			(placeInfo ? placeInfo.name : '');
+	}
+	if (place.sqlId === TRADE_TAKE || tradeTaken(item.sqlId)) {
+		deny = true;
+		text = 'Чужие вещи нельзя перекладывать';
+	} else if (place.sqlId === TRADE_GIVE && isWorn(item)) {
+		deny = true;
+		text = 'Сначала снимите предмет';
 	}
 	const map: { [key: string]: boolean } = {};
 	let targetSqlId = current.access.targetSqlId;
-	const cols = place.sqlId > 0 ? equipmentBusyColumns() : environmentBusyColumns();
+	const cols =
+		place.sqlId > 0 ? equipmentBusyColumns() : environmentBusyColumns();
 	for (let x = 0; x < info.width; x++) {
 		for (let y = 0; y < info.height; y++) {
-			const cell = xyToIndex(pocket.rows, pocket.cols, { x: coord.x + x, y: coord.y + y });
+			const cell = xyToIndex(pocket.rows, pocket.cols, {
+				x: coord.x + x,
+				y: coord.y + y,
+			});
 			map[cell] = true;
 			if (!deny) {
 				deny = isColumnBusy(place, pocketI, cell, item, cols);
 				if (deny) {
 					if (current.mergeList[item.itemId]) {
 						const target = getItemInColumn(place, pocketI, cell, cols);
-						const canMerge = !!(target && current.mergeList[item.itemId].indexOf(target.itemId) !== -1 && place.sqlId > 0 && getItem(item.sqlId));
+						const canMerge = !!(
+							target &&
+							current.mergeList[item.itemId].indexOf(target.itemId) !== -1 &&
+							place.sqlId > 0 &&
+							getItem(item.sqlId)
+						);
 						targetSqlId = canMerge ? target.sqlId : null;
 					}
 				} else targetSqlId = null;
@@ -1207,7 +1502,9 @@ export function handleMouseUp() {
 	const access = current.access;
 	const item = current.dragItem;
 	if (item) {
-		if (access.bodyFocus != null) moveItemToBody(item, access.bodyFocus);
+		if (handleTradeDrop(item, access)) {
+			// обмен забирает перенос себе и не двигает предмет в инвентаре
+		} else if (access.bodyFocus != null) moveItemToBody(item, access.bodyFocus);
 		else if (access.hotkeyFocus) bindHotkey(item.sqlId, access.hotkeyFocus);
 		else if (access.targetSqlId) {
 			deleteItem(item.sqlId);
@@ -1223,7 +1520,13 @@ export function handleMouseUp() {
 		} else {
 			const rawIndex = Object.keys(access.columns)[0];
 			const index = parseInt(rawIndex, 10);
-			if (!access.deny && access.placeSqlId != null && access.pocketI != null && rawIndex != null && !isNaN(index)) {
+			if (
+				!access.deny &&
+				access.placeSqlId != null &&
+				access.pocketI != null &&
+				rawIndex != null &&
+				!isNaN(index)
+			) {
 				if (access.placeSqlId > 0) {
 					if (!getItem(item.sqlId)) setWaitItem(item, true);
 					addItem(item, access.pocketI, index, access.placeSqlId);
@@ -1251,7 +1554,25 @@ export function handleMouseUp() {
 
 export function handleKeyUp(e: KeyboardEvent) {
 	const busy = (window as any).busy;
-	if (busy && busy.includes && busy.includes(['auth', 'chat', 'terminal', 'interaction', 'mapCase', 'phone', 'playerMenu', 'inputWindow', 'fishing.game', 'selectItems', 'playersList', 'bugTracker'])) return;
+	if (
+		busy &&
+		busy.includes &&
+		busy.includes([
+			'auth',
+			'chat',
+			'terminal',
+			'interaction',
+			'mapCase',
+			'phone',
+			'playerMenu',
+			'inputWindow',
+			'fishing.game',
+			'selectItems',
+			'playersList',
+			'bugTracker',
+		])
+	)
+		return;
 	const selectMenu = (window as any).selectMenu;
 	if (selectMenu && selectMenu.isEditing) return;
 	const current = state();

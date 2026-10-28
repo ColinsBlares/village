@@ -1,21 +1,77 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import styles from './index.module.css';
 import { useNotificationsStore } from '../../store';
-import errorImg from '@imgs/notifications/error.svg';
-import infoImg from '@imgs/notifications/info.svg';
-import successImg from '@imgs/notifications/success.svg';
-import warningImg from '@imgs/notifications/warning.svg';
-import cashImg from '@imgs/notifications/cash.svg';
-import moneyImg from '@imgs/notifications/money.svg';
 
-const IMAGES: Record<string, string> = {
-	error: errorImg,
-	info: infoImg,
-	success: successImg,
-	warning: warningImg,
-	cash: cashImg,
-	money: moneyImg,
-};
+function toneOf(type: string) {
+	const head = String(type).split(' ')[0];
+	if (head === 'success' || head === 'add') {
+		return 'success';
+	}
+	if (head === 'error' || head === 'remove') {
+		return 'error';
+	}
+	if (head === 'warning') {
+		return 'warning';
+	}
+	return 'info';
+}
+
+function defaultTitle(type: string) {
+	const parts = String(type).split(' ');
+	const head = parts[0];
+	const img = parts.length > 1 ? parts[1] : head;
+	if (img === 'cash') {
+		return 'Наличные';
+	}
+	if (img === 'money') {
+		return 'Банк';
+	}
+	if (head === 'success' || head === 'add') {
+		return 'Успешно';
+	}
+	if (head === 'error' || head === 'remove') {
+		return 'Ошибка';
+	}
+	if (head === 'warning') {
+		return 'Внимание';
+	}
+	return 'Информация';
+}
+
+const Mark = React.memo(function Mark({ tone }: { tone: string }) {
+	if (tone === 'error') {
+		return (
+			<svg className={styles.icon} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+				<path d="M7 7L17 17" pathLength="1" strokeWidth="1.5" />
+				<path d="M17 7L7 17" pathLength="1" strokeWidth="1.5" />
+			</svg>
+		);
+	}
+
+	if (tone === 'warning') {
+		return (
+			<svg className={styles.icon} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+				<path d="M12 6.5V13" pathLength="1" strokeWidth="1.8" />
+				<path d="M12 17.2H12.01" strokeWidth="2.4" />
+			</svg>
+		);
+	}
+
+	if (tone === 'info') {
+		return (
+			<svg className={styles.icon} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+				<path d="M12 10.5V17.2" pathLength="1" strokeWidth="1.8" />
+				<path d="M12 7H12.01" strokeWidth="2.4" />
+			</svg>
+		);
+	}
+
+	return (
+		<svg className={styles.icon + ' ' + styles.check} viewBox="0 0 26 22" fill="none" aria-hidden="true">
+			<path d="M2 11.2L9 18.4L24 3" pathLength="1" strokeWidth="2" />
+		</svg>
+	);
+});
 
 function Item({ hash }: { hash: number }) {
 	const message = useNotificationsStore(function (state) {
@@ -27,30 +83,72 @@ function Item({ hash }: { hash: number }) {
 		}
 		return null;
 	});
+	const innerRef = useRef<HTMLDivElement>(null);
+	const [height, setHeight] = useState(0);
+	const [shown, setShown] = useState(false);
+
+	useLayoutEffect(function () {
+		const el = innerRef.current;
+		if (!el) {
+			return undefined;
+		}
+		const next = el.offsetHeight;
+		let second = 0;
+		const first = requestAnimationFrame(function () {
+			second = requestAnimationFrame(function () {
+				setHeight(next);
+				setShown(true);
+			});
+		});
+		return function () {
+			cancelAnimationFrame(first);
+			if (second) {
+				cancelAnimationFrame(second);
+			}
+		};
+	}, []);
+
+	useLayoutEffect(
+		function () {
+			if (!message || !message.leaving) {
+				return;
+			}
+			setHeight(0);
+			setShown(false);
+		},
+		[message],
+	);
 
 	if (!message) {
 		return null;
 	}
 
-	const parts = message.type.split(' ');
-	let typeClass = styles.box;
-	for (let i = 0; i < parts.length; i++) {
-		const partClass = (styles as any)[parts[i]];
-		if (partClass) {
-			typeClass += ' ' + partClass;
-		}
+	const tone = toneOf(message.type);
+	let slotClass = styles.slot;
+	if (message.leaving) {
+		slotClass += ' ' + styles.slotLeave;
+	} else if (shown) {
+		slotClass += ' ' + styles.slotShown;
 	}
 
-	const src = IMAGES[message.img] || '';
+	const title = message.header || defaultTitle(message.type);
 
 	return (
-		<div className={typeClass}>
-			<img src={src} alt="" />
-			<div className={styles.message}>
-				{message.header ? (
-					<div className={styles.header}>{message.header}</div>
-				) : null}
-				{message.text}
+		<div className={slotClass} style={{ maxHeight: height }}>
+			<div ref={innerRef}>
+				<div className={styles.card + ' ' + styles[tone]}>
+					<div className={styles.track}>
+						<div
+							className={styles.fill}
+							style={{ animationDuration: message.duration + 'ms' }}
+						/>
+					</div>
+					<Mark tone={tone} />
+					<div className={styles.copy}>
+						<div className={styles.title}>{title}</div>
+						{message.text ? <div className={styles.subtitle}>{message.text}</div> : null}
+					</div>
+				</div>
 			</div>
 		</div>
 	);

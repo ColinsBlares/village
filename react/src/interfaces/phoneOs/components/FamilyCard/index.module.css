@@ -1,0 +1,81 @@
+:global([data-mode='enter']) .card {
+	animation: pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.card {
+	background: none;
+	border: 0;
+	color: #fff;
+	cursor: pointer;
+	font: inherit;
+	padding: 0;
+	position: absolute;
+	touch-action: none;
+	transition:
+		left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+		top 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+	user-select: none;
+	z-index: 2;
+}
+
+.plain {
+	height: 100%;
+	position: relative;
+	width: 100%;
+}
+
+.dragging {
+	animation: none;
+	transition: none;
+	z-index: 5;
+}
+
+.card.dragging .photo,
+.card.dragging:active .photo {
+	box-shadow: 0 14px 26px rgba(0, 0, 0, 0.35);
+	transform: scale(1.04);
+}
+
+.photo {
+	border-radius: 15px;
+	display: block;
+	height: calc(100% - 16px);
+	object-fit: cover;
+	object-position: center;
+	pointer-events: none;
+	transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+	width: 100%;
+}
+
+.card:active .photo {
+	transform: scale(0.96);
+}
+
+.name {
+	display: block;
+	font-size: 10px;
+	font-weight: 500;
+	line-height: 12px;
+	margin-top: 3px;
+	pointer-events: none;
+	text-align: center;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+@keyframes pop {
+	from {
+		opacity: 0;
+		transform: translateY(14px) scale(0.9);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.card {
+		animation: none;
+	}
+}

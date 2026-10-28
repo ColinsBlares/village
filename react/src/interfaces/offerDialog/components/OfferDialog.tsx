@@ -1,17 +1,17 @@
 import React from 'react';
 import styles from './OfferDialog.module.css';
-import Agree from './Agree';
+import Actions from './Actions';
 import Message from './Message';
-import Cancel from './Cancel';
+import Progress from './Progress';
+import Title from './Title';
 
 function OfferDialog() {
 	return (
-		<div id="offerDialog">
-			<div className={styles.quick}>
-				<Agree />
-				<Message />
-				<Cancel />
-			</div>
+		<div id="offerDialog" className={styles.card}>
+			<Progress />
+			<Title />
+			<Message />
+			<Actions />
 		</div>
 	);
 }

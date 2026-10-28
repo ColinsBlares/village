@@ -1,0 +1,83 @@
+:global([data-mode='enter']) .widget {
+	animation: pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s backwards;
+}
+
+.widget {
+	background: none;
+	border: 0;
+	border-radius: 15px;
+	cursor: pointer;
+	padding: 0;
+	position: absolute;
+	touch-action: none;
+	transition:
+		left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+		top 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+	user-select: none;
+	z-index: 2;
+}
+
+.plain {
+	height: 100%;
+	position: relative;
+	width: 100%;
+}
+
+.dragging {
+	animation: none;
+	transition: none;
+	z-index: 5;
+}
+
+.widget.dragging .photo,
+.widget.dragging:active .photo {
+	transform: scale(1.03);
+}
+
+.photo {
+	border-radius: 15px;
+	display: block;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	pointer-events: none;
+	transition: transform 0.35s ease;
+	width: 100%;
+}
+
+.widget:active .photo {
+	transform: scale(1.03);
+}
+
+.caption {
+	bottom: 8px;
+	color: #cacaca;
+	font-family: phone-font, Ubuntu, sans-serif;
+	font-size: 13px;
+	font-weight: 500;
+	left: 0;
+	letter-spacing: -0.2px;
+	pointer-events: none;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+@keyframes pop {
+	from {
+		opacity: 0;
+		transform: translateY(16px) scale(0.94);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.widget {
+		animation: none;
+	}
+}

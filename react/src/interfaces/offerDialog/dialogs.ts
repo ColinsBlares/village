@@ -1,6 +1,7 @@
 import { setLoaderShow } from '../loader/store';
 
 export interface OfferDialogDef {
+	title: string;
 	text: string;
 	price?: number;
 	name?: string | null;
@@ -21,6 +22,7 @@ export function prettyOffer(val: any) {
 
 export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 	documents: {
+		title: 'Документы',
 		text: 'Carter Slade хочет показать вам паспорт',
 		on: function (values) {
 			this.text = '<span>' + values.name + '</span> хочет показать Вам ' + values.doc;
@@ -38,6 +40,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	carservice_diagnostics: {
+		title: 'Диагностика',
 		text: 'Вы желаете провести диагностику вашего транспорта',
 		price: 100,
 		name: 'Cyrus Raider',
@@ -62,6 +65,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	house_sell: {
+		title: 'Покупка дома',
 		text: 'Swifty Swift предлагает вам купить его дом за 1`',
 		price: 100,
 		name: 'Cyrus Rader',
@@ -84,6 +88,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	biz_sell: {
+		title: 'Покупка бизнеса',
 		text: 'Swifty Swift предлагает вам купить его бизнес',
 		price: 100,
 		name: 'Cy Raider',
@@ -106,6 +111,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	vehicles_sell: {
+		title: 'Покупка транспорта',
 		text: 'Carter Slade предлагает вам купить т/с "Glendale" (AYE741)',
 		price: 228,
 		on: function (values) {
@@ -135,6 +141,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	faction_invite: {
+		title: 'Приглашение',
 		text: 'Carter Slade предлагает вам вступить в Groove Street',
 		on: function (values) {
 			this.text =
@@ -151,6 +158,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	family_invite: {
+		title: 'Приглашение',
 		text: 'Carter Slade предлагает вам вступить в семью',
 		on: function (values) {
 			this.text =
@@ -167,6 +175,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	hospital_healing: {
+		title: 'Лечение',
 		text: 'Carter Slade предлагает вам лечение',
 		price: 100,
 		on: function (values) {
@@ -188,6 +197,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	farm_sell: {
+		title: 'Покупка фермы',
 		text: 'Carter Slade предлагает вам купить Ферму #99',
 		price: 999,
 		on: function (values) {
@@ -211,6 +221,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	carrier_job: {
+		title: 'Аренда',
 		text: 'Вы желаете арендовать рендовать грузовик за <span>100 $</span>?',
 		price: 999,
 		name: 'Parking',
@@ -227,7 +238,26 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		no: function () {},
 		ignore: function () {},
 	},
+	trade: {
+		title: 'Запрос на обмен',
+		text: 'Гражданин отправил вам запрос на обмен',
+		playerId: null,
+		on: function (values) {
+			this.playerId = values.playerId;
+			this.text = 'Гражданин [' + values.playerId + '] отправил вам запрос на обмен';
+		},
+		yes: function () {
+			mp.trigger('callRemote', 'trade.accept', this.playerId);
+		},
+		no: function () {
+			mp.trigger('callRemote', 'trade.decline', this.playerId);
+		},
+		ignore: function () {
+			mp.trigger('callRemote', 'trade.decline', this.playerId);
+		},
+	},
 	familiar: {
+		title: 'Знакомство',
 		text: 'Незнакомец (ID: 11) хочет пожать вам руку',
 		playerId: null,
 		on: function (values) {
@@ -241,6 +271,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		ignore: function () {},
 	},
 	death: {
+		title: 'Потеря сознания',
 		text: 'Дождаться медиков?',
 		medKnockTime: 0,
 		knockTime: 0,
@@ -259,6 +290,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	vehicle_unload: {
+		title: 'Разгрузка',
 		text: 'Начать разгрузку боеприпасов?',
 		vehId: null,
 		on: function (values) {
@@ -276,6 +308,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		ignore: function () {},
 	},
 	faction_cash_check: {
+		title: 'Общак',
 		text: 'Желаете пополнить общак The Ballas на сумму $999999?',
 		on: function (values) {
 			this.text =
@@ -296,6 +329,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	mafia_power_sell: {
+		title: 'Крыша',
 		text: 'Carter Slade предлагает вам крышу АЗС за $999',
 		on: function (values) {
 			this.text =
@@ -316,6 +350,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	wedding_male: {
+		title: 'Предложение',
 		text: 'Вы хотите сделать Swifty Swift предложение?',
 		recId: null,
 		on: function (values) {
@@ -329,6 +364,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		ignore: function () {},
 	},
 	wedding_female: {
+		title: 'Предложение',
 		text: 'Carter Slade предлагает вам выйти замуж',
 		on: function (values) {
 			this.text = '<span>' + values.name + '</span> предлагает вам выйти замуж';
@@ -344,6 +380,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	unarrest: {
+		title: 'Освобождение',
 		text: 'Carter Slade предлагает вас освободить',
 		price: 999,
 		name: null,
@@ -366,6 +403,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	dice: {
+		title: 'Игра в кости',
 		text: 'Carter Slade предлагает вам сыграть в кости',
 		price: 999,
 		on: function (values) {
@@ -388,6 +426,7 @@ export const OFFER_DIALOGS: Record<string, OfferDialogDef> = {
 		},
 	},
 	winter_job: {
+		title: 'Аренда',
 		text: 'Вы желаете арендовать рендовать трактор за <span>100 $</span>?',
 		on: function (values) {
 			this.text =

@@ -1,0 +1,302 @@
+.root {
+	--bg: #000;
+	--fg: #fff;
+	--muted: #8e8e93;
+	--line: rgba(255, 255, 255, 0.12);
+	--card: #1c1c1e;
+	--blue: #0a84ff;
+	--pill: rgba(10, 132, 255, 0.18);
+	background: var(--bg);
+	color: var(--fg);
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	font-family: phone-font, Ubuntu, sans-serif;
+	min-height: 0;
+	padding: 40px 0 14px;
+	transition: background 0.25s ease, color 0.25s ease;
+}
+
+.root[data-theme='light'] {
+	--bg: #f2f2f7;
+	--fg: #000;
+	--muted: #6e6e73;
+	--line: rgba(60, 60, 67, 0.14);
+	--card: #fff;
+	--blue: #007aff;
+	--pill: rgba(0, 122, 255, 0.12);
+}
+
+.screen {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.scroll {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 0 14px 8px;
+	scrollbar-width: none;
+}
+
+.scroll::-webkit-scrollbar {
+	display: none;
+}
+
+.title {
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: -0.6px;
+	margin: 0;
+	padding: 2px 16px 8px;
+}
+
+.section {
+	color: var(--muted);
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.2px;
+	margin: 14px 2px 6px;
+}
+
+.feature {
+	background: var(--card);
+	border: 0;
+	border-radius: 16px;
+	color: inherit;
+	cursor: pointer;
+	display: block;
+	font: inherit;
+	margin-bottom: 10px;
+	padding: 12px;
+	text-align: left;
+	width: 100%;
+}
+
+.featureTop {
+	align-items: center;
+	display: flex;
+	gap: 10px;
+}
+
+.featureTop img,
+.row img,
+.hero img {
+	border-radius: 12px;
+	height: 48px;
+	object-fit: cover;
+	width: 48px;
+}
+
+.featureTop span {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.featureTop strong,
+.meta strong,
+.hero h1 {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.featureTop em,
+.meta span,
+.hero p {
+	color: var(--muted);
+	font-size: 12px;
+	font-style: normal;
+}
+
+.feature p,
+.about {
+	font-size: 13px;
+	line-height: 1.35;
+	margin: 10px 0 0;
+}
+
+.row {
+	align-items: center;
+	background: none;
+	border: 0;
+	border-bottom: 0.5px solid var(--line);
+	color: inherit;
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	gap: 10px;
+	padding: 8px 0;
+	text-align: left;
+	width: 100%;
+}
+
+.meta {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.meta strong,
+.meta span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.get {
+	background: var(--pill);
+	border: 0;
+	border-radius: 14px;
+	color: var(--blue);
+	cursor: pointer;
+	flex: none;
+	font: inherit;
+	font-size: 11px;
+	font-weight: 700;
+	height: 26px;
+	letter-spacing: 0.2px;
+	min-width: 78px;
+	padding: 0 8px;
+}
+
+.get:active {
+	opacity: 0.6;
+}
+
+.busy {
+	align-items: center;
+	display: inline-flex;
+	justify-content: center;
+	min-width: 36px;
+	padding: 0;
+	width: 36px;
+}
+
+.ring {
+	display: block;
+}
+
+.search {
+	padding: 0 14px 8px;
+}
+
+.search input {
+	background: var(--card);
+	border: 0;
+	border-radius: 10px;
+	color: var(--fg);
+	font: inherit;
+	font-size: 15px;
+	outline: none;
+	padding: 8px 12px;
+	width: 100%;
+}
+
+.search input::placeholder {
+	color: var(--muted);
+}
+
+.empty {
+	color: var(--muted);
+	font-size: 14px;
+	margin: 24px 0;
+	text-align: center;
+}
+
+.bar {
+	height: 32px;
+	padding: 0 8px;
+}
+
+.link {
+	background: none;
+	border: 0;
+	color: var(--blue);
+	cursor: pointer;
+	font: inherit;
+	font-size: 16px;
+	padding: 4px 8px;
+}
+
+.hero {
+	align-items: center;
+	display: flex;
+	gap: 12px;
+	padding: 6px 2px 4px;
+}
+
+.hero div {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.hero h1 {
+	font-size: 20px;
+	margin: 0;
+}
+
+.hero p {
+	margin: 0 0 6px;
+}
+
+.hero .get {
+	align-self: flex-start;
+}
+
+.facts {
+	display: grid;
+	gap: 8px;
+	grid-template-columns: repeat(3, 1fr);
+	margin-top: 16px;
+}
+
+.facts span {
+	background: var(--card);
+	border-radius: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 8px;
+}
+
+.facts em {
+	color: var(--muted);
+	font-size: 10px;
+	font-style: normal;
+}
+
+.facts strong {
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.tabs {
+	display: grid;
+	flex: none;
+	grid-template-columns: repeat(3, 1fr);
+	padding: 4px 8px 0;
+}
+
+.tab {
+	background: none;
+	border: 0;
+	color: var(--muted);
+	cursor: pointer;
+	font: inherit;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 8px 0 2px;
+}
+
+.tabOn {
+	color: var(--blue);
+}

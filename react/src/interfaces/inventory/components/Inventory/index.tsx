@@ -1,6 +1,8 @@
 import React, { memo } from 'react';
 import { cx } from '../../cx';
 import { useInventoryStore } from '../../store';
+import { useTradeStore } from '../../../trade/store';
+import TradeBoard from '../../../trade/components/Board';
 import Bin from '../Bin';
 import Environment from '../Environment';
 import Equipment from '../Equipment';
@@ -17,13 +19,22 @@ function Inventory() {
 	const spin = useInventoryStore(function (store) {
 		return store.spin;
 	});
-	const hideEnvironment = useInventoryStore(function (store) {
-		return store.environment.length === 0 || store.searchMode != null;
+	const searchMode = useInventoryStore(function (store) {
+		return store.searchMode;
 	});
+	const envEmpty = useInventoryStore(function (store) {
+		return store.environment.length === 0;
+	});
+	const tradeOpen = useTradeStore(function (store) {
+		return store.show;
+	});
+	const hideEnvironment = envEmpty || searchMode != null;
+	const showTrade = tradeOpen && searchMode == null;
+	const wide = !showTrade && hideEnvironment;
 
 	return (
-		<div id="inventory" className={cx(styles.root, spin && styles.spin, hideEnvironment && styles.nonEnvironment)}>
-			{hideEnvironment ? null : <Environment />}
+		<div id="inventory" className={cx(styles.root, spin && styles.spin, wide && styles.nonEnvironment)}>
+			{showTrade ? <TradeBoard /> : hideEnvironment ? null : <Environment />}
 			<Equipment />
 			<PlayerInventory />
 			<Hands />

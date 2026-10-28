@@ -1,0 +1,63 @@
+.card {
+	background: rgba(255, 255, 255, 0.58);
+	backdrop-filter: blur(22px) saturate(1.6);
+	border: 0;
+	border-radius: 22px;
+	box-shadow:
+		0 10px 24px rgba(0, 0, 0, 0.16),
+		inset 0 0 0 0.5px rgba(255, 255, 255, 0.55);
+	color: #1c1c1e;
+	cursor: pointer;
+	display: flex;
+	flex-direction: column;
+	font: inherit;
+	gap: 1px;
+	padding: 11px 14px 12px;
+	text-align: left;
+	width: 100%;
+}
+
+.head {
+	align-items: center;
+	display: flex;
+	gap: 6px;
+}
+
+.head img {
+	border-radius: 5px;
+	height: 20px;
+	width: 20px;
+}
+
+.app {
+	flex: 1;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: -0.1px;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.time {
+	color: rgba(28, 28, 30, 0.48);
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.title {
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: -0.2px;
+	line-height: 1.2;
+	margin-top: 3px;
+}
+
+.text {
+	font-size: 15px;
+	font-weight: 400;
+	letter-spacing: -0.2px;
+	line-height: 1.25;
+	opacity: 0.78;
+}

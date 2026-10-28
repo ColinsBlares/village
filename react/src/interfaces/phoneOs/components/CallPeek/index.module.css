@@ -1,0 +1,74 @@
+.peek {
+	align-items: center;
+	color: #fff;
+	display: flex;
+	flex-direction: column;
+	left: 0;
+	padding: 46px 22px 0;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	top: 0;
+	z-index: 6;
+}
+
+.peek strong {
+	font-size: 22px;
+	font-weight: 600;
+	letter-spacing: -0.4px;
+	line-height: 1.15;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.peek > span {
+	color: rgba(255, 255, 255, 0.78);
+	font-size: 14px;
+	margin-top: 2px;
+}
+
+.pair {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 16px;
+	width: 100%;
+}
+
+.pair button {
+	align-items: center;
+	background: none;
+	border: 0;
+	color: #fff;
+	cursor: pointer;
+	display: flex;
+	flex-direction: column;
+	font: inherit;
+	font-size: 12px;
+	gap: 6px;
+	padding: 0;
+}
+
+.decline,
+.accept {
+	align-items: center;
+	border-radius: 50%;
+	color: #fff;
+	display: flex;
+	height: 54px;
+	justify-content: center;
+	width: 54px;
+}
+
+.decline {
+	background: #fc3e30;
+}
+
+.decline svg {
+	transform: rotate(135deg);
+}
+
+.accept {
+	background: #2fd158;
+}

@@ -60,16 +60,23 @@ global.inited = dirname => {
 			);
 		isInited = true;
 		console.log('[BASE] Все модули загружены');
-		playersJoinPool.forEach(player => {
-			if (player == null) return;
-			if (!mp.players.exists(player)) return;
-			player.call('init', [activeClientModules]);
-		});
+		const waiting = playersJoinPool.splice(0);
+		waiting.forEach(releasePlayer);
 	}
 };
 
 let modulesToLoad = [];
 let playersJoinPool = [];
+const preloadPos = new mp.Vector3(-1685.21, -1653.46, 183.55);
+
+function releasePlayer(player) {
+	if (player == null || !mp.players.exists(player)) return;
+	if (player._initSent) return;
+	player._initSent = true;
+	player.dimension = player.id + 1;
+	player.position = preloadPos;
+	player.call('init', [activeClientModules]);
+}
 const crashLogPath = path.resolve(__dirname, '../../server-crash.log');
 
 function writeCrashLog(label, err) {
@@ -111,6 +118,27 @@ global.d = text => {
     console.log('END BUILD CLIENT-SIDE');
 } */
 
+/// До базы: игрок уже может зайти, пока connect ещё ждёт таймаут и sync
+mp.events.add('playerJoin', player => {
+	player.dimension = player.id + 1;
+	player.position = preloadPos;
+});
+
+mp.events.add('playerQuit', player => {
+	const index = playersJoinPool.indexOf(player);
+	if (index !== -1) playersJoinPool.splice(index, 1);
+});
+
+mp.events.add('player.join', player => {
+	if (!isInited) {
+		if (!playersJoinPool.includes(player)) playersJoinPool.push(player);
+		return;
+	}
+	releasePlayer(player);
+});
+
+console.log('[BASE] Ожидание игроков включено, база ещё грузится');
+
 /// Вызов подключения к БД, подключение всех модулей и вызов их инициализации
 /// Должен быть ниже объявления глобальных функций, что бы они успели загрузииться
 db.connect(function () {
@@ -148,15 +176,12 @@ db.connect(function () {
 	);
 	mp.events.call('init');
 	console.log('[BASE] Init event dispatched');
-});
-
-mp.events.add('playerJoin', player => {
-	player.dimension = player.id + 1;
-});
-
-mp.events.add('player.join', player => {
-	if (modulesToLoad.length !== 0) return playersJoinPool.push(player);
-	player.call('init', [activeClientModules]);
+	if (modulesToLoad.length === 0 && !isInited) {
+		isInited = true;
+		console.log('[BASE] Все модули загружены');
+		const waiting = playersJoinPool.splice(0);
+		waiting.forEach(releasePlayer);
+	}
 });
 
 /// Main events list

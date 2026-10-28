@@ -1,35 +1,18 @@
-.quick {
-	font-family: Ubuntu, sans-serif;
-	left: 50%;
-	transform: translate(-50%);
+.card {
 	position: absolute;
-	background: rgba(12, 12, 12, 0.6);
-	border-radius: 1vh;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	box-sizing: border-box;
+	width: 33.333vh;
+	min-height: 11.852vh;
+	padding: 0 4.907vh 1.667vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background: rgba(7, 7, 11, 0.6);
+	border-radius: 1.852vh;
 	color: #fff;
 	text-align: center;
-	bottom: 13.8vh;
-	min-height: 5.2vh;
-	max-width: 60vh;
-	display: grid;
-	grid-template-columns: min-content 1fr min-content;
-	font-size: 1.5vh;
-	font-weight: 400;
-}
-
-.quick svg {
-	position: relative;
-	height: 3.5vh;
-	top: 50%;
-	transform: translateY(-50%);
-	margin: 0 1.3vh;
-	fill: none;
-}
-
-.quick svg circle {
-	stroke: rgba(255, 255, 255, 0.6);
-}
-
-.quick svg .fill {
-	fill: none;
-	stroke: none;
+	font-family: Montserrat, sans-serif;
 }

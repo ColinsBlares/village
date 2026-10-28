@@ -1,7 +1,12 @@
 import React, { memo } from 'react';
 import arrowImg from '@imgs/inventory/arrow.svg';
 import { cx } from '../../cx';
-import { getCommonWeight, getItemName, getPlaceWeight, toggleShowPockets } from '../../model';
+import {
+	getCommonWeight,
+	getItemName,
+	getPlaceWeight,
+	toggleShowPockets,
+} from '../../model';
 import { useInventoryStore } from '../../store';
 import Pocket from '../Pocket';
 import styles from './index.module.css';
@@ -35,19 +40,29 @@ function PlayerInventory() {
 		if (!item || !item.pockets) continue;
 		const weight = +getPlaceWeight(item).toFixed(1);
 		containers.push(
-			<div key={item.sqlId} className={cx(styles.container, dragSqlId != null && dragSqlId == item.sqlId && styles.drag)}>
+			<div
+				key={item.sqlId}
+				className={cx(
+					styles.container,
+					dragSqlId != null && dragSqlId == item.sqlId && styles.drag,
+				)}
+			>
 				<div
 					className={item.showPockets ? styles.header : styles.headerHidden}
 					onClick={function () {
 						toggleShowPockets(item);
 					}}
 				>
-					<img className={item.showPockets ? styles.arrow : styles.arrowHidden} src={arrowImg} alt="" />
 					<div className={styles.title}>{getItemName(item)}</div>
 					<div className={styles.weight}>{weight} кг</div>
+					<img
+						className={item.showPockets ? styles.arrow : styles.arrowHidden}
+						src={arrowImg}
+						alt=''
+					/>
 				</div>
-				<Pocket place={item} scope="equipment" contextMenu />
-			</div>
+				<Pocket place={item} scope='equipment' contextMenu />
+			</div>,
 		);
 	}
 
@@ -55,7 +70,9 @@ function PlayerInventory() {
 		<div className={styles.player}>
 			<div className={styles.top}>
 				<div className={styles.topTitle}>{title}</div>
-				<div>Тяжесть {getCommonWeight()} из {maxPlayerWeight} кг</div>
+				<div>
+					Тяжесть {getCommonWeight()} из {maxPlayerWeight} кг
+				</div>
 			</div>
 			<div className={styles.block}>{containers}</div>
 		</div>

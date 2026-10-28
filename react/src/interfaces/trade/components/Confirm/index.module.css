@@ -1,0 +1,68 @@
+.confirm {
+	display: flex;
+	flex-direction: column;
+	gap: 0.7vh;
+	margin-top: auto;
+	padding-top: 1vh;
+}
+
+.status {
+	color: #95a2a8;
+	font-size: 1.15vh;
+	min-height: 1.6vh;
+	padding-left: 0.4vh;
+}
+
+.buttons {
+	display: flex;
+	gap: 0.6vh;
+}
+
+.ghost,
+.ready,
+.readyOn,
+.trade {
+	appearance: none;
+	background: rgba(255, 255, 255, 0.035);
+	border: 1px solid rgba(255, 255, 255, 0.055);
+	border-radius: 0.85vh;
+	color: #d9e0e1;
+	cursor: pointer;
+	flex: 1;
+	font: inherit;
+	font-size: 1.25vh;
+	font-weight: 600;
+	height: 3.4vh;
+}
+
+.ghost:hover,
+.ready:hover {
+	background: rgba(255, 255, 255, 0.08);
+	border-color: rgba(255, 255, 255, 0.12);
+}
+
+.readyOn {
+	background: rgba(94, 193, 124, 0.22);
+	border-color: rgba(111, 219, 146, 0.5);
+	color: #e7fff0;
+}
+
+.readyOn:hover {
+	background: rgba(94, 193, 124, 0.3);
+}
+
+.trade:not(:disabled) {
+	background: #5ec17c;
+	border-color: #5ec17c;
+	color: #102117;
+}
+
+.trade:not(:disabled):hover {
+	background: #6ed28d;
+	border-color: #6ed28d;
+}
+
+.trade:disabled {
+	color: #6d7c74;
+	cursor: default;
+}

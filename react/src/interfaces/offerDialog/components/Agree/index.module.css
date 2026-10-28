@@ -1,14 +1,17 @@
-.fill {
-	fill: none;
-	stroke: none;
+.btn {
+	width: 11.204vh;
+	height: 2.222vh;
+	border-radius: 0.463vh;
+	background: #34c759;
+	color: #fff;
+	font-family: Montserrat, sans-serif;
+	font-size: 1.019vh;
+	font-weight: 500;
+	line-height: 2.222vh;
+	cursor: pointer;
 }
 
-.agree:hover svg circle,
-.green circle {
-	stroke: #00ff19;
-}
-
-.agree:hover svg .fill,
-.green .fill {
-	fill: #00ff19;
+.btn:hover,
+.pressed {
+	filter: brightness(0.88);
 }

@@ -1,0 +1,252 @@
+.home,
+.sheet {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	width: 100%;
+}
+
+.home *,
+.sheet * {
+	box-sizing: border-box;
+}
+
+.home {
+	background: #111;
+	color: #fff;
+	padding: 58px 0 28px;
+}
+
+.logo {
+	display: block;
+	height: 52px;
+	margin: 6px auto 0;
+	object-fit: contain;
+	width: 150px;
+}
+
+.caption {
+	color: #8d8d8d;
+	font-size: 13px;
+	margin: 14px 0 16px;
+	text-align: center;
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 0 10px;
+}
+
+.card {
+	align-items: center;
+	background: #161616;
+	border: 0;
+	border-radius: 12px;
+	color: #fff;
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	height: 92px;
+	justify-content: space-between;
+	overflow: hidden;
+	padding: 0 4px 0 16px;
+	text-align: left;
+	width: 100%;
+}
+
+.card.on {
+	background: #2a2a2a;
+}
+
+.card span {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+}
+
+.card strong {
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: -0.3px;
+}
+
+.card em {
+	color: #8a8a8a;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: 400;
+}
+
+.card img {
+	height: 72px;
+	object-fit: contain;
+	object-position: right center;
+	width: 146px;
+}
+
+.go {
+	align-items: center;
+	background: #ffbb0b;
+	border: 0;
+	border-radius: 10px;
+	color: #111;
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	font-size: 16px;
+	font-weight: 600;
+	height: 46px;
+	justify-content: space-between;
+	margin: auto 10px 8px;
+	padding: 0 16px;
+}
+
+.sheet {
+	color: #161616;
+	overflow: hidden;
+	position: relative;
+}
+
+.wait {
+	background: #ffbb0b;
+	--ring: #ffe70b;
+	--ring-mid: rgba(255, 201, 11, 0.6);
+	--ring-out: rgba(255, 201, 11, 0.4);
+}
+
+.ok {
+	background: #79ea09;
+	--ring: #a9ff53;
+	--ring-mid: rgba(169, 255, 83, 0.6);
+	--ring-out: rgba(169, 255, 83, 0.4);
+}
+
+.bad {
+	background: #f63e16;
+	--ring: #ff6746;
+	--ring-mid: rgba(255, 73, 34, 0.6);
+	--ring-out: rgba(255, 128, 101, 0.4);
+}
+
+.glow {
+	border-radius: 50%;
+	pointer-events: none;
+	position: absolute;
+}
+
+.g1 {
+	background: var(--ring);
+	height: 257px;
+	left: 150px;
+	top: 175px;
+	width: 257px;
+}
+
+.g2 {
+	background: var(--ring-mid);
+	height: 283px;
+	left: 124px;
+	top: 159px;
+	width: 283px;
+}
+
+.g3 {
+	background: var(--ring-out);
+	height: 323px;
+	left: 104px;
+	top: 140px;
+	width: 323px;
+}
+
+.mark {
+	height: 42px;
+	left: 79px;
+	object-fit: contain;
+	position: absolute;
+	top: 68px;
+	width: 128px;
+	z-index: 2;
+}
+
+.tariff,
+.className,
+.note {
+	left: 16px;
+	margin: 0;
+	position: absolute;
+	right: 16px;
+	text-align: center;
+	z-index: 2;
+}
+
+.tariff {
+	font-size: 15px;
+	font-weight: 500;
+	top: 142px;
+}
+
+.className {
+	color: #393939;
+	font-size: 15px;
+	font-weight: 500;
+	top: 168px;
+}
+
+.car {
+	height: 156px;
+	left: -18px;
+	max-width: none;
+	object-fit: contain;
+	position: absolute;
+	top: 200px;
+	transform: scaleX(-1);
+	width: 292px;
+	z-index: 1;
+}
+
+.note {
+	top: 422px;
+}
+
+.note strong {
+	display: block;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.note span {
+	color: #393939;
+	display: block;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.35;
+	margin: 10px auto 0;
+	max-width: 220px;
+	white-space: pre-line;
+}
+
+.bar {
+	align-items: center;
+	background: #fff;
+	border: 0;
+	border-radius: 8px;
+	color: #161616;
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	font-size: 15px;
+	font-weight: 500;
+	height: 41px;
+	justify-content: space-between;
+	left: 7px;
+	padding: 0 16px;
+	position: absolute;
+	top: 519px;
+	width: 259px;
+	z-index: 2;
+}

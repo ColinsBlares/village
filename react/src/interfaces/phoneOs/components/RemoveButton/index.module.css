@@ -1,0 +1,49 @@
+.remove {
+	align-items: center;
+	background: rgba(0, 0, 0, 0.5);
+	border: 0;
+	border-radius: 50%;
+	box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.4);
+	color: #fff;
+	display: flex;
+	height: 18px;
+	justify-content: center;
+	left: -7px;
+	padding: 0;
+	position: absolute;
+	top: -7px;
+	width: 18px;
+	z-index: 3;
+}
+
+.inset {
+	left: 1px;
+}
+
+.shake {
+	animation: jiggle 0.28s linear infinite;
+	height: 100%;
+	position: relative;
+	transform-origin: center 32%;
+	width: 100%;
+}
+
+@keyframes jiggle {
+	0% {
+		transform: rotate(-1.6deg);
+	}
+
+	50% {
+		transform: rotate(1.6deg);
+	}
+
+	100% {
+		transform: rotate(-1.6deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.shake {
+		animation: none;
+	}
+}

@@ -7,6 +7,25 @@ const PRICE_PER_KM = 100;
 
 let lastCallTime;
 let minCallTime = 60*1000; /// промежуток для вызова
+let noDriverTimer = null;
+const noDriverText = 'К сожалению сейчас по данному тарифу нет таксистов';
+
+function clearNoDriverTimer() {
+    if (noDriverTimer == null) return;
+    mp.timer.remove(noDriverTimer);
+    noDriverTimer = null;
+}
+
+function armNoDriverTimer() {
+    clearNoDriverTimer();
+    noDriverTimer = mp.timer.add(() => {
+        noDriverTimer = null;
+        mp.notify.error(noDriverText, 'Такси');
+        mp.events.call('taxi.client.waitshape.destroy');
+        mp.callCEFR('taxi.client.order.cancel', [noDriverText]);
+        mp.events.callRemote('taxi.client.order.cancel');
+    }, minCallTime);
+}
 
 let isActiveTaxiClient = false;
 mp.events.add('taxi.client.app.open', () => {
@@ -16,13 +35,14 @@ mp.events.add('taxi.client.app.open', () => {
 mp.events.add('taxi.client.app.search', () => {
     if (mp.players.local.vehicle) {
         mp.notify.error('Нельзя заказать такси из транспорта', 'Такси');
-        mp.callCEFR('taxi.client.order.cancel', []);
+        mp.callCEFR('taxi.client.order.cancel', ['Нельзя заказать такси из транспорта']);
         return;
     }
     let diff = Date.now() - lastCallTime;
     if (diff < minCallTime) {
-        mp.notify.error(`Ожидайте ${parseInt((minCallTime - diff)/ 1000)} секунд`, 'Такси');
-        mp.callCEFR('taxi.client.order.cancel', []);
+        let text = `Ожидайте ${parseInt((minCallTime - diff)/ 1000)} секунд`;
+        mp.notify.error(text, 'Такси');
+        mp.callCEFR('taxi.client.order.cancel', [text]);
         return;
     } 
     lastCallTime = Date.now();
@@ -33,24 +53,25 @@ mp.events.add('taxi.client.order.ans', (ans) => {
     switch (ans) {
         case 0:
             mp.notify.error('Нельзя заказать такси из транспорта', 'Такси');
-            mp.callCEFR('taxi.client.order.cancel', []);
+            mp.callCEFR('taxi.client.order.cancel', ['Нельзя заказать такси из транспорта']);
             break;
         case 1:
             mp.notify.error('Вы не на улице', 'Такси');
-            mp.callCEFR('taxi.client.order.cancel', []);
+            mp.callCEFR('taxi.client.order.cancel', ['Вы не на улице']);
             break;
         case 2:
             mp.notify.error('У вас недостаточно наличности', 'Такси');
-            mp.callCEFR('taxi.client.order.cancel', []);
+            mp.callCEFR('taxi.client.order.cancel', ['У вас недостаточно наличности']);
             break;
         case 3:
             mp.notify.error('Вы уже сделали заказ', 'Такси');
-            mp.callCEFR('taxi.client.order.cancel', []);
+            mp.callCEFR('taxi.client.order.cancel', ['Вы уже сделали заказ']);
             break;
         case 4:
             mp.notify.success('Заказ отправлен', 'Такси');
             mp.notify.warning('Не покидайте зону, выделенную зеленым', 'Такси');
             mp.events.call('taxi.client.waitshape.create');
+            armNoDriverTimer();
             break;
     }
 });
@@ -83,6 +104,7 @@ mp.events.add('taxi.client.waitshape.destroy', () => {
 });
 
 mp.events.add('taxi.client.order.taken', (driverInfo) => {
+    clearNoDriverTimer();
     let info = {
         name: driverInfo.name,
         model: driverInfo.model,
@@ -134,7 +156,8 @@ mp.events.add('taxi.client.app.confirm', () => {
 });
 
 mp.events.add('taxi.client.destination.reach', () => {
-    mp.callCEFR('taxi.client.order.cancel', []);
+    clearNoDriverTimer();
+    mp.callCEFR('taxi.client.order.cancel', ['Поездка завершена']);
 });
 
 mp.events.add('taxi.client.app.confirm.ans', (ans) => {
@@ -143,7 +166,7 @@ mp.events.add('taxi.client.app.confirm.ans', (ans) => {
             mp.notify.success('Данные переданы таксисту', 'Такси');
             break;
         case 1:
-            mp.callCEFR('taxi.client.order.error', []);
+            mp.callCEFR('taxi.client.order.error', ['Недостаточно денег, выберите другое место']);
             mp.notify.error('Недостаточно денег, выберите другое место', 'Такси');
             break;
     }
@@ -180,9 +203,10 @@ mp.events.add("characterInit.done", () => {
 });
 
 mp.events.add('taxi.client.order.canceled', () => {
+    clearNoDriverTimer();
     mp.notify.error('Заказ отменен водителем', 'Такси');
     mp.events.call('taxi.client.waitshape.destroy');
-    mp.callCEFR('taxi.client.order.cancel', []);
+    mp.callCEFR('taxi.client.order.cancel', ['Заказ отменен водителем']);
 });
 
 mp.events.add('taxi.client.app.cancel', () => {
@@ -190,20 +214,23 @@ mp.events.add('taxi.client.app.cancel', () => {
 });
 
 mp.events.add('taxi.client.order.cancel', () => {
+    clearNoDriverTimer();
     mp.notify.warning('Вы отменили заказ', 'Такси');
     mp.events.call('taxi.client.waitshape.destroy');
     mp.events.callRemote('taxi.client.order.cancel');
 });
 
 mp.events.add('taxi.client.car.leave', () => {
+    clearNoDriverTimer();
     mp.notify.warning('Вы покинули такси, заказ отменен', 'Такси');
     mp.events.call('taxi.client.waitshape.destroy');
-    mp.callCEFR('taxi.client.order.cancel', []);
+    mp.callCEFR('taxi.client.order.cancel', ['Вы покинули такси, заказ отменен']);
 });
 
 mp.events.add('taxi.client.waitshape.leave', () => {
+    clearNoDriverTimer();
     mp.notify.warning('Вы покинули зону ожидания, заказ отменен', 'Такси');
     mp.events.call('taxi.client.waitshape.destroy');
-    mp.callCEFR('taxi.client.order.cancel', []);
+    mp.callCEFR('taxi.client.order.cancel', ['Вы покинули зону ожидания, заказ отменен']);
     mp.events.callRemote('taxi.client.order.cancel');
 });

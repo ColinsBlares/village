@@ -1,8 +1,5 @@
 .list {
 	display: flex;
 	flex-direction: column;
-}
-
-.list > :nth-last-child(-n + 8) {
-	position: relative !important;
+	align-items: center;
 }

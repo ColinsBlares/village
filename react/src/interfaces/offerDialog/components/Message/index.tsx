@@ -7,12 +7,10 @@ function Message() {
 	const text = useOfferDialogStore(state => state.text);
 
 	return (
-		<div className={styles.content}>
-			<div
-				className={styles.message}
-				dangerouslySetInnerHTML={{ __html: sanitizeHtml(text) }}
-			/>
-		</div>
+		<div
+			className={styles.message}
+			dangerouslySetInnerHTML={{ __html: sanitizeHtml(text) }}
+		/>
 	);
 }
 

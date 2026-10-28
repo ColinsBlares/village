@@ -1,0 +1,55 @@
+.cash {
+	align-items: center;
+	display: flex;
+	gap: 0.6vh;
+	margin: 0.55vh 0.35vh 0.15vh;
+}
+
+.wallet,
+.field {
+	align-items: center;
+	background: rgba(255, 255, 255, 0.035);
+	border: 1px solid rgba(255, 255, 255, 0.055);
+	border-radius: 0.85vh;
+	color: #95a2a8;
+	display: flex;
+	font-size: 1.2vh;
+	height: 3.25vh;
+}
+
+.wallet {
+	flex: 1;
+	justify-content: space-between;
+	min-width: 0;
+	padding: 0 1vh;
+}
+
+.sum {
+	color: #e7c56a;
+	font-variant-numeric: tabular-nums;
+}
+
+.field {
+	gap: 0.7vh;
+	padding: 0 0.35vh 0 1vh;
+}
+
+.input {
+	appearance: none;
+	background: rgba(0, 0, 0, 0.28);
+	border: 0;
+	border-radius: 0.55vh;
+	color: #f3e7c2;
+	font: inherit;
+	font-size: 1.3vh;
+	font-variant-numeric: tabular-nums;
+	height: 2.35vh;
+	outline: none;
+	padding: 0 0.7vh;
+	text-align: right;
+	width: 11vh;
+}
+
+.input:focus {
+	background: rgba(0, 0, 0, 0.42);
+}

@@ -1,0 +1,32 @@
+.dock {
+	animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.18s backwards;
+	backdrop-filter: blur(16px) saturate(1.35);
+	background: rgba(191, 191, 191, 0.44);
+	border-radius: 17px;
+	box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.28);
+	height: 69px;
+	left: 10px;
+	pointer-events: none;
+	position: absolute;
+	top: 524px;
+	width: 255px;
+	z-index: 1;
+}
+
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dock {
+		animation: none;
+	}
+}

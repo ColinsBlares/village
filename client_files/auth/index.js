@@ -46,6 +46,8 @@ function tryAutoLogin() {
 
 /// Инициализация перед авторизацией
 mp.events.add('auth.init', () => {
+    mp.preload = false;
+    mp.players.local.setAlpha(255);
     mp.gui.cursor.show(true, true);
     mp.players.local.freezePosition(true);
     mp.game.ui.displayRadar(false);

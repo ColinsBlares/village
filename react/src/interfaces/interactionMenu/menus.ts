@@ -157,6 +157,7 @@ export function createMenus(): Record<string, InteractionMenuDef> {
 				{ text: 'Познакомиться', icon: 'hands.png' },
 				{ text: 'Документы', icon: 'doc.png' },
 				{ text: 'Деньги', icon: 'wallet.png' },
+				{ text: 'Обмен', icon: 'hands.png' },
 			],
 			handler: function (index) {
 				const item = this.items[index];
@@ -168,6 +169,9 @@ export function createMenus(): Record<string, InteractionMenuDef> {
 				} else if (item.text == 'Деньги') {
 					closeMenu();
 					mp.trigger('interaction.money.show');
+				} else if (item.text == 'Обмен') {
+					closeMenu();
+					mp.trigger('trade.offer');
 				} else if (item.text == 'Пригласить в семью') {
 					closeMenu();
 					clickItem(this.name, item.text);

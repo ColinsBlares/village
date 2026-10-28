@@ -15,10 +15,12 @@
 .column {
 	background: rgba(255, 255, 255, 0.045);
 	border: 1px solid rgba(225, 237, 239, 0.045);
-	height: 2.45vh;
-	width: 2.45vh;
+	height: 2.35vh;
+	width: 2.35vh;
 	border-radius: 0.48vh;
-	transition: background-color 120ms ease, border-color 120ms ease;
+	transition:
+		background-color 120ms ease,
+		border-color 120ms ease;
 }
 
 .column:hover {

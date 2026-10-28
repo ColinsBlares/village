@@ -1,0 +1,48 @@
+.wallpaper {
+	inset: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: 0;
+}
+
+.wallpaper img {
+	height: 100%;
+	object-fit: cover;
+	width: 100%;
+}
+
+.drift img {
+	animation: drift 18s ease-in-out infinite alternate;
+}
+
+.zoom img {
+	animation: none;
+	transform: scale(1.12);
+	transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.flash {
+	background: radial-gradient(circle at 30% 88%, rgba(255, 246, 214, 0.72), rgba(255, 244, 210, 0) 58%);
+	inset: 0;
+	mix-blend-mode: screen;
+	pointer-events: none;
+	position: absolute;
+}
+
+@keyframes drift {
+	from {
+		transform: scale(1);
+	}
+
+	to {
+		transform: scale(1.06) translate3d(0, -1.5%, 0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.drift img,
+	.zoom img {
+		animation: none;
+		transform: none;
+	}
+}

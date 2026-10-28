@@ -1,8 +1,10 @@
+import { createElement, ReactNode } from 'react';
 import { create } from 'zustand';
+import { FaLongArrowAltUp } from 'react-icons/fa';
 import { useVisibilityStore } from '@utils/visibility/store';
 
 export interface HudKeyItem {
-	key: string;
+	key: string | ReactNode;
 	name: string;
 }
 
@@ -95,7 +97,10 @@ const DEFAULT_KEYS: HudKeyItem[] = [
 	{ key: 'I', name: 'Инвентарь' },
 	{ key: 'T', name: 'Чат' },
 	{ key: 'P', name: 'Планшет' },
-	{ key: "<i class='fas fa-arrow-up'></i>", name: 'Телефон' },
+	{
+		key: createElement(FaLongArrowAltUp, { size: '0.85em' }),
+		name: 'Телефон',
+	},
 	{ key: 'N', name: 'Войс-чат' },
 	{ key: 'L', name: 'Действия' },
 	{ key: 'M', name: 'Меню' },

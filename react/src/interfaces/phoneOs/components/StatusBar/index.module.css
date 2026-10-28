@@ -1,0 +1,37 @@
+.bar {
+	align-items: center;
+	color: #fff;
+	display: flex;
+	font-size: 15px;
+	font-weight: 600;
+	height: 22px;
+	justify-content: space-between;
+	left: 0;
+	letter-spacing: -0.2px;
+	pointer-events: none;
+	position: absolute;
+	right: 0;
+	top: 12px;
+	z-index: 6;
+}
+
+.dark {
+	color: #111;
+}
+
+.time {
+	font-variant-numeric: tabular-nums;
+	min-width: 52px;
+	padding-left: 22px;
+}
+
+.icons {
+	align-items: center;
+	display: flex;
+	gap: 5px;
+	padding-right: 16px;
+}
+
+.icons svg {
+	display: block;
+}

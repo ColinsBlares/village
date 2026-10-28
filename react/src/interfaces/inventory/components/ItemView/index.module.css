@@ -23,16 +23,16 @@
 .hotkeyCount {
 	background: rgba(12, 17, 19, 0.82);
 	color: #d5e2d7;
-	font-size: 1.15vh;
+	font-size: 0.5vw;
 	font-weight: bold;
-	padding: 0 0.4vh;
+	/* padding: 0 0.4vh; */
 	position: absolute;
 	border: 1px solid rgba(255, 255, 255, 0.08);
 	border-radius: 0.45vh;
-	left: 0.2vh;
-	top: 0.2vh;
-	height: 1.55vh;
-	line-height: 1.5vh;
+	right: 0.2vh;
+	bottom: 0.2vh;
+	/* height: 1.55vh; */
+	/* line-height: 1.5vh; */
 }
 
 .hotkeyCount {
@@ -79,7 +79,7 @@
 }
 
 .rolling div:after {
-	content: "";
+	content: '';
 	transform: rotate(90deg);
 }
 

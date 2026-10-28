@@ -1,0 +1,142 @@
+.page {
+	animation: openPage 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+	background: rgba(250, 250, 252, 1);
+	color: #111;
+	display: flex;
+	flex-direction: column;
+	font-family: phone-font, Ubuntu, sans-serif;
+	inset: 0;
+	padding: 54px 18px 28px;
+	position: absolute;
+	z-index: 5;
+}
+
+.closing {
+	animation: closePage 0.48s cubic-bezier(0.4, 0, 1, 1) forwards;
+	pointer-events: none;
+}
+
+.back {
+	align-items: center;
+	background: none;
+	border: 0;
+	color: #0a84ff;
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	font-size: 16px;
+	font-weight: 500;
+	gap: 2px;
+	left: 16px;
+	padding: 0;
+	position: absolute;
+	top: 52px;
+	z-index: 2;
+}
+
+.phoneDark,
+.phoneLight {
+	padding: 0;
+	transition: background 0.25s ease, color 0.25s ease;
+}
+
+.phoneDark {
+	background: #000;
+	color: #fff;
+}
+
+.phoneLight {
+	background: #f2f2f7;
+	color: #000;
+}
+
+.back:active {
+	opacity: 0.55;
+}
+
+.taxiSplash {
+	background: #ffbb0b;
+	padding: 0;
+}
+
+.taxiLoad {
+	align-items: center;
+	display: flex;
+	height: 100%;
+	justify-content: center;
+	width: 100%;
+}
+
+.taxiLoad img {
+	height: 58px;
+	object-fit: contain;
+	width: 163px;
+}
+
+.body {
+	align-items: center;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.icon {
+	border-radius: 18px;
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+	height: 78px;
+	object-fit: cover;
+	width: 78px;
+}
+
+.title {
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: -0.6px;
+	margin: 16px 0 0;
+}
+
+.spinner {
+	animation: spin 0.8s linear infinite;
+	border: 2px solid rgba(0, 0, 0, 0.12);
+	border-radius: 50%;
+	border-top-color: #111;
+	height: 26px;
+	margin-top: 22px;
+	width: 26px;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes openPage {
+	from {
+		border-radius: 36px;
+		opacity: 0.4;
+		transform: scale(0.72);
+	}
+
+	to {
+		border-radius: 0;
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes closePage {
+	to {
+		border-radius: 32px;
+		opacity: 0;
+		transform: scale(0.78);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.page,
+	.closing {
+		animation: none;
+	}
+}

@@ -1,0 +1,30 @@
+.slot {
+	animation: drop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+	left: 8px;
+	position: absolute;
+	right: 8px;
+	top: 48px;
+	z-index: 7;
+}
+
+.still {
+	animation: none;
+}
+
+@keyframes drop {
+	from {
+		opacity: 0;
+		transform: translateY(-140%);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.slot {
+		animation: none;
+	}
+}

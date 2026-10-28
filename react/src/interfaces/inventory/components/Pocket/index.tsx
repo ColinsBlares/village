@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { cx } from '../../cx';
 import { isColumnAccess, onColumnMouse, onItemContextMenu, onItemMouseDown, onItemMouseEnter, onItemMouseLeave, onItemMouseMove } from '../../model';
 import { useInventoryStore } from '../../store';
+import { useTradeStore } from '../../../trade/store';
 import ItemView from '../ItemView';
 import styles from './index.module.css';
 
@@ -9,6 +10,7 @@ type PocketProps = {
 	place: any;
 	contextMenu: boolean;
 	scope: 'equipment' | 'environment';
+	readonly?: boolean;
 };
 
 function Pocket(props: PocketProps) {
@@ -36,6 +38,12 @@ function Pocket(props: PocketProps) {
 	const dragSqlId = useInventoryStore(function (store) {
 		return store.dragItem ? store.dragItem.sqlId : null;
 	});
+	const offerItems = useTradeStore(function (store) {
+		return store.offerItems;
+	});
+	const tradeShow = useTradeStore(function (store) {
+		return store.show;
+	});
 	const debug = useInventoryStore(function (store) {
 		return store.debug;
 	});
@@ -57,6 +65,7 @@ function Pocket(props: PocketProps) {
 				const cells = [];
 				for (let index = 0; index < count; index++) {
 					const item = pocket.items[index];
+					const hidden = props.scope === 'equipment' && tradeShow && item && offerItems.some(function (entry) { return entry.sqlId == item.sqlId; });
 					const access = isColumnAccess(index, pocket, props.place);
 					cells.push(
 						<div
@@ -69,7 +78,7 @@ function Pocket(props: PocketProps) {
 								onColumnMouse(props.place, pocket, index, 'mouseleave');
 							}}
 						>
-							{item && !item.search ? (
+							{item && !item.search && !hidden ? (
 								<ItemView
 									item={item}
 									mode="pocket"
@@ -84,7 +93,7 @@ function Pocket(props: PocketProps) {
 									onMouseMove={function (e) {
 										onItemMouseMove(item, e);
 									}}
-									onMouseDown={function (e) {
+									onMouseDown={props.readonly ? undefined : function (e) {
 										onItemMouseDown(item, e);
 									}}
 									onContextMenu={props.contextMenu ? function (e) {

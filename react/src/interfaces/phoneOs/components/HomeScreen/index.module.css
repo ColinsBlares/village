@@ -1,0 +1,61 @@
+.home {
+	font-family: phone-font, Ubuntu, sans-serif;
+	inset: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: 2;
+}
+
+.track {
+	display: flex;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	will-change: transform;
+}
+
+.sheet {
+	flex: none;
+	height: 100%;
+	position: relative;
+	width: 279px;
+}
+
+.enter {
+	animation: settle 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.leave {
+	animation: away 0.42s ease forwards;
+	pointer-events: none;
+}
+
+@keyframes settle {
+	from {
+		filter: blur(8px);
+		opacity: 0;
+		transform: scale(1.14);
+	}
+
+	to {
+		filter: none;
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes away {
+	to {
+		filter: blur(6px);
+		opacity: 0;
+		transform: scale(1.06);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.enter,
+	.leave {
+		animation: none;
+	}
+}

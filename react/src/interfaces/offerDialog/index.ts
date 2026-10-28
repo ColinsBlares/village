@@ -6,4 +6,7 @@ export default defineScreen({
 	load: function () { return import('./runtime'); },
 	global: 'offerDialog',
 	methods: ["show","hide","pretty"],
+	isOpen: function (bag) {
+		return !!(bag && bag.opened);
+	},
 });

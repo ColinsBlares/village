@@ -1,84 +1,111 @@
 #chat-form-react {
-    height: 40vh;
-    max-height: 40vh;
-    position: absolute;
-    color: white;
-    width: 60%;
-    max-width: 70vw;
-    font-size: 1.6vh;
-    z-index: -1;
-    font-family: Arial, Helvetica, sans-serif
+	position: absolute;
+	top: 1.8519vh;
+	left: 0;
+	box-sizing: border-box;
+	width: calc(45.278vh * var(--chat-scale, 1));
+	padding-left: calc(1.042vw * var(--chat-scale, 1));
+	color: #fff;
+	font-family: Montserrat, sans-serif;
+	font-weight: 500;
+	font-size: calc(1.111vh * var(--chat-scale, 1));
+	line-height: 1.35;
+	z-index: 1;
+	pointer-events: none;
+}
+
+#chat-form-react.chat-focus-react,
+#chat-form-react.chat-focus-react #message-list-chat-react {
+	pointer-events: auto;
 }
 
 #message-list-chat-react {
-    height: 25vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-top: 10px;
-    text-overflow: ellipsis;
-    user-select: none;
-    word-wrap: normal;
+	box-sizing: border-box;
+	height: calc(26.111vh * var(--chat-scale, 1));
+	margin: 0;
+	padding: 0.556vh 0 0;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	list-style: none;
+	user-select: none;
 }
 
-.block-input-chat-react {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    width: 100%;
-    padding-left: 10px;
-    margin-left: 30px;
-}
-
-#chat-message-input-react {
-    padding-top: .9vh;
-    padding-bottom: .9vh;
-    width: 80%;
-    position: relative;
-    outline: none;
-    background: transparent;
-    border: none;
-    color: white;
-    display: inline-block;
-    margin-left: 1vw;
-    font-size: 1.6vh;
-}
-
-.tag-chat-react {
-    display: inline-block;
-    text-align: center;
-    color: white;
-    /* width: 3vw; */
-    /* font-size: 1.6vh; */
+#message-list-chat-react::-webkit-scrollbar {
+	width: 0;
 }
 
 .message-chat-react {
-    width: 100%;
-    overflow-wrap: break-word;  /* не поддерживает IE, Firefox; является копией word-wrap */
-    word-wrap: break-word;
-    word-break: break-all;  /* не поддерживает Opera12.14, значение keep-all не поддерживается IE, Chrome */
-    line-break: auto;  /* нет поддержки для русского языка */
-    hyphens: manual;  /* значение auto не поддерживается Chrome */
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 .word-chat-react {
-    word-wrap: normal;
-    text-overflow: ellipsis;
-    text-shadow:
-            -0   -1px 0   #000000,
-            0   -1px 0   #000000,
-            -0    1px 0   #000000,
-            0    1px 0   #000000,
-            -1px -0   0   #000000,
-            1px -0   0   #000000,
-            -1px  0   0   #000000,
-            1px  0   0   #000000,
-            -1px -1px 0   #000000,
-            1px -1px 0   #000000,
-            -1px  1px 0   #000000,
-            1px  1px 0   #000000,
-            -1px -1px 0   #000000,
-            1px -1px 0   #000000,
-            -1px  1px 0   #000000,
-            1px  1px 0   #000000;
+	text-shadow: 0 0 0.278vh rgba(0, 0, 0, 0.8);
+}
 
-    letter-spacing: 0.05em;
+.composer-chat-react {
+	display: flex;
+	align-items: center;
+	gap: calc(0.556vh * var(--chat-scale, 1));
+	margin-top: 0;
+	pointer-events: auto;
+}
+
+.field-chat-react {
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	width: calc(41.667vh * var(--chat-scale, 1));
+	height: calc(2.778vh * var(--chat-scale, 1));
+	padding: 0 calc(0.833vh * var(--chat-scale, 1));
+	background: rgba(0, 0, 0, 0.8);
+	border-radius: calc(0.278vh * var(--chat-scale, 1));
+}
+
+.tag-chat-react {
+	flex: none;
+	margin-right: calc(0.556vh * var(--chat-scale, 1));
+	font: inherit;
+	line-height: 1;
+	white-space: nowrap;
+}
+
+#chat-message-input-react {
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: none;
+	outline: none;
+	background: transparent;
+	color: #fff;
+	font: inherit;
+}
+
+#chat-message-input-react::placeholder {
+	color: #7e7e7e;
+}
+
+.send-chat-react {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: calc(2.778vh * var(--chat-scale, 1));
+	height: calc(2.778vh * var(--chat-scale, 1));
+	padding: 0;
+	border: none;
+	border-radius: calc(0.278vh * var(--chat-scale, 1));
+	background: rgba(0, 0, 0, 0.8);
+	cursor: pointer;
+}
+
+.send-chat-react svg {
+	width: 58%;
+	height: 58%;
+}
+
+.send-chat-react:hover {
+	filter: brightness(1.15);
 }

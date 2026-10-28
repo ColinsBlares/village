@@ -4,8 +4,14 @@
 	padding-right: 0;
 	border: 1px solid rgba(222, 232, 235, 0.09);
 	border-radius: 1.4vh;
-	background: linear-gradient(145deg, rgba(18, 24, 29, 0.94), rgba(11, 16, 20, 0.92));
-	box-shadow: 0 1.2vh 3.5vh rgba(0, 0, 0, 0.24), inset 0 1px rgba(255, 255, 255, 0.035);
+	background: linear-gradient(
+		145deg,
+		rgba(18, 24, 29, 0.94),
+		rgba(11, 16, 20, 0.92)
+	);
+	box-shadow:
+		0 1.2vh 3.5vh rgba(0, 0, 0, 0.24),
+		inset 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .top {
@@ -59,9 +65,11 @@
 	color: #d9e0e1;
 	display: flex;
 	font-size: 1.2vh;
-	justify-content: flex-end;
+	justify-content: flex-start;
 	cursor: pointer;
-	transition: background 140ms ease, border-color 140ms ease;
+	transition:
+		background 140ms ease,
+		border-color 140ms ease;
 }
 
 .header:hover,
@@ -80,7 +88,7 @@
 	color: #d2dbdc;
 	font-size: 1.2vh;
 	font-weight: 500;
-	margin-left: 0.35vh;
+	margin-left: 1vh;
 	margin-right: auto;
 	line-height: 3.25vh;
 }
@@ -102,7 +110,10 @@
 	opacity: 0.56;
 	padding-left: 0.7vh;
 	margin-top: 1.15vh;
+	margin-right: 0.7vh;
 	transform-origin: 75% 50%;
+	margin-left: auto;
+	transition: 0.2s;
 }
 
 .arrowHidden {

@@ -95,13 +95,15 @@ function Chat(ownProps) {
     } = self.props;
     event.preventDefault();
 
-    if (currentMessage && currentMessage.length <= 300) {
+    const tag = chat.tags[curTagIndex];
+
+    if (tag && currentMessage && currentMessage.length <= 300) {
       self.history.push(currentMessage);
       setState({
         index: self.history.length,
         isMyMessage: true
       });
-      mp.trigger('chat.message.get', chat.tags[curTagIndex].id, currentMessage);
+      mp.trigger('chat.message.get', tag.id, currentMessage);
       setState({
         currentMessage: ''
       });
@@ -269,38 +271,39 @@ function Chat(ownProps) {
       curTagIndex
     } = self.state;
 
+    const tag = chat.tags[curTagIndex];
+
     if (chat.isShow) {
-      return <div id="chat-form-react" style={{
+      return <div id="chat-form-react" className={chat.isFocus ? 'chat-focus-react' : undefined} style={{
         opacity: chat.opacity,
-        fontSize: `${chat.size * 1.6}vh`
+        ['--chat-scale']: chat.size
       }}>
 
                     <ul id="message-list-chat-react" ref={list => {
           self.refList = list;
-        }} style={{
-          height: `${chat.size * 25}vh`
         }}>
                         {chat.messages.map((message, index) => self.getMessage(index, message))}
                     </ul>
 
-                    {chat.isFocus && <div className='block-input-chat-react' style={{
-          width: `${chat.size * 80}%`
-        }}>
-                        <div className="tag-chat-react">
-                            <span style={{
-              color: chat.tags[curTagIndex].color
+                    {chat.isFocus && <div className="composer-chat-react">
+                        <div className="field-chat-react">
+                            {tag && <div className="tag-chat-react" style={{
+              color: tag.color
             }}>
-                                {chat.tags[curTagIndex].name}
-                            </span>
+                                {tag.name}
+                            </div>}
+                            <input type="text" value={self.state.currentMessage} onChange={self.handleChangeInput} ref={input => {
+              self.refInput = input;
+            }} placeholder="Введите сообщение" id="chat-message-input-react" onKeyDown={self.keyDownInput} onKeyUp={self.keyUpInput} maxLength={300} onFocus={self.focusInput.bind(this)} onBlur={() => {
+              self.refInput.focus();
+            }} autoFocus={true} />
                         </div>
-                        <input type='text' value={self.state.currentMessage} onChange={self.handleChangeInput} ref={input => {
-            self.refInput = input;
-          }} placeholder='Введите сообщение' id="chat-message-input-react" onKeyDown={self.keyDownInput} onKeyUp={self.keyUpInput} maxLength={300} onFocus={self.focusInput.bind(this)} onBlur={() => {
-            self.refInput.focus();
-          }} autoFocus={true} style={{
-            fontSize: `${chat.size * 1.6}vh`
-          }}>
-                        </input>
+                        <button type="button" className="send-chat-react" aria-label="Отправить" onMouseDown={event => event.preventDefault()} onClick={self.sendMessage}>
+                            <svg viewBox="0 0 16 16" aria-hidden="true">
+                                <path fill="#fff" d="M1.1 8.35 14.7 1.35 9.15 14.7 7.25 9.15 1.1 8.35z" />
+                                <path fill="#000" fillOpacity="0.28" d="M7.25 9.15 14.7 1.35 8.7 7.45 7.25 9.15z" />
+                            </svg>
+                        </button>
                     </div>}
                 </div>;
     } else {

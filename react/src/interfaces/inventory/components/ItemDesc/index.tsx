@@ -1,4 +1,5 @@
 import React, { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { findTradeItem } from '../../../trade/store';
 import { cx } from '../../cx';
 import { getDescParams, getEnvironmentItem, getItem, getItemName, getItemsCount, itemStyle } from '../../model';
 import { useInventoryStore } from '../../store';
@@ -30,7 +31,8 @@ function ItemDesc() {
 	const [holdShift, setHoldShift] = useState(false);
 	const rootRef = useRef<HTMLDivElement>(null);
 	const item = desc.item;
-	const contents = getItemsCount(item);
+	const shown = !item || menuItem || dragItem ? null : getItem(item.sqlId) || getEnvironmentItem(item.sqlId) || findTradeItem(item.sqlId);
+	const contents = getItemsCount(shown);
 	const showContents = holdShift && contents > 0;
 
 	useEffect(function () {
@@ -69,10 +71,9 @@ function ItemDesc() {
 		if (dx || dy) el.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
 	}, [desc.x, desc.y, showContents, item]);
 
-	if (!item || menuItem || dragItem) return null;
-	if (!getItem(item.sqlId) && !getEnvironmentItem(item.sqlId)) return null;
-	const info = itemsInfo[item.itemId];
-	const params = getDescParams(item);
+	if (!shown) return null;
+	const info = itemsInfo[shown.itemId];
+	const params = getDescParams(shown);
 
 	return (
 		<div
@@ -80,15 +81,15 @@ function ItemDesc() {
 			className={cx(styles.desc, showContents && styles.open, 'inv-item-desc')}
 			style={{ left: desc.x + 'px', top: desc.y + 'px' }}
 		>
-			<div className={styles.title}>{getItemName(item)}</div>
-			{debug ? <div>itemId: #{item.itemId}</div> : null}
+			<div className={styles.title}>{getItemName(shown)}</div>
+			{debug ? <div>itemId: #{shown.itemId}</div> : null}
 			{contents > 0 ? (
-				<ContentsPreview item={item} open={holdShift} equipment={equipment} environment={environment} />
+				<ContentsPreview item={shown} open={holdShift} equipment={equipment} environment={environment} />
 			) : null}
 			{showContents ? null : (
-				<div className={styles.preview + ' inv-item'} style={itemStyle(item)}>
-					{debug ? <div className={styles.sqlid}>#{item.sqlId}</div> : null}
-					{item.params && item.params.count ? <div className={styles.count}>{item.params.count}</div> : null}
+				<div className={styles.preview + ' inv-item'} style={itemStyle(shown)}>
+					{debug ? <div className={styles.sqlid}>#{shown.sqlId}</div> : null}
+					{shown.params && shown.params.count ? <div className={styles.count}>{shown.params.count}</div> : null}
 				</div>
 			)}
 			<div className={styles.description}>{info ? info.description : ''}</div>

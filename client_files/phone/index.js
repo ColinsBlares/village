@@ -146,6 +146,15 @@ mp.events.add('phone.error', function (number) {
     mp.callCEFR('phone.error', [number]);
 });
 
+/// Тест интерфейса: уведомление и шаги такси
+mp.events.add('phone.test.notice', function (appId, title, text) {
+    mp.callCEFR('phone.test.notice', [appId, title, text]);
+});
+
+mp.events.add('phone.test.taxi', function (step, model) {
+    mp.callCEFR('phone.test.taxi', [step, model]);
+});
+
 
 
 let bindButtons = (state) => {

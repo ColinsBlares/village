@@ -1,18 +1,22 @@
 import { create } from 'zustand';
 import { OFFER_DIALOGS, OfferDialogDef, prettyOffer } from './dialogs';
 
-const SHOW_TIME = 10000;
+export const SHOW_TIME = 10000;
 
 export interface OfferDialogState {
 	show: boolean;
+	title: string;
 	text: string;
+	openedAt: number;
 	green: boolean;
 	red: boolean;
 }
 
 export const useOfferDialogStore = create<OfferDialogState>(() => ({
 	show: false,
+	title: '',
 	text: '',
+	openedAt: 0,
 	green: false,
 	red: false,
 }));
@@ -52,10 +56,13 @@ export function hideOfferDialog() {
 	activeDialog = null;
 	useOfferDialogStore.setState({
 		show: false,
+		title: '',
 		text: '',
+		openedAt: 0,
 		green: false,
 		red: false,
 	});
+	markOpened(false);
 	if (wasOpen) {
 		busyRemove();
 	}
@@ -83,12 +90,22 @@ export function showOfferDialog(name: string, values: any) {
 	const wasOpen = useOfferDialogStore.getState().show;
 	useOfferDialogStore.setState({
 		show: true,
+		title: dialog.title,
 		text: dialog.text,
+		openedAt: Date.now(),
 		green: false,
 		red: false,
 	});
+	markOpened(true);
 	if (!wasOpen) {
 		busyAdd();
+	}
+}
+
+function markOpened(open: boolean) {
+	const bag = (window as any).offerDialog;
+	if (bag) {
+		bag.opened = open;
 	}
 }
 
@@ -145,7 +162,12 @@ export function initOfferDialogLegacyBridge() {
 	const win = window as any;
 	const target = win.offerDialog || {};
 
-	target.show = showOfferDialog;
+	Object.defineProperty(target, 'show', {
+		configurable: true,
+		enumerable: true,
+		writable: false,
+		value: showOfferDialog,
+	});
 	target.hide = hideOfferDialog;
 	target.pretty = prettyOffer;
 

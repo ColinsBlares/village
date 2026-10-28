@@ -82,7 +82,10 @@ function cleanBrowserDir(): Plugin {
 					return;
 				}
 
-				fs.rmSync(path.join(browserDir, name), { recursive: true, force: true });
+				fs.rmSync(path.join(browserDir, name), {
+					recursive: true,
+					force: true,
+				});
 			});
 		},
 	};
@@ -109,11 +112,8 @@ export default defineConfig(function (env) {
 		},
 		esbuild: {
 			jsx: 'transform',
-			target: 'chrome80',
 		},
 		build: {
-			target: 'chrome80',
-			cssTarget: 'chrome80',
 			outDir: browserDir,
 			emptyOutDir: false,
 			cssCodeSplit: false,
