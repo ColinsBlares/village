@@ -1,0 +1,15 @@
+transport.key
+logs/*
+cache/*
+logs
+cache
+licenses
+licenses/*
+resources/dlcpacks/*
+linux-x64
+data
+node_modules
+dist
+browser
+package-lock.json
+crash.log

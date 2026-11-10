@@ -1,0 +1,12 @@
+{
+  "dbHost": "localhost",
+  "dbPort": 3306,
+  "dbName": "test",
+  "dbUser": "root",
+  "dbPassword": "123456",
+  "smtpHost": "smtp.gmail.com",
+  "smtpPort": 587,
+  "emailLogin": "test@gmail.com",
+  "emailPass": "app_password",
+  "ignoredModules": ["test", "bugTracker"]
+}

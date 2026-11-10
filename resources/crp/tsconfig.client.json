@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "types": ["@mint-sdk/types-shared", "@mint-sdk/types-client", "@mint-sdk/types-natives"],
+    "rootDir": "client",
+    "outDir": "dist/client",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmitOnError": true,
+    "forceConsistentCasingInFileNames": true,
+    "composite": true
+  },
+  "include": ["client/**/*.ts"]
+}

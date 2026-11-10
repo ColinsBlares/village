@@ -1,0 +1,1864 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Mint.Server.Sdk</name>
+    </assembly>
+    <members>
+        <member name="T:Mint.Server.Async.IResourceDispatcher">
+            <summary>Runs work in the server-thread context of one resource activation.</summary>
+            <remarks>Capture <see cref="P:Mint.Server.Server.Dispatcher"/> inside the resource before passing it to background code.
+            A dispatcher remains bound to that activation after a resource restart.</remarks>
+        </member>
+        <member name="P:Mint.Server.Async.IResourceDispatcher.Stopping">
+            <summary>Cancellation requested when the owning resource is stopping.</summary>
+        </member>
+        <member name="M:Mint.Server.Async.IResourceDispatcher.InvokeAsync(System.Action,System.Threading.CancellationToken)">
+            <summary>Runs a synchronous callback on the server thread. Runs inline in the owning resource context.</summary>
+            <remarks>Async delegates are rejected. Queue overload faults the returned task with
+            <see cref="T:System.InvalidOperationException"/>; stopping cancels it. Cancellation before execution prevents the callback.</remarks>
+        </member>
+        <member name="M:Mint.Server.Async.IResourceDispatcher.InvokeAsync``1(System.Func{``0},System.Threading.CancellationToken)">
+            <summary>Runs a synchronous callback on the server thread and returns its result.</summary>
+            <remarks>Returning Task or ValueTask, including a boxed task, is not supported; use RunAsync for async work.</remarks>
+        </member>
+        <member name="M:Mint.Server.Async.IResourceDispatcher.RunAsync(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)">
+            <summary>Starts a tracked asynchronous operation in the resource context, with a combined cancellation token.</summary>
+            <remarks>Only a single delegate is accepted. Normal await resumes on the server thread. Stop or cancellation
+            can finish the runtime's waiting task even if the underlying operation ignores cancellation.</remarks>
+        </member>
+        <member name="T:Mint.Server.Configuration.ConfigNode">
+            <summary>An immutable configuration snapshot. Missing keys and JSON null are distinct.</summary>
+        </member>
+        <member name="M:Mint.Server.Configuration.ConfigNode.Parse(System.String)">
+            <summary>Parses a strict JSON object (64 KiB, 4096 nodes, 16 container levels).
+            Duplicate keys and integers outside the signed/unsigned 64-bit range are rejected.</summary>
+        </member>
+        <member name="M:Mint.Server.Configuration.ConfigNode.TryGetDouble(System.Double@)">
+            <summary>Numeric conversion to IEEE 754 may round integers that exceed its exact precision.</summary>
+        </member>
+        <member name="M:Mint.Server.Configuration.ConfigurationApi.SetPassword(System.String)">
+            <summary>Changes the password checked by new boot authentication requests. Empty disables the gate.</summary>
+        </member>
+        <member name="P:Mint.Server.Configuration.ServerConfig.MigrationDistance">
+            <summary>Owner migration radius; zero derives the radius from each entity's streaming distance.</summary>
+        </member>
+        <member name="P:Mint.Server.Configuration.ServerConfig.Values">
+            <summary>Effective server settings, using configuration keys. Credentials are excluded.</summary>
+        </member>
+        <member name="T:Mint.Server.Entities.AttachmentKind">
+            <summary>The kind of a committed synchronized entity attachment.</summary>
+        </member>
+        <member name="M:Mint.Server.Entities.BaseObject.OnDestroy">
+            <summary>
+            Releases custom managed state after this wrapper becomes invalid, including resource stop and pool failure.
+            Called once, synchronously. The data bag is already cleared; native operations on this handle are unavailable.
+            Factories that throw before returning a valid wrapper must clean up their own partial construction.
+            </summary>
+        </member>
+        <member name="T:Mint.Server.Entities.EntityConfiguration">
+            <summary>Resource-local entity construction. Available only during ConfigureEntities.</summary>
+        </member>
+        <member name="T:Mint.Server.Entities.EntityConstructionContext">
+            <summary>A single-use construction permit supplied to a resource's entity factory.</summary>
+        </member>
+        <member name="T:Mint.Server.Entities.EntityCreationOptions">
+            <summary>Initial visibility applied before an entity is published.</summary>
+        </member>
+        <member name="T:Mint.Server.Entities.EntityKey">
+            <summary>Identifies an object in a server process. Subtype is BlipSubtype for blips, zero for other kinds.</summary>
+        </member>
+        <member name="M:Mint.Server.Entities.EntityKey.#ctor(System.UInt32,Mint.Server.Shared.BaseObjectType,System.Byte)">
+            <summary>Identifies an object in a server process. Subtype is BlipSubtype for blips, zero for other kinds.</summary>
+        </member>
+        <member name="T:Mint.Server.Entities.EntityTypeConfiguration`1">
+            <summary>Configures a factory and independently replaceable pool before resource startup.</summary>
+        </member>
+        <member name="T:Mint.Server.Entities.Pools.BaseObjectPool`1">
+            <summary>A replaceable dictionary pool. Enumeration returns an independent snapshot.</summary>
+        </member>
+        <member name="T:Mint.Server.Entities.Pools.IBaseObjectPool`1">
+            <summary>Resource-local managed storage. Removing a handle never destroys its native object.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ConnectionDeniedInfo">
+            <summary>An immutable snapshot of a terminal player-authentication rejection after boot authorization.</summary>
+        </member>
+        <member name="P:Mint.Server.Events.ConnectionDeniedInfo.AdmissionId">
+            <summary>The actual admission request ID, when one was issued; this is not a player ID.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.EmitClients(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])">
+            <summary>Sends one encoded event to the selected players, omitting duplicate recipients.</summary>
+            <remarks>The sequence is enumerated once. All recipients are validated before the first send.
+            A later transport failure does not roll back earlier sends. An empty sequence skips argument encoding.</remarks>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.EmitClientsRaw(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])">
+            <summary>Sends one raw event to the selected players, omitting duplicate recipients.</summary>
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.EmitClients(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])" path="/remarks" />
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.EmitClientsUnreliable(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])">
+            <summary>Sends one unreliable event to the selected players, omitting duplicate recipients.</summary>
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.EmitClients(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])" path="/remarks" />
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <summary>Registers a tracked notification. Its asynchronous completion is not awaited by Emit.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OffAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <summary>Removes a subscription without cancelling an invocation already in progress.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnAnyAsync(System.Func{System.String,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <summary>Observes local notifications only. Native decision event names are excluded.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnServerStarted">
+            <summary>Subscribes to genuine serverStarted host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnConsoleCommand">
+            <summary>Subscribes to genuine consoleCommand host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnAnyResourceStart">
+            <summary>Subscribes to genuine anyResourceStart host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnAnyResourceStop">
+            <summary>Subscribes to genuine anyResourceStop host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnAnyResourceError">
+            <summary>Subscribes to genuine anyResourceError host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerConnect">
+            <summary>Subscribes to genuine playerConnect host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerSpawn">
+            <summary>Subscribes to genuine playerSpawn host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerStartTalking">
+            <summary>Subscribes to genuine playerStartTalking host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerStopTalking">
+            <summary>Subscribes to genuine playerStopTalking host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerConnectDenied">
+            <summary>Subscribes to genuine playerConnectDenied host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerDisconnect">
+            <summary>Receives a disconnected player, the reason, and its immutable last known server state.
+            The player is invalid; read the snapshot to save state, including after await.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerDeath">
+            <summary>Subscribes to genuine playerDeath host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerPickup">
+            <summary>Subscribes to genuine playerPickup host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerHeal">
+            <summary>Subscribes to genuine playerHeal host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerWeaponChange">
+            <summary>Subscribes to genuine playerWeaponChange host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerDimensionChange">
+            <summary>Subscribes to genuine playerDimensionChange host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerInteriorChange">
+            <summary>Subscribes to genuine playerInteriorChange host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerAnimationChange">
+            <summary>Subscribes to genuine playerAnimationChange host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerEnteringVehicle">
+            <summary>Subscribes to genuine playerEnteringVehicle host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerEnteredVehicle">
+            <summary>Subscribes to genuine playerEnteredVehicle host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerLeftVehicle">
+            <summary>Subscribes to genuine playerLeftVehicle host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerChangedVehicleSeat">
+            <summary>Subscribes to genuine playerChangedVehicleSeat host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnVehicleDestroy">
+            <summary>Subscribes to genuine vehicleDestroy host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnVehicleSiren">
+            <summary>Subscribes to genuine vehicleSiren host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnVehicleAttach">
+            <summary>Subscribes to genuine vehicleAttach host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnVehicleDetach">
+            <summary>Subscribes to genuine vehicleDetach host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPedDeath">
+            <summary>Subscribes to genuine pedDeath host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPedHeal">
+            <summary>Subscribes to genuine pedHeal host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnBaseObjectCreate">
+            <summary>Subscribes to genuine baseObjectCreate host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnBaseObjectRemove">
+            <summary>Subscribes to genuine baseObjectRemove host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnRemoveEntity">
+            <summary>Subscribes to genuine removeEntity host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnEntityModelChange">
+            <summary>Subscribes to committed entity model changes for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnEntityAttached">
+            <summary>Subscribes to committed entity attachments for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnEntityDetached">
+            <summary>Subscribes to removed entity attachments for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnNetOwnerChange">
+            <summary>Subscribes to genuine netOwnerChange host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnEntityEnterColshape">
+            <summary>Subscribes to genuine entityEnterColshape host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnEntityLeaveColshape">
+            <summary>Subscribes to genuine entityLeaveColshape host notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnStartProjectile">
+            <summary>Subscribes to genuine startProjectile synchronous host decisions for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnProjectileExplosion">
+            <summary>Subscribes to genuine projectileExplosion synchronous host decisions for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnExplosion">
+            <summary>Subscribes to synchronous explosion decisions before the effect starts. Return false to cancel.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnFire">
+            <summary>Subscribes to synchronous fire decisions before the effect starts. Return false to cancel.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnVehicleHorn">
+            <summary>Subscribes to genuine vehicleHorn synchronous host decisions for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnPlayerRequestControl">
+            <summary>Subscribes to genuine playerRequestControl synchronous host decisions for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnClientRequestObject">
+            <summary>Subscribes to genuine clientRequestObject synchronous host decisions for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnClientDeleteObject">
+            <summary>Subscribes to genuine clientDeleteObject synchronous host decisions for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnGlobalMetaChange">
+            <summary>Subscribes to genuine globalMetaChange metadata notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnGlobalSyncedMetaChange">
+            <summary>Subscribes to genuine globalSyncedMetaChange metadata notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnMetaChange">
+            <summary>Subscribes to genuine metaChange metadata notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnSyncedMetaChange">
+            <summary>Subscribes to genuine syncedMetaChange metadata notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnStreamSyncedMetaChange">
+            <summary>Subscribes to genuine streamSyncedMetaChange metadata notifications for the current resource.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnLocalMetaChange">
+            <summary>Subscribes to genuine localMetaChange metadata notifications for the current resource.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.On(Mint.Server.Events.ServerEventType,System.Action{System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.On(System.String,System.Action{System.Object[]})"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.On(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.On(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.Once(Mint.Server.Events.ServerEventType,System.Action{System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Once(System.String,System.Action{System.Object[]})"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.Once(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Once(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.Off(Mint.Server.Events.ServerEventType,System.Action{System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Off(System.String,System.Action{System.Object[]})"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.Off(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Off(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnAsync(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnAsync(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAsync(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnceAsync(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnceAsync(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceAsync(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OffAsync(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OffAsync(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAsync(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnDecision(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Boolean})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnDecision(System.String,System.Func{System.Object[],System.Boolean})"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnDecision(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnDecision(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OffDecision(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Boolean})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffDecision(System.String,System.Func{System.Object[],System.Boolean})"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OffDecision(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffDecision(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.On(System.String,System.Delegate)">
+            <summary>Registers a typed notification in the current resource.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.Once(System.String,System.Delegate)">
+            <summary>Registers a typed notification in the current resource.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.Off(System.String,System.Delegate)">
+            <summary>Removes the first matching typed registration without cancelling active work.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnAsync(System.String,System.Delegate)">
+            <summary>Registers a tracked Task or ValueTask notification; a final CancellationToken is injected if present.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnceAsync(System.String,System.Delegate)">
+            <summary>Registers a tracked Task or ValueTask notification; a final CancellationToken is injected if present.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OffAsync(System.String,System.Delegate)">
+            <summary>Removes the first matching typed registration without cancelling active work.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnClient(System.String,System.Delegate)">
+            <summary>Registers a typed notification in the current resource.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnceClient(System.String,System.Delegate)">
+            <summary>Registers a typed notification in the current resource.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OffClient(System.String,System.Delegate)">
+            <summary>Removes the first matching typed registration without cancelling active work.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnClientAsync(System.String,System.Delegate)">
+            <summary>Registers a tracked Task or ValueTask notification; a final CancellationToken is injected if present.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnceClientAsync(System.String,System.Delegate)">
+            <summary>Registers a tracked Task or ValueTask notification; a final CancellationToken is injected if present.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OffClientAsync(System.String,System.Delegate)">
+            <summary>Removes the first matching typed registration without cancelling active work.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OnDecision(System.String,System.Delegate)">
+            <summary>Registers a synchronous typed decision. Returning false denies the action.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.EventsApi.OffDecision(System.String,System.Delegate)">
+            <summary>Removes the first matching typed registration without cancelling active work.</summary>
+        </member>
+        <member name="E:Mint.Server.Events.EventsApi.OnWeaponDamage">
+            <summary>Intercepts genuine host weapon damage. Async handlers are not supported.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ExplosionType">
+            <summary>GTA explosion tags. These values differ from the old compressed sbyte catalog.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.ExplosionTypes.TryFromCode(System.Int64,Mint.Server.Events.ExplosionType@)">
+            <summary>Converts a named GTA tag. The explosion event also preserves unnamed native tags as numeric enum values.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.ExplosionTypes.FromLegacyCode(System.SByte)">
+            <summary>Converts the old compressed -1..38 catalog, whose Firework code is 35 rather than GTA tag 38.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.ExplosionTypes.TryGetLegacyCode(Mint.Server.Events.ExplosionType,System.SByte@)">
+            <summary>Returns false for GTA tags with no representation in the old compressed catalog.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ServerStartedHandler">
+            <summary>Receives the serverStarted notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ConsoleCommandHandler">
+            <summary>Receives the consoleCommand notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.AnyResourceStartHandler">
+            <summary>Receives the anyResourceStart notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.AnyResourceStopHandler">
+            <summary>Receives the anyResourceStop notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.AnyResourceErrorHandler">
+            <summary>Receives the anyResourceError notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerConnectHandler">
+            <summary>Receives the playerConnect notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerSpawnHandler">
+            <summary>Receives the playerSpawn notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerStartTalkingHandler">
+            <summary>Receives the playerStartTalking notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerStopTalkingHandler">
+            <summary>Receives the playerStopTalking notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerConnectDeniedHandler">
+            <summary>Receives the playerConnectDenied notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerDisconnectHandler">
+            <summary>Receives the playerDisconnect notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerDeathHandler">
+            <summary>Receives the playerDeath notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerPickupHandler">
+            <summary>Receives the playerPickup notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerHealHandler">
+            <summary>Receives the playerHeal notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerWeaponChangeHandler">
+            <summary>Receives the playerWeaponChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerDimensionChangeHandler">
+            <summary>Receives the playerDimensionChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerInteriorChangeHandler">
+            <summary>Receives the playerInteriorChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerAnimationChangeHandler">
+            <summary>Receives the playerAnimationChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerEnteringVehicleHandler">
+            <summary>Receives the playerEnteringVehicle notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerEnteredVehicleHandler">
+            <summary>Receives the playerEnteredVehicle notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerLeftVehicleHandler">
+            <summary>Receives the playerLeftVehicle notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerChangedVehicleSeatHandler">
+            <summary>Receives the playerChangedVehicleSeat notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.VehicleDestroyHandler">
+            <summary>Receives the vehicleDestroy notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.VehicleSirenHandler">
+            <summary>Receives the vehicleSiren notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.VehicleAttachHandler">
+            <summary>Receives the vehicleAttach notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.VehicleDetachHandler">
+            <summary>Receives the vehicleDetach notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PedDeathHandler">
+            <summary>Receives the pedDeath notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PedHealHandler">
+            <summary>Receives the pedHeal notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.BaseObjectCreateHandler">
+            <summary>Receives the baseObjectCreate notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.BaseObjectRemoveHandler">
+            <summary>Receives the baseObjectRemove notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.RemoveEntityHandler">
+            <summary>Receives the removeEntity notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.EntityModelChangeHandler">
+            <summary>Receives a committed entity model change in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.EntityAttachedHandler">
+            <summary>Receives a committed attachment with its carrying parent, attached child, and kind.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.EntityDetachedHandler">
+            <summary>Receives a removed attachment with its previous parent and kind.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.NetOwnerChangeHandler">
+            <summary>Receives the netOwnerChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.EntityEnterColshapeHandler">
+            <summary>Receives the entityEnterColshape notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.EntityLeaveColshapeHandler">
+            <summary>Receives the entityLeaveColshape notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.StartProjectileHandler">
+            <summary>Receives the startProjectile decision in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ProjectileExplosionHandler">
+            <summary>Receives the projectileExplosion decision in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ExplosionHandler">
+            <summary>Decides whether an explosion may start. Return false to cancel; reporter is null for server-origin effects.
+            Unnamed native tags retain their numeric value in type.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.FireHandler">
+            <summary>Decides whether a fire may start. Reporter is null for server-origin effects; entity is null for a world-position fire.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.VehicleHornHandler">
+            <summary>Receives the vehicleHorn decision in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerRequestControlHandler">
+            <summary>Receives the playerRequestControl decision in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ClientRequestObjectHandler">
+            <summary>Receives the clientRequestObject decision in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ClientDeleteObjectHandler">
+            <summary>Receives the clientDeleteObject decision in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.GlobalMetaChangeHandler">
+            <summary>Receives the globalMetaChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.GlobalSyncedMetaChangeHandler">
+            <summary>Receives the globalSyncedMetaChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.MetaChangeHandler">
+            <summary>Receives the metaChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.SyncedMetaChangeHandler">
+            <summary>Receives the syncedMetaChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.StreamSyncedMetaChangeHandler">
+            <summary>Receives the streamSyncedMetaChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.LocalMetaChangeHandler">
+            <summary>Receives the localMetaChange notification in the current resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.PlayerDisconnectSnapshot">
+            <summary>
+            The last player state known to the server before disconnect cleanup. Contains no live entity references
+            and remains readable after awaiting work or stopping the resource.
+            </summary>
+        </member>
+        <member name="P:Mint.Server.Events.PlayerDisconnectSnapshot.Rotation">
+            <summary>The last rotation in radians, matching the player API.</summary>
+        </member>
+        <member name="P:Mint.Server.Events.PlayerDisconnectSnapshot.CurrentAmmo">
+            <summary>The last server ammo-pool amount for the current weapon, including zero when empty.</summary>
+        </member>
+        <member name="P:Mint.Server.Events.PlayerDisconnectSnapshot.VehicleId">
+            <summary>The last occupied vehicle ID, or null when the player was outside a vehicle.</summary>
+        </member>
+        <member name="P:Mint.Server.Events.PlayerDisconnectSnapshot.Seat">
+            <summary>The last occupied seat (driver = 1), or null when the player was outside a vehicle.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ResourceErrorInfo">
+            <summary>An immutable diagnostic snapshot from an actual runtime exception or resource lifecycle failure.</summary>
+        </member>
+        <member name="P:Mint.Server.Events.ResourceErrorInfo.Message">
+            <summary>A diagnostic excerpt bounded to 1024 UTF-8 bytes. The runtime log retains its normal detailed error.</summary>
+        </member>
+        <member name="P:Mint.Server.Events.ResourceErrorInfo.Resource">
+            <summary>The viewing resource's canonical handle for the same live activation, or null after failure/removal.</summary>
+            <remarks>A restart with the same name never substitutes its new activation. The handle may become invalid after delivery.</remarks>
+        </member>
+        <member name="T:Mint.Server.Events.ResourceErrorPhase">
+            <summary>The runtime boundary that reported a resource failure.</summary>
+        </member>
+        <member name="F:Mint.Server.Events.ResourceErrorPhase.Runtime">
+            <summary>The hosting runtime failed. The resource is affected, not necessarily the source of that failure.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.ServerEventType">
+            <summary>Built-in server events supported by the SDK. Values are selectors, not native event IDs.</summary>
+            <remarks>Use string names for custom resource events. Handlers retain the same signatures and rules as string subscriptions.</remarks>
+        </member>
+        <member name="T:Mint.Server.Events.WeaponDamageResult">
+            <summary>A synchronous weapon damage decision. The default value allows the current damage.</summary>
+        </member>
+        <member name="F:Mint.Server.Events.WeaponDamageResult.MaximumDamage">
+            <summary>Maximum script damage override on every supported transport.</summary>
+        </member>
+        <member name="M:Mint.Server.Events.WeaponDamageResult.WithDamage(System.Single)">
+            <summary>Replaces the damage supplied to subsequent handlers and the game. Zero is allowed.</summary>
+        </member>
+        <member name="T:Mint.Server.Events.WeaponDamageHandler">
+            <summary>Intercepts weapon damage synchronously with the native high-LOD body region.</summary>
+        </member>
+        <member name="T:Mint.Server.Exports.ResourceExportCollection">
+            <summary>Exports of one resource activation. Writes are restricted to Resources.Current.</summary>
+        </member>
+        <member name="M:Mint.Server.Exports.ResourceExportCollection.TryGet``1(System.String,``0@)">
+            <summary>Returns false only for a missing export. Conversion, access, and runtime failures throw.</summary>
+        </member>
+        <member name="M:Mint.Server.Exports.ResourceExportCollection.Import``1(System.String)">
+            <summary>Imports a synchronous function bound to its current owner activation and function identity.</summary>
+            <remarks>Replacing or deleting the export does not revoke an existing import. Revoke and owner/consumer stop do.
+            The remote signature and value conversions are checked when the function is invoked.</remarks>
+        </member>
+        <member name="M:Mint.Server.Exports.ResourceExportCollection.TryImport``1(System.String,``0@)">
+            <summary>Returns false only for a missing export. Invalid signatures, non-functions and runtime failures throw.</summary>
+        </member>
+        <member name="T:Mint.Server.Exports.ScriptFunction">
+            <summary>A function capability issued to this resource. Invocation is synchronous on the server thread.</summary>
+        </member>
+        <member name="M:Mint.Server.Exports.ScriptFunction.Create(System.Delegate)">
+            <summary>Registers one synchronous delegate until explicit revocation or resource stop.</summary>
+        </member>
+        <member name="M:Mint.Server.Exports.ScriptFunction.Revoke">
+            <summary>Only the original owner may revoke the function for all recipients.</summary>
+        </member>
+        <member name="T:Mint.Server.Api">
+            <summary>Short entry points for the server scripting API.</summary>
+            <remarks>Delegates to the same services as <see cref="T:Mint.Server.Server"/>. Resource ownership,
+            server-thread access, entity lifetime and asynchronous execution rules are unchanged.</remarks>
+        </member>
+        <member name="M:Mint.Server.Api.EmitClients(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.EmitClients(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])" />
+        </member>
+        <member name="M:Mint.Server.Api.EmitClientsRaw(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.EmitClientsRaw(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])" />
+        </member>
+        <member name="M:Mint.Server.Api.EmitClientsUnreliable(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.EmitClientsUnreliable(System.Collections.Generic.IEnumerable{Mint.Server.Players.IPlayer},System.String,System.Object[])" />
+        </member>
+        <member name="P:Mint.Server.Api.IsDebug">
+            <summary>Whether the current server configuration enables debug mode.</summary>
+        </member>
+        <member name="P:Mint.Server.Api.StreamingDistance">
+            <inheritdoc cref="P:Mint.Server.Configuration.ConfigurationApi.StreamingDistance"/>
+        </member>
+        <member name="P:Mint.Server.Api.MaxStreamingPlayers">
+            <inheritdoc cref="P:Mint.Server.Configuration.ConfigurationApi.MaxStreamingPlayers"/>
+        </member>
+        <member name="P:Mint.Server.Api.MaxStreamingVehicles">
+            <inheritdoc cref="P:Mint.Server.Configuration.ConfigurationApi.MaxStreamingVehicles"/>
+        </member>
+        <member name="P:Mint.Server.Api.MaxStreamingWorldEntities">
+            <inheritdoc cref="P:Mint.Server.Configuration.ConfigurationApi.MaxStreamingWorldEntities"/>
+        </member>
+        <member name="P:Mint.Server.Api.MigrationDistance">
+            <inheritdoc cref="P:Mint.Server.Configuration.ConfigurationApi.MigrationDistance"/>
+        </member>
+        <member name="P:Mint.Server.Api.ColShapeTickRate">
+            <inheritdoc cref="P:Mint.Server.Configuration.ConfigurationApi.ColShapeTickRate"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetConnectionInfoById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Resources.ConnectionsApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetConnectionInfoById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Resources.ConnectionsApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllConnectionInfos">
+            <inheritdoc cref="P:Mint.Server.Resources.ConnectionsApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllConnectionInfos``1">
+            <inheritdoc cref="M:Mint.Server.Resources.ConnectionsApi.AllOf``1"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateVehicle(System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateVehicle(System.String,Mint.Server.Shared.Vector3,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(System.String,Mint.Server.Shared.Vector3,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateVehicle(System.String,Mint.Server.Shared.Vector3,System.Double,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(System.String,Mint.Server.Shared.Vector3,System.Double,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateObject(System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Byte,System.Byte,System.UInt16,System.UInt32,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.Objects.ObjectsApi.Create(System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Byte,System.Byte,System.UInt16,System.UInt32,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreatePed(System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.Peds.PedsApi.Create(System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreatePickup(System.UInt32,System.String,System.Int32,System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Pickups.PickupsApi.Create(System.UInt32,System.String,System.Int32,System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Int32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateVehicle(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateVehicle(Mint.Server.Vehicles.VehicleModel,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(Mint.Server.Vehicles.VehicleModel,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateVehicle(System.UInt32,Mint.Server.Shared.Vector3,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(System.UInt32,Mint.Server.Shared.Vector3,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateVehicle(System.UInt32,Mint.Server.Shared.Vector3,System.Double,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(System.UInt32,Mint.Server.Shared.Vector3,System.Double,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateObject(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Byte,System.Byte,System.UInt16,System.UInt32,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.Objects.ObjectsApi.Create(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Byte,System.Byte,System.UInt16,System.UInt32,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreatePed(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.Peds.PedsApi.Create(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreatePed(Mint.Server.World.Peds.PedModel,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.Peds.PedsApi.Create(Mint.Server.World.Peds.PedModel,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreatePickup(System.UInt32,System.UInt32,System.Int32,System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Pickups.PickupsApi.Create(System.UInt32,System.UInt32,System.Int32,System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Int32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateMarker(Mint.Server.World.Markers.MarkerType,Mint.Server.Shared.Vector3,Mint.Server.Shared.Rgba,System.Int32,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Markers.MarkersApi.Create(Mint.Server.World.Markers.MarkerType,Mint.Server.Shared.Vector3,Mint.Server.Shared.Rgba,System.Int32,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateMarker(Mint.Server.Players.IPlayer,Mint.Server.World.Markers.MarkerType,Mint.Server.Shared.Vector3,Mint.Server.Shared.Rgba,System.Int32,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Markers.MarkersApi.Create(Mint.Server.Players.IPlayer,Mint.Server.World.Markers.MarkerType,Mint.Server.Shared.Vector3,Mint.Server.Shared.Rgba,System.Int32,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateTextLabel(System.String,System.String,System.Double,System.Double,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,Mint.Server.Shared.Rgba,System.Double,Mint.Server.Shared.Rgba,System.Int32,System.UInt32,Mint.Server.World.TextLabels.TextLabelAlignment,System.Boolean,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.TextLabels.TextLabelsApi.Create(System.String,System.String,System.Double,System.Double,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,Mint.Server.Shared.Rgba,System.Double,Mint.Server.Shared.Rgba,System.Int32,System.UInt32,Mint.Server.World.TextLabels.TextLabelAlignment,System.Boolean,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateCheckpoint(Mint.Server.World.Checkpoints.CheckpointType,Mint.Server.Shared.Vector3,System.Double,System.Double,Mint.Server.Shared.Rgba,System.Nullable{System.UInt32},System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Checkpoints.CheckpointsApi.Create(Mint.Server.World.Checkpoints.CheckpointType,Mint.Server.Shared.Vector3,System.Double,System.Double,Mint.Server.Shared.Rgba,System.Nullable{System.UInt32},System.Int32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateParticleEffect(System.String,System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Double,System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Particles.ParticlesApi.Create(System.String,System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Double,System.Int32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateVirtualEntityGroup(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.VirtualEntities.VirtualEntityGroupsApi.Create(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateColShapeSphere(Mint.Server.Shared.Vector3,System.Double,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.ColShapes.ColShapesApi.CreateSphere(Mint.Server.Shared.Vector3,System.Double,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateColShapeCylinder(Mint.Server.Shared.Vector3,System.Double,System.Double,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.ColShapes.ColShapesApi.CreateCylinder(Mint.Server.Shared.Vector3,System.Double,System.Double,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateColShapeCircle(Mint.Server.Shared.Vector3,System.Double,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.ColShapes.ColShapesApi.CreateCircle(Mint.Server.Shared.Vector3,System.Double,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateColShapeCuboid(Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.ColShapes.ColShapesApi.CreateCuboid(Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateColShapeRectangle(Mint.Server.Shared.Vector2,Mint.Server.Shared.Vector2,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.ColShapes.ColShapesApi.CreateRectangle(Mint.Server.Shared.Vector2,Mint.Server.Shared.Vector2,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateColShapeRectangle(System.Double,Mint.Server.Shared.Vector2,Mint.Server.Shared.Vector2,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.ColShapes.ColShapesApi.CreateRectangle(System.Double,Mint.Server.Shared.Vector2,Mint.Server.Shared.Vector2,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateColShapePolygon(System.Collections.Generic.IReadOnlyList{Mint.Server.Shared.Vector2},System.Double,System.Double,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.ColShapes.ColShapesApi.CreatePolygon(System.Collections.Generic.IReadOnlyList{Mint.Server.Shared.Vector2},System.Double,System.Double,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreatePointBlip(Mint.Server.Shared.Vector3,System.Boolean,System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.CreatePointBlip(Mint.Server.Shared.Vector3,System.Boolean,System.Int32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreatePointBlip(Mint.Server.Entities.IEntity,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.CreatePointBlip(Mint.Server.Entities.IEntity,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreatePointBlip(Mint.Server.Shared.Vector3,System.Collections.Generic.IReadOnlyList{Mint.Server.Players.IPlayer},System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.CreatePointBlip(Mint.Server.Shared.Vector3,System.Collections.Generic.IReadOnlyList{Mint.Server.Players.IPlayer},System.Int32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreatePointBlip(Mint.Server.Entities.IEntity,System.Collections.Generic.IReadOnlyList{Mint.Server.Players.IPlayer})">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.CreatePointBlip(Mint.Server.Entities.IEntity,System.Collections.Generic.IReadOnlyList{Mint.Server.Players.IPlayer})"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateRadiusBlip(Mint.Server.Shared.Vector3,System.Double,System.Boolean,System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.CreateRadiusBlip(Mint.Server.Shared.Vector3,System.Double,System.Boolean,System.Int32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateRadiusBlip(Mint.Server.Shared.Vector3,System.Double,System.Collections.Generic.IReadOnlyList{Mint.Server.Players.IPlayer},System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.CreateRadiusBlip(Mint.Server.Shared.Vector3,System.Double,System.Collections.Generic.IReadOnlyList{Mint.Server.Players.IPlayer},System.Int32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateAreaBlip(Mint.Server.Shared.Vector3,System.Double,System.Double,System.Boolean,System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.CreateAreaBlip(Mint.Server.Shared.Vector3,System.Double,System.Double,System.Boolean,System.Int32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateAreaBlip(Mint.Server.Shared.Vector3,System.Double,System.Double,System.Collections.Generic.IReadOnlyList{Mint.Server.Players.IPlayer},System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.CreateAreaBlip(Mint.Server.Shared.Vector3,System.Double,System.Double,System.Collections.Generic.IReadOnlyList{Mint.Server.Players.IPlayer},System.Int32)"/>
+        </member>
+        <member name="P:Mint.Server.Api.Dispatcher">
+            <inheritdoc cref="P:Mint.Server.Server.Dispatcher"/>
+        </member>
+        <member name="P:Mint.Server.Api.NetTime">
+            <inheritdoc cref="P:Mint.Server.Server.NetTime"/>
+        </member>
+        <member name="M:Mint.Server.Api.Stop">
+            <inheritdoc cref="M:Mint.Server.Server.Stop"/>
+        </member>
+        <member name="M:Mint.Server.Api.Hash(System.String)">
+            <inheritdoc cref="M:Mint.Server.Shared.GameHash.Compute(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetServerConfig">
+            <inheritdoc cref="P:Mint.Server.Configuration.ConfigurationApi.Current"/>
+        </member>
+        <member name="M:Mint.Server.Api.SetServerPassword(System.String)">
+            <inheritdoc cref="M:Mint.Server.Configuration.ConfigurationApi.SetPassword(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetPlayerById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Players.PlayersApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetPlayerById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Players.PlayersApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllPlayers">
+            <inheritdoc cref="P:Mint.Server.Players.PlayersApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVehicleById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVehicleById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllVehicles">
+            <inheritdoc cref="P:Mint.Server.Vehicles.VehiclesApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetObjectById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Objects.ObjectsApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetObjectById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Objects.ObjectsApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllObjects">
+            <inheritdoc cref="P:Mint.Server.World.Objects.ObjectsApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetPedById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Peds.PedsApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetPedById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Peds.PedsApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllPeds">
+            <inheritdoc cref="P:Mint.Server.World.Peds.PedsApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetPickupById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Pickups.PickupsApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetPickupById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Pickups.PickupsApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllPickups">
+            <inheritdoc cref="P:Mint.Server.World.Pickups.PickupsApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetColShapeById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.ColShapes.ColShapesApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetColShapeById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.ColShapes.ColShapesApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllColShapes">
+            <inheritdoc cref="P:Mint.Server.World.ColShapes.ColShapesApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetCheckpointById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Checkpoints.CheckpointsApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetCheckpointById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Checkpoints.CheckpointsApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllCheckpoints">
+            <inheritdoc cref="P:Mint.Server.World.Checkpoints.CheckpointsApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetMarkerById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Markers.MarkersApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetMarkerById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Markers.MarkersApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllMarkers">
+            <inheritdoc cref="P:Mint.Server.World.Markers.MarkersApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetTextLabelById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.TextLabels.TextLabelsApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetTextLabelById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.TextLabels.TextLabelsApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllTextLabels">
+            <inheritdoc cref="P:Mint.Server.World.TextLabels.TextLabelsApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetBlipById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetBlipById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Blips.BlipsApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllBlips">
+            <inheritdoc cref="P:Mint.Server.World.Blips.BlipsApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetParticleEffectById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Particles.ParticlesApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetParticleEffectById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.Particles.ParticlesApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllParticleEffects">
+            <inheritdoc cref="P:Mint.Server.World.Particles.ParticlesApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVirtualEntityById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.VirtualEntities.VirtualEntitiesApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVirtualEntityById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.VirtualEntities.VirtualEntitiesApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllVirtualEntities">
+            <inheritdoc cref="P:Mint.Server.World.VirtualEntities.VirtualEntitiesApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVirtualEntityGroupById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.VirtualEntities.VirtualEntityGroupsApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVirtualEntityGroupById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.VirtualEntities.VirtualEntityGroupsApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllVirtualEntityGroups">
+            <inheritdoc cref="P:Mint.Server.World.VirtualEntities.VirtualEntityGroupsApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetBaseObjectById(Mint.Server.Shared.BaseObjectType,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.WorldApi.GetById(Mint.Server.Shared.BaseObjectType,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetWorldObjectById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.World.WorldApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllWorldObjects">
+            <inheritdoc cref="P:Mint.Server.World.WorldApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetEntitiesInDimension(System.Int32,Mint.Server.World.EntityFilter)">
+            <inheritdoc cref="M:Mint.Server.World.WorldApi.GetEntitiesInDimension(System.Int32,Mint.Server.World.EntityFilter)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetEntitiesInRange(Mint.Server.Shared.Vector3,System.Double,System.Int32,Mint.Server.World.EntityFilter)">
+            <inheritdoc cref="M:Mint.Server.World.WorldApi.GetEntitiesInRange(Mint.Server.Shared.Vector3,System.Double,System.Int32,Mint.Server.World.EntityFilter)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetClosestEntities(Mint.Server.Shared.Vector3,System.Double,System.Int32,System.Int32,Mint.Server.World.EntityFilter)">
+            <inheritdoc cref="M:Mint.Server.World.WorldApi.GetClosestEntities(Mint.Server.Shared.Vector3,System.Double,System.Int32,System.Int32,Mint.Server.World.EntityFilter)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.OnceAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.OffAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAsync(System.String,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.OnClientAsync(System.String,System.Func{Mint.Server.Players.IPlayer,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnClientAsync(System.String,System.Func{Mint.Server.Players.IPlayer,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.OnceClientAsync(System.String,System.Func{Mint.Server.Players.IPlayer,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceClientAsync(System.String,System.Func{Mint.Server.Players.IPlayer,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.OffClientAsync(System.String,System.Func{Mint.Server.Players.IPlayer,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffClientAsync(System.String,System.Func{Mint.Server.Players.IPlayer,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.OnAnyAsync(System.Func{System.String,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAnyAsync(System.Func{System.String,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.OffAnyAsync(System.Func{System.String,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAnyAsync(System.Func{System.String,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.OnAnyClientAsync(System.Func{Mint.Server.Players.IPlayer,System.String,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAnyClientAsync(System.Func{Mint.Server.Players.IPlayer,System.String,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.OffAnyClientAsync(System.Func{Mint.Server.Players.IPlayer,System.String,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAnyClientAsync(System.Func{Mint.Server.Players.IPlayer,System.String,System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})" />
+        </member>
+        <member name="M:Mint.Server.Api.Once(System.String,System.Action{System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Once(System.String,System.Action{System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.OnceClient(System.String,System.Action{Mint.Server.Players.IPlayer,System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceClient(System.String,System.Action{Mint.Server.Players.IPlayer,System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.OnDecision(System.String,System.Func{System.Object[],System.Boolean})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnDecision(System.String,System.Func{System.Object[],System.Boolean})" />
+        </member>
+        <member name="M:Mint.Server.Api.OffDecision(System.String,System.Func{System.Object[],System.Boolean})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffDecision(System.String,System.Func{System.Object[],System.Boolean})" />
+        </member>
+        <member name="M:Mint.Server.Api.OnAny(System.Action{System.String,System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAny(System.Action{System.String,System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.OffAny(System.Action{System.String,System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAny(System.Action{System.String,System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.OnAnyClient(System.Action{Mint.Server.Players.IPlayer,System.String,System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAnyClient(System.Action{Mint.Server.Players.IPlayer,System.String,System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.OffAnyClient(System.Action{Mint.Server.Players.IPlayer,System.String,System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAnyClient(System.Action{Mint.Server.Players.IPlayer,System.String,System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.GetRegisteredServerEvents">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.GetRegisteredServerEvents" />
+        </member>
+        <member name="M:Mint.Server.Api.GetRegisteredClientEvents">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.GetRegisteredClientEvents" />
+        </member>
+        <member name="M:Mint.Server.Api.On(System.String,System.Action{System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.On(System.String,System.Action{System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.Off(System.String,System.Action{System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Off(System.String,System.Action{System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.Emit(System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Emit(System.String,System.Object[])" />
+        </member>
+        <member name="M:Mint.Server.Api.EmitAllClients(System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.EmitAllClients(System.String,System.Object[])" />
+        </member>
+        <member name="M:Mint.Server.Api.EmitAllClientsRaw(System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.EmitAllClientsRaw(System.String,System.Object[])" />
+        </member>
+        <member name="M:Mint.Server.Api.EmitAllClientsUnreliable(System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.EmitAllClientsUnreliable(System.String,System.Object[])" />
+        </member>
+        <member name="M:Mint.Server.Api.OnClient(System.String,System.Action{Mint.Server.Players.IPlayer,System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnClient(System.String,System.Action{Mint.Server.Players.IPlayer,System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.OffClient(System.String,System.Action{Mint.Server.Players.IPlayer,System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffClient(System.String,System.Action{Mint.Server.Players.IPlayer,System.Object[]})" />
+        </member>
+        <member name="M:Mint.Server.Api.EmitClient(Mint.Server.Players.IPlayer,System.String,System.Object[])">
+            <summary>Emits an event to the specified player through its remote API.</summary>
+        </member>
+        <member name="M:Mint.Server.Api.EmitClientRaw(Mint.Server.Players.IPlayer,System.String,System.Object[])">
+            <summary>Emits a raw event to the specified player through its remote API.</summary>
+        </member>
+        <member name="M:Mint.Server.Api.EmitClientUnreliable(Mint.Server.Players.IPlayer,System.String,System.Object[])">
+            <summary>Emits an unreliable event to the specified player through its remote API.</summary>
+        </member>
+        <member name="M:Mint.Server.Api.GetGameDataCatalogInfo">
+            <inheritdoc cref="M:Mint.Server.GameData.GameDataApi.GetCatalogInfo"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVehicleModelInfo(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.GameData.GameDataApi.GetVehicleModelInfo(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVehicleModelInfo(System.String)">
+            <inheritdoc cref="M:Mint.Server.GameData.GameDataApi.GetVehicleModelInfo(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetPedModelInfo(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.GameData.GameDataApi.GetPedModelInfo(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetPedModelInfo(System.String)">
+            <inheritdoc cref="M:Mint.Server.GameData.GameDataApi.GetPedModelInfo(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetWeaponModelInfo(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.GameData.GameDataApi.GetWeaponModelInfo(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetWeaponModelInfo(System.String)">
+            <inheritdoc cref="M:Mint.Server.GameData.GameDataApi.GetWeaponModelInfo(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetClothesModelInfo(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.GameData.GameDataApi.GetClothesModelInfo(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAmmoHashForWeaponHash(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.GameData.GameDataApi.GetAmmoHashForWeaponHash(System.UInt32)"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnServerStarted">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnServerStarted"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnConsoleCommand">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnConsoleCommand"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnAnyResourceStart">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnAnyResourceStart"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnAnyResourceStop">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnAnyResourceStop"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnAnyResourceError">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnAnyResourceError"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerConnect">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerConnect"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerSpawn">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerSpawn"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerStartTalking">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerStartTalking"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerStopTalking">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerStopTalking"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerConnectDenied">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerConnectDenied"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerDisconnect">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerDisconnect"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerDeath">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerDeath"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerPickup">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerPickup"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerHeal">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerHeal"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerWeaponChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerWeaponChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerDimensionChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerDimensionChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerInteriorChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerInteriorChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerAnimationChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerAnimationChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerEnteringVehicle">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerEnteringVehicle"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerEnteredVehicle">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerEnteredVehicle"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerLeftVehicle">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerLeftVehicle"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerChangedVehicleSeat">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerChangedVehicleSeat"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnVehicleDestroy">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnVehicleDestroy"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnVehicleSiren">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnVehicleSiren"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnVehicleAttach">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnVehicleAttach"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnVehicleDetach">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnVehicleDetach"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPedDeath">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPedDeath"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPedHeal">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPedHeal"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnBaseObjectCreate">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnBaseObjectCreate"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnBaseObjectRemove">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnBaseObjectRemove"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnRemoveEntity">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnRemoveEntity"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnEntityModelChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnEntityModelChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnEntityAttached">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnEntityAttached"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnEntityDetached">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnEntityDetached"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnNetOwnerChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnNetOwnerChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnEntityEnterColshape">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnEntityEnterColshape"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnEntityLeaveColshape">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnEntityLeaveColshape"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnStartProjectile">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnStartProjectile"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnProjectileExplosion">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnProjectileExplosion"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnExplosion">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnExplosion"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnFire">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnFire"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnVehicleHorn">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnVehicleHorn"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnPlayerRequestControl">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnPlayerRequestControl"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnClientRequestObject">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnClientRequestObject"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnClientDeleteObject">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnClientDeleteObject"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnGlobalMetaChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnGlobalMetaChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnGlobalSyncedMetaChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnGlobalSyncedMetaChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnMetaChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnMetaChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnSyncedMetaChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnSyncedMetaChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnStreamSyncedMetaChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnStreamSyncedMetaChange"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnLocalMetaChange">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnLocalMetaChange"/>
+        </member>
+        <member name="M:Mint.Server.Api.Import``1(System.String,System.String)">
+            <inheritdoc cref="M:Mint.Server.Exports.ResourceExportCollection.Import``1(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.TryImport``1(System.String,System.String,``0@)">
+            <summary>Returns false only if the resource or export is missing. Import and runtime failures throw.</summary>
+        </member>
+        <member name="M:Mint.Server.Api.GetExport``1(System.String,System.String)">
+            <summary>Reads an exported value. Missing resources/exports and incompatible values throw.</summary>
+        </member>
+        <member name="M:Mint.Server.Api.TryGetExport``1(System.String,System.String,``0@)">
+            <summary>Returns false only if the resource or export is missing. Present null is a value; conversion failures throw.</summary>
+        </member>
+        <member name="M:Mint.Server.Api.Log(System.String,Mint.Server.Logging.LogLevel)">
+            <inheritdoc cref="M:Mint.Server.Logging.LoggingApi.Log(System.String,Mint.Server.Logging.LogLevel)"/>
+        </member>
+        <member name="M:Mint.Server.Api.LogDebug(System.String)">
+            <inheritdoc cref="M:Mint.Server.Logging.LoggingApi.LogDebug(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.LogColored(System.String)">
+            <inheritdoc cref="M:Mint.Server.Logging.LoggingApi.LogColored(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.LogColored(Mint.Server.Logging.ColoredMessage)">
+            <inheritdoc cref="M:Mint.Server.Logging.LoggingApi.LogColored(Mint.Server.Logging.ColoredMessage)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetMeta(System.String)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Get(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetMeta``1(System.String)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Get``1(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.TryGetMeta(System.String,System.Object@)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.TryGet(System.String,System.Object@)"/>
+        </member>
+        <member name="M:Mint.Server.Api.TryGetMeta``1(System.String,``0@)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.TryGet``1(System.String,``0@)"/>
+        </member>
+        <member name="M:Mint.Server.Api.HasMeta(System.String)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Has(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetMetaKeys">
+            <inheritdoc cref="P:Mint.Server.Metadata.MetadataStore.Keys"/>
+        </member>
+        <member name="M:Mint.Server.Api.SetMeta(System.String,System.Object)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Set(System.String,System.Object)"/>
+        </member>
+        <member name="M:Mint.Server.Api.SetMeta(System.Collections.Generic.IReadOnlyDictionary{System.String,System.Object})">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Set(System.Collections.Generic.IReadOnlyDictionary{System.String,System.Object})"/>
+        </member>
+        <member name="M:Mint.Server.Api.DeleteMeta(System.String)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Delete(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetSyncedMeta(System.String)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Get(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetSyncedMeta``1(System.String)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Get``1(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.TryGetSyncedMeta(System.String,System.Object@)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.TryGet(System.String,System.Object@)"/>
+        </member>
+        <member name="M:Mint.Server.Api.TryGetSyncedMeta``1(System.String,``0@)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.TryGet``1(System.String,``0@)"/>
+        </member>
+        <member name="M:Mint.Server.Api.HasSyncedMeta(System.String)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Has(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetSyncedMetaKeys">
+            <inheritdoc cref="P:Mint.Server.Metadata.MetadataStore.Keys"/>
+        </member>
+        <member name="M:Mint.Server.Api.SetSyncedMeta(System.String,System.Object)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Set(System.String,System.Object)"/>
+        </member>
+        <member name="M:Mint.Server.Api.SetSyncedMeta(System.Collections.Generic.IReadOnlyDictionary{System.String,System.Object})">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Set(System.Collections.Generic.IReadOnlyDictionary{System.String,System.Object})"/>
+        </member>
+        <member name="M:Mint.Server.Api.DeleteSyncedMeta(System.String)">
+            <inheritdoc cref="M:Mint.Server.Metadata.MetadataStore.Delete(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.RegisterMetric(System.String,Mint.Server.Metrics.MetricType,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String})">
+            <inheritdoc cref="M:Mint.Server.Metrics.MetricsApi.Register(System.String,Mint.Server.Metrics.MetricType,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String})"/>
+        </member>
+        <member name="M:Mint.Server.Api.UnregisterMetric(Mint.Server.Metrics.IMetric)">
+            <inheritdoc cref="M:Mint.Server.Metrics.MetricsApi.Unregister(Mint.Server.Metrics.IMetric)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllMetrics">
+            <inheritdoc cref="P:Mint.Server.Metrics.MetricsApi.All"/>
+        </member>
+        <member name="P:Mint.Server.Api.CurrentResource">
+            <inheritdoc cref="P:Mint.Server.Resources.ResourcesApi.Current"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetResourceById(System.UInt64)">
+            <inheritdoc cref="M:Mint.Server.Resources.ResourcesApi.GetById(System.UInt64)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetResourceById``1(System.UInt64)">
+            <inheritdoc cref="M:Mint.Server.Resources.ResourcesApi.GetById``1(System.UInt64)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetResourceByName(System.String)">
+            <inheritdoc cref="M:Mint.Server.Resources.ResourcesApi.GetByName(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllResources">
+            <inheritdoc cref="P:Mint.Server.Resources.ResourcesApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetResourceCatalog">
+            <inheritdoc cref="P:Mint.Server.Resources.ResourcesApi.Catalog"/>
+        </member>
+        <member name="M:Mint.Server.Api.StartResource(System.String)">
+            <inheritdoc cref="M:Mint.Server.Resources.ResourcesApi.Start(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.StopResource(System.String)">
+            <inheritdoc cref="M:Mint.Server.Resources.ResourcesApi.Stop(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.RestartResource(System.String)">
+            <inheritdoc cref="M:Mint.Server.Resources.ResourcesApi.Restart(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.Export(System.String,System.Object)">
+            <summary>Sets a value exported by the current resource.</summary>
+            <inheritdoc cref="M:Mint.Server.Exports.ResourceExportCollection.Set(System.String,System.Object)"/>
+        </member>
+        <member name="M:Mint.Server.Api.Export(System.String,System.Delegate)">
+            <summary>Exports a synchronous function from the current resource.</summary>
+            <inheritdoc cref="M:Mint.Server.Exports.ResourceExportCollection.Set(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.DeleteExport(System.String)">
+            <summary>Removes an export from the current resource.</summary>
+        </member>
+        <member name="M:Mint.Server.Api.ResourceFileExists(System.String)">
+            <inheritdoc cref="M:Mint.Server.Files.ResourceFilesApi.Exists(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.ReadResourceFileBytes(System.String)">
+            <inheritdoc cref="M:Mint.Server.Files.ResourceFilesApi.ReadBytes(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.ReadResourceFile(System.String,Mint.Server.Files.ResourceFileEncoding)">
+            <inheritdoc cref="M:Mint.Server.Files.ResourceFilesApi.ReadText(System.String,Mint.Server.Files.ResourceFileEncoding)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnRpc(System.String,Mint.Server.Rpc.RpcHandler)">
+            <inheritdoc cref="M:Mint.Server.Rpc.RpcApi.On(System.String,Mint.Server.Rpc.RpcHandler)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnRpc(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Rpc.RpcApi.On(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnRpc(System.String,System.Func{Mint.Server.Players.IPlayer,System.Object[],System.Threading.Tasks.ValueTask{Mint.Server.Rpc.RpcResult}})">
+            <inheritdoc cref="M:Mint.Server.Rpc.RpcApi.On(System.String,System.Func{Mint.Server.Players.IPlayer,System.Object[],System.Threading.Tasks.ValueTask{Mint.Server.Rpc.RpcResult}})"/>
+        </member>
+        <member name="M:Mint.Server.Api.OffRpc(System.String)">
+            <inheritdoc cref="M:Mint.Server.Rpc.RpcApi.Off(System.String)"/>
+        </member>
+        <member name="M:Mint.Server.Api.EmitClientRpcAsync(Mint.Server.Players.IPlayer,System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Players.Remote.PlayerRemote.EmitRpcAsync(System.String,System.Object[])"/>
+        </member>
+        <member name="M:Mint.Server.Api.EmitClientRpcAsync``1(Mint.Server.Players.IPlayer,System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Players.Remote.PlayerRemote.EmitRpcAsync``1(System.String,System.Object[])"/>
+        </member>
+        <member name="M:Mint.Server.Api.On(Mint.Server.Events.ServerEventType,System.Action{System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.On(Mint.Server.Events.ServerEventType,System.Action{System.Object[]})"/>
+        </member>
+        <member name="M:Mint.Server.Api.On(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.On(Mint.Server.Events.ServerEventType,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.Once(Mint.Server.Events.ServerEventType,System.Action{System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Once(Mint.Server.Events.ServerEventType,System.Action{System.Object[]})"/>
+        </member>
+        <member name="M:Mint.Server.Api.Once(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Once(Mint.Server.Events.ServerEventType,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.Off(Mint.Server.Events.ServerEventType,System.Action{System.Object[]})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Off(Mint.Server.Events.ServerEventType,System.Action{System.Object[]})"/>
+        </member>
+        <member name="M:Mint.Server.Api.Off(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Off(Mint.Server.Events.ServerEventType,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnAsync(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAsync(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnAsync(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAsync(Mint.Server.Events.ServerEventType,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnceAsync(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceAsync(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnceAsync(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceAsync(Mint.Server.Events.ServerEventType,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OffAsync(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAsync(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Threading.CancellationToken,System.Threading.Tasks.Task})"/>
+        </member>
+        <member name="M:Mint.Server.Api.OffAsync(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAsync(Mint.Server.Events.ServerEventType,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnDecision(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Boolean})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnDecision(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Boolean})"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnDecision(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnDecision(Mint.Server.Events.ServerEventType,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OffDecision(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Boolean})">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffDecision(Mint.Server.Events.ServerEventType,System.Func{System.Object[],System.Boolean})"/>
+        </member>
+        <member name="M:Mint.Server.Api.OffDecision(Mint.Server.Events.ServerEventType,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffDecision(Mint.Server.Events.ServerEventType,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.On(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.On(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.Once(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Once(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.Off(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.Off(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnAsync(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnAsync(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnceAsync(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceAsync(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OffAsync(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffAsync(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnClient(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnClient(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnceClient(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceClient(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OffClient(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffClient(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnClientAsync(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnClientAsync(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnceClientAsync(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnceClientAsync(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OffClientAsync(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffClientAsync(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OnDecision(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OnDecision(System.String,System.Delegate)"/>
+        </member>
+        <member name="M:Mint.Server.Api.OffDecision(System.String,System.Delegate)">
+            <inheritdoc cref="M:Mint.Server.Events.EventsApi.OffDecision(System.String,System.Delegate)"/>
+        </member>
+        <member name="P:Mint.Server.Api.VoiceDeployment">
+            <inheritdoc cref="P:Mint.Server.Voice.VoiceApi.Deployment"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVoiceChannelById(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Voice.VoiceApi.GetById(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetVoiceChannelById``1(System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Voice.VoiceApi.GetById``1(System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Api.GetAllVoiceChannels">
+            <inheritdoc cref="P:Mint.Server.Voice.VoiceApi.All"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateSpatialVoiceChannel(System.Double)">
+            <inheritdoc cref="M:Mint.Server.Voice.VoiceApi.CreateSpatial(System.Double)"/>
+        </member>
+        <member name="M:Mint.Server.Api.CreateNonSpatialVoiceChannel">
+            <inheritdoc cref="M:Mint.Server.Voice.VoiceApi.CreateNonSpatial"/>
+        </member>
+        <member name="E:Mint.Server.Api.OnWeaponDamage">
+            <inheritdoc cref="E:Mint.Server.Events.EventsApi.OnWeaponDamage"/>
+        </member>
+        <member name="T:Mint.Server.Files.ResourceFilesApi">
+            <summary>Read-only access to files beneath the current resource's activation root.</summary>
+        </member>
+        <member name="M:Mint.Server.Files.ResourceFilesApi.Exists(System.String)">
+            <summary>Returns whether the safe relative path names an accessible regular file.</summary>
+        </member>
+        <member name="M:Mint.Server.Files.ResourceFilesApi.ReadBytes(System.String)">
+            <summary>Reads an independent binary snapshot of a file up to 64 MiB.</summary>
+        </member>
+        <member name="M:Mint.Server.Files.ResourceFilesApi.ReadText(System.String,Mint.Server.Files.ResourceFileEncoding)">
+            <summary>Reads strict UTF-8 or UTF-16; an optional matching BOM is removed.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.GameDataApi">
+            <summary>The immutable GTA definitions loaded by the server host.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.GameDataApi.GetVehicleModelInfo(System.String)">
+            <summary>Looks up a model by its name hashed with the standard game hash.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.GameDataApi.GetPedModelInfo(System.String)">
+            <summary>Looks up a model by its name hashed with the standard game hash.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.GameDataApi.GetWeaponModelInfo(System.String)">
+            <summary>Looks up a weapon by its name hashed with the standard game hash.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.GameDataNameInfo">
+            <summary>A source-backed identifier. Hash matching does not recover original spelling or case.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.GameDataNameInfo.#ctor(System.String,System.UInt32,Mint.Server.GameData.GameDataNameBasis,System.Int32)">
+            <summary>A source-backed identifier. Hash matching does not recover original spelling or case.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.GameDataPedTypeInfo">
+            <summary>A source ped-type hash and mapping that agree with the live model's numeric type.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.GameDataPedTypeInfo.#ctor(System.String,System.UInt32,System.Int32,System.UInt32,System.Int32,System.Int32)">
+            <summary>A source ped-type hash and mapping that agree with the live model's numeric type.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.GameDataPedDlcInfo">
+            <summary>A stock ped package identity backed by its model definition and selected DLC XML sources.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.GameDataPedDlcInfo.#ctor(System.String,System.UInt32,System.Int32,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>A stock ped package identity backed by its model definition and selected DLC XML sources.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.ModelBoneInfo">
+            <summary>Exact serialized skeleton indices and tags; ParentIndex is -1 for a root bone.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.ModelBoneInfo.#ctor(System.String,System.UInt16,System.UInt16,System.Int16)">
+            <summary>Exact serialized skeleton indices and tags; ParentIndex is -1 for a root bone.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.ModelSkeletonInfo">
+            <summary>A complete skeleton from the exact committed source asset. Null means unavailable.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.ModelSkeletonInfo.#ctor(System.Int32,System.Collections.Generic.IReadOnlyList{Mint.Server.GameData.ModelBoneInfo})">
+            <summary>A complete skeleton from the exact committed source asset. Null means unavailable.</summary>
+        </member>
+        <member name="P:Mint.Server.GameData.GameDataSourceFile.PedTypeNames">
+            <summary>Source array indexed by numeric ped type; null for other source kinds.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.VehicleModelInfo">
+            <summary>A detached projection of the host's vehicle record. Schema 2 has no Metadata.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.VehicleModelInfo.#ctor(System.UInt32,System.String,System.Int32,System.Boolean,Mint.Server.GameData.VehicleModelMetadata)">
+            <summary>A detached projection of the host's vehicle record. Schema 2 has no Metadata.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.VehicleModelMetadata">
+            <summary>Null entity-query fields remain unavailable; QueryStatus explains why.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.VehicleModelMetadata.#ctor(System.Int32,System.Boolean,System.Int32,System.Collections.Generic.IReadOnlyList{System.UInt16},System.String,System.Nullable{System.Int32},System.Nullable{System.UInt32},System.Collections.Generic.IReadOnlyList{System.Int32},System.Collections.Generic.IReadOnlyList{Mint.Server.GameData.VehicleModKitInfo})">
+            <summary>Null entity-query fields remain unavailable; QueryStatus explains why.</summary>
+        </member>
+        <member name="P:Mint.Server.GameData.VehicleModelMetadata.DefaultColorCombinations">
+            <summary>Verified model color rows; scalar colors select the first row. Null means unavailable.</summary>
+        </member>
+        <member name="P:Mint.Server.GameData.VehicleModelMetadata.Type">
+            <summary>Maps known GTA kinds; reserved DRAFT and unknown values remain Invalid, with VehicleType retained.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.VehicleWheelModCounts">
+            <summary>Indexed mod counts for one wheel category; null means GTA refused that category.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.VehicleWheelModCounts.#ctor(System.Int32,System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>Indexed mod counts for one wheel category; null means GTA refused that category.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.PedModelMetadata">
+            <summary>Names unavailable in GTA stay null; weapon and movement identifiers are hashes.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.PedModelMetadata.#ctor(System.String,System.String,System.Int32,System.UInt32,System.UInt32)">
+            <summary>Names unavailable in GTA stay null; weapon and movement identifiers are hashes.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.ClothesSlotInfo">
+            <summary>Collections is unavailable in schema 2; zero texture counts are preserved.</summary>
+        </member>
+        <member name="M:Mint.Server.GameData.ClothesSlotInfo.#ctor(System.Int32,System.Collections.Generic.IReadOnlyList{System.Int32},System.Collections.Generic.IReadOnlyList{Mint.Server.GameData.ClothesCollectionInfo})">
+            <summary>Collections is unavailable in schema 2; zero texture counts are preserved.</summary>
+        </member>
+        <member name="T:Mint.Server.GameData.VehicleModelType">
+            <summary>Semantic model kinds. Values differ from GTA's raw vehicle-type field.</summary>
+        </member>
+        <member name="T:Mint.Server.Logging.ColoredMessage">
+            <summary>An immutable message built with text and server console color tokens.</summary>
+        </member>
+        <member name="M:Mint.Server.Logging.LoggingApi.LogDebug(System.String)">
+            <summary>Writes a DEBUG record when the server's debug configuration is enabled.</summary>
+        </member>
+        <member name="M:Mint.Server.Logging.LoggingApi.LogColored(System.String)">
+            <summary>Writes a colored INFO record. Recognized color tokens are omitted from plain text log files.</summary>
+        </member>
+        <member name="M:Mint.Server.Metadata.MetadataStore.Get``1(System.String)">
+            <summary>Missing keys throw; stored null is allowed for reference/nullable types. Numeric conversion is checked.</summary>
+        </member>
+        <member name="M:Mint.Server.Metadata.MetadataStore.TryGet``1(System.String,``0@)">
+            <summary>Returns false for missing keys or incompatible values. Backend and custom-adapter exceptions propagate.</summary>
+        </member>
+        <member name="M:Mint.Server.Metadata.MetadataStore.Set(System.Collections.Generic.IReadOnlyDictionary{System.String,System.Object})">
+            <summary>Prevalidates all entries, then writes in enumeration order. A later failure may leave a committed prefix.</summary>
+        </member>
+        <member name="M:Mint.Server.Players.Appearance.PlayerAppearance.SetHeadBlendPaletteColor(System.Byte,Mint.Server.Shared.Rgba)">
+            <summary>Palette entries are RGB; alpha must be 255.</summary>
+        </member>
+        <member name="T:Mint.Server.Players.BodyPart">
+            <summary>GTA high-LOD ragdoll regions. These ordinals are not bone tags or skeleton indices.</summary>
+        </member>
+        <member name="M:Mint.Server.Players.BodyParts.FromBoneId(System.UInt32)">
+            <summary>Classifies only exact verified pelvis, foot, upper-arm, neck and head skeleton tags.
+            Other tags return Unknown; no nearest-bone, model-dependent ragdoll or name-based inference is performed.</summary>
+        </member>
+        <member name="P:Mint.Server.Players.IPlayer.LastDamagedBodyRegion">
+            <summary>A conservative exact-bone classification; unsupported tags yield Unknown. The raw bone ID remains available.</summary>
+        </member>
+        <member name="P:Mint.Server.Players.Player.IsSuperJumpEnabled">
+            <summary>Throws until the client has supplied an available super-jump sample.</summary>
+        </member>
+        <member name="P:Mint.Server.Players.Player.BloodDamage">
+            <summary>Canonical base64 of MiNT PlayerBloodData v1; unavailable samples throw.</summary>
+        </member>
+        <member name="P:Mint.Server.Players.Player.AimPosition">
+            <summary>World aim point, or zero while aiming at an entity.</summary>
+        </member>
+        <member name="P:Mint.Server.Players.Player.EntityAimOffset">
+            <summary>Target-relative offset, or zero when there is no entity aim target.</summary>
+        </member>
+        <member name="P:Mint.Server.Players.Player.SocialId">
+            <summary>Client-supplied decimal Social Club ID; retained as text without narrowing its range.</summary>
+        </member>
+        <member name="P:Mint.Server.Players.Player.HwidHash">
+            <summary>Client installation identifier (64 hex characters), not an attested hardware fingerprint.</summary>
+        </member>
+        <member name="P:Mint.Server.Players.Player.DiscordId">
+            <summary>Client-reported decimal Discord user ID, or empty; not proof of OAuth authentication.</summary>
+        </member>
+        <member name="M:Mint.Server.Players.Player.GetForwardVector">
+            <summary>Unit forward direction for GTA XYZ rotation in radians; zero rotation points along +Y.</summary>
+        </member>
+        <member name="M:Mint.Server.Players.Remote.IPlayerRemote.EmitRpcAsync``1(System.String,System.Object[])">
+            <summary>Requests a value converted to T in the calling resource before the task completes.</summary>
+            <remarks>A missing result fails; an explicit null is accepted only for reference or nullable value types.</remarks>
+        </member>
+        <member name="M:Mint.Server.Players.Remote.PlayerRemote.EmitRpcAsync``1(System.String,System.Object[])">
+            <inheritdoc cref="M:Mint.Server.Players.Remote.IPlayerRemote.EmitRpcAsync``1(System.String,System.Object[])"/>
+        </member>
+        <member name="T:Mint.Server.Players.Weapons.AmmoType">
+            <summary>Named GTA ammo hashes. Null is the hash of "NULL", not the absence sentinel zero.</summary>
+        </member>
+        <member name="T:Mint.Server.Players.Weapons.WeaponModel">
+            <summary>GTA weapon hashes verified against the MiNT WeaponAmmo catalog.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.ConnectionConfiguration">
+            <summary>Configures the connection factory and independent canonical pool before OnStart.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.ConnectionConstructionContext">
+            <summary>A single-use permit supplied during the resource's connection factory call.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.ConnectionInfo">
+            <summary>
+            A resource-local view of one admission attempt. Identity, status and vote snapshots remain readable after removal;
+            local data and mutations require an active handle in its owning resource callback.
+            </summary>
+        </member>
+        <member name="P:Mint.Server.Resources.ConnectionInfo.IsAccepted">
+            <summary>This resource's acceptance vote, initially false; retained for diagnostics after removal.</summary>
+        </member>
+        <member name="P:Mint.Server.Resources.ConnectionInfo.DiscordUserId">
+            <summary>Informational desktop Discord snapshot; empty when unavailable, never OAuth proof.</summary>
+        </member>
+        <member name="P:Mint.Server.Resources.ConnectionInfo.Text">
+            <summary>Status shown while this resource's queue handler is pending; at most 256 UTF-8 bytes.</summary>
+        </member>
+        <member name="M:Mint.Server.Resources.ConnectionInfo.Accept(System.Boolean)">
+            <summary>Records an acceptance vote. Declines always win; name visibility is combined with logical AND.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.IConnectionInfo">
+            <summary>A resource-local connection attempt. Its ID is independent of player IDs.</summary>
+        </member>
+        <member name="P:Mint.Server.Resources.IConnectionInfo.IsAccepted">
+            <summary>This resource's current acceptance vote; it does not mean core admission has completed.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.IConnectionInfoPool`1">
+            <summary>Canonical connection storage belonging to one resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.IModule">
+            <summary>A managed component owned by one resource activation.</summary>
+        </member>
+        <member name="M:Mint.Server.Resources.IModule.OnScriptsStarted(Mint.Server.Resources.IScript[])">
+            <summary>Runs after the resource starts and its script handlers have been bound.</summary>
+        </member>
+        <member name="M:Mint.Server.Resources.IModule.OnStop">
+            <summary>Releases this component, including when resource startup fails.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.IResourceHandle">
+            <summary>A resource activation as seen by the current script resource.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.IResourceHandlePool`1">
+            <summary>Replaceable managed storage; removal and disposal never stop resources.</summary>
+        </member>
+        <member name="M:Mint.Server.Resources.Resource.GetScripts">
+            <summary>Supplies script instances before automatic discovery constructs remaining types.</summary>
+        </member>
+        <member name="M:Mint.Server.Resources.Resource.GetModules">
+            <summary>Supplies module instances before automatic discovery constructs remaining types.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.ResourceConstructionContext">
+            <summary>A runtime-issued, single-use construction capability for one activation.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.ResourceHandle">
+            <summary>Subclass this handle to store state for a resource activation.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.ResourceHandleConfiguration">
+            <summary>Configures activation wrappers and their storage before resource startup.</summary>
+        </member>
+        <member name="T:Mint.Server.Resources.ResourceManifest">
+            <summary>A published resource definition, including stopped resources. It has no activation identity.</summary>
+        </member>
+        <member name="P:Mint.Server.Resources.ResourcesApi.Catalog">
+            <summary>Published definitions, including stopped resources. Module-disabled resources are omitted.</summary>
+        </member>
+        <member name="M:Mint.Server.Rpc.RpcApi.On(System.String,System.Delegate)">
+            <summary>Registers a typed RPC handler with a player, payload parameters, and an optional trailing async cancellation token.</summary>
+            <remarks>Accepts synchronous results, Task, and ValueTask. Registration rejects multicast and async void handlers.</remarks>
+        </member>
+        <member name="P:Mint.Server.Server.Dispatcher">
+            <summary>Dispatcher bound to the current resource activation. Capture it here before using it from another thread.</summary>
+        </member>
+        <member name="M:Mint.Server.Server.Stop">
+            <summary>Requests a graceful server shutdown after the current host callback returns.</summary>
+        </member>
+        <member name="P:Mint.Server.Server.NetTime">
+            <summary>Milliseconds elapsed on the server's monotonic clock since this server start.</summary>
+        </member>
+        <member name="T:Mint.Server.Values.ScriptValueConfiguration">
+            <summary>Opt-in value adapters owned by one resource; registration closes before OnStart.</summary>
+        </member>
+        <member name="M:Mint.Server.Values.ScriptValueConfiguration.Register``1(System.Func{``0,System.Object},System.Func{System.Object,``0})">
+            <summary>Encodes an exact CLR type to transport data; decoding occurs only on an explicit typed read.</summary>
+        </member>
+        <member name="F:Mint.Server.Vehicles.Damage.VehicleDoorState.Detached">
+            <summary>Request detaching the door, hood or trunk with a local physical debris object.</summary>
+        </member>
+        <member name="T:Mint.Server.Vehicles.PlayerSeat">
+            <summary>A vehicle occupant snapshot. Seat 1 is the driver; seats 2 through 16 are passengers.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.PlayerSeat.#ctor(Mint.Server.Players.IPlayer,System.Byte)">
+            <summary>A vehicle occupant snapshot. Seat 1 is the driver; seats 2 through 16 are passengers.</summary>
+        </member>
+        <member name="T:Mint.Server.Vehicles.VehicleConstants">
+            <summary>Exclusive slot counts supported by MiNT; a specific model may expose fewer slots.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.VehicleConstants.IsDamageWheelId(System.Byte)">
+            <summary>GTA damage-wheel IDs are sparse and differ from geometry and burst slots.</summary>
+        </member>
+        <member name="T:Mint.Server.Vehicles.VehicleCreationOptions">
+            <summary>Initial vehicle visibility and lock state applied before publication.</summary>
+        </member>
+        <member name="T:Mint.Server.Vehicles.VehicleModel">
+            <summary>Named GTA model hashes; availability depends on the loaded game-data catalog.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.Wheels.IVehicleWheels.IsWheelBurst(Mint.Server.Vehicles.Wheels.VehicleWheel)">
+            <summary>Uses verified physical wheel positions; unknown selectors are rejected.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.Wheels.IVehicleWheels.IsWheelBurst(System.Byte)">
+            <summary>Raw burst-state bit index, 0..7. This is not a CWheel array index.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.Wheels.IVehicleWheels.SetWheelFixed(System.Byte)">
+            <summary>Clears the burst flag only. Tire presence, detachment, fire and health are independent.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.Wheels.IVehicleWheels.DoesWheelHasTire(System.Byte)">
+            <summary>Raw GTA tyre ID, 0..5 or 45/47. This is not a CWheel array index.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.Wheels.IVehicleWheels.GetWheelCamber(System.Byte)">
+            <summary>Raw model-specific CWheel array index, 0..15. No physical-position conversion is assumed.</summary>
+        </member>
+        <member name="T:Mint.Server.Vehicles.Wheels.VehicleWheel">
+            <summary>Physical wheel selectors. Only the four named positions have verified MiNT operation adapters.
+            Unk1..Unk6 retain their reference constant values but are rejected by typed operations.
+            Raw byte overloads retain their documented tyre-ID, burst-bit or CWheel-array-index domains.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.Wheels.VehicleWheels.IsWheelBurst(Mint.Server.Vehicles.Wheels.VehicleWheel)">
+            <summary>Uses a physical position mapped to the burst-state bit domain, not its enum ordinal.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.Wheels.VehicleWheels.DoesWheelHasTire(Mint.Server.Vehicles.Wheels.VehicleWheel)">
+            <summary>Uses a physical position mapped to a GTA tyre ID. Unknown positions are unsupported.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.Wheels.VehicleWheels.SetWheelFixed(System.Byte)">
+            <summary>Clears the burst flag only. Tire presence, detachment, fire and health are independent.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.VehiclesApi.Create(Mint.Server.Vehicles.VehicleCreationOptions,System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)">
+            <summary>Creates a fully configured vehicle before publishing it. Rotation is in radians.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.VehiclesApi.Create(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)">
+            <summary>Creates a vehicle with its full initial Euler rotation in radians.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.VehiclesApi.Create(Mint.Server.Vehicles.VehicleModel,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)">
+            <summary>Creates a named model with its full initial Euler rotation in radians.</summary>
+        </member>
+        <member name="M:Mint.Server.Vehicles.VehiclesApi.Create(System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Vehicles.VehiclesApi.Create(System.String,Mint.Server.Shared.Vector3,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(System.UInt32,Mint.Server.Shared.Vector3,System.UInt32)"/>
+        </member>
+        <member name="M:Mint.Server.Vehicles.VehiclesApi.Create(System.String,Mint.Server.Shared.Vector3,System.Double,System.UInt32)">
+            <inheritdoc cref="M:Mint.Server.Vehicles.VehiclesApi.Create(System.UInt32,Mint.Server.Shared.Vector3,System.Double,System.UInt32)"/>
+        </member>
+        <member name="T:Mint.Server.Voice.VoiceDeploymentState">
+            <summary>Native host observation; it does not assert participant or microphone connectivity.</summary>
+        </member>
+        <member name="T:Mint.Server.World.Blips.BlipSubtype">
+            <summary>The stable subtype stored in a blip's EntityKey.</summary>
+        </member>
+        <member name="M:Mint.Server.World.ColShapes.ColShape.IsEntityIdIn(System.UInt32)">
+            <summary>Tests the current membership snapshot. Zero or a missing entity ID returns false.</summary>
+        </member>
+        <member name="M:Mint.Server.World.ColShapes.ColShapesApi.CreateRectangle(System.Double,Mint.Server.Shared.Vector2,Mint.Server.Shared.Vector2,System.Int32,System.Boolean)">
+            <summary>Creates a rectangle at the supplied Z. Membership remains two dimensional.</summary>
+        </member>
+        <member name="T:Mint.Server.World.EntityFilter">
+            <summary>Entity families supported by server spatial queries. VirtualEntity is a MiNT extension.</summary>
+        </member>
+        <member name="P:Mint.Server.World.Markers.IMarker.StreamingDistance">
+            <summary>Maximum three-dimensional streaming distance in world units; zero is unbounded.</summary>
+        </member>
+        <member name="M:Mint.Server.World.Objects.ObjectsApi.Create(Mint.Server.Entities.EntityCreationOptions,System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Byte,System.Byte,System.UInt16,System.UInt32,System.Boolean)">
+            <summary>Applies dimension and streaming before the object is published.</summary>
+        </member>
+        <member name="M:Mint.Server.World.Objects.ObjectsApi.Create(System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Byte,System.Byte,System.UInt16,System.UInt32,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.Objects.ObjectsApi.Create(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Byte,System.Byte,System.UInt16,System.UInt32,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="T:Mint.Server.World.Peds.PedModel">
+            <summary>Named GTA model hashes; availability depends on the loaded game-data catalog.</summary>
+        </member>
+        <member name="M:Mint.Server.World.Peds.PedsApi.Create(Mint.Server.Entities.EntityCreationOptions,System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32,System.Boolean)">
+            <summary>Applies dimension and streaming before the ped is published.</summary>
+        </member>
+        <member name="M:Mint.Server.World.Peds.PedsApi.Create(System.String,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Mint.Server.World.Peds.PedsApi.Create(System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.UInt32,System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:Mint.Server.World.Pickups.PickupsApi.Create(System.UInt32,System.String,System.Int32,System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Int32)">
+            <inheritdoc cref="M:Mint.Server.World.Pickups.PickupsApi.Create(System.UInt32,System.UInt32,System.Int32,System.UInt32,Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Int32)"/>
+        </member>
+        <member name="P:Mint.Server.World.TextLabels.ITextLabel.Text">
+            <summary>Text with LF/CRLF/CR or ~n~ line breaks and ~r~/~g~/~b~/~y~/~p~/~o~/~w~/~c~ colors. ~s~ restores Color; ~~ renders a tilde. Stored text is unchanged.</summary>
+        </member>
+        <member name="P:Mint.Server.World.TextLabels.ITextLabel.ShowOnPauseMenu">
+            <summary>Whether to render above the GTA pause menu/map. Defaults to false.</summary>
+        </member>
+        <member name="P:Mint.Server.World.TextLabels.ITextLabel.StreamingDistance">
+            <summary>Maximum three-dimensional streaming distance; zero is unbounded.</summary>
+        </member>
+        <member name="M:Mint.Server.World.WorldApi.GetById(Mint.Server.Shared.BaseObjectType,System.UInt32)">
+            <summary>Looks up exactly the requested server family, including non-world voice channels and virtual groups.</summary>
+        </member>
+        <member name="M:Mint.Server.World.WorldApi.GetEntitiesInDimension(System.Int32,Mint.Server.World.EntityFilter)">
+            <summary>Queries one authoritative snapshot. Global dimension selects all dimensions.</summary>
+        </member>
+        <member name="M:Mint.Server.World.WorldApi.GetEntitiesInRange(Mint.Server.Shared.Vector3,System.Double,System.Int32,Mint.Server.World.EntityFilter)">
+            <summary>Returns entities within an inclusive 3D range; zero matches the exact position.</summary>
+        </member>
+        <member name="M:Mint.Server.World.WorldApi.GetClosestEntities(Mint.Server.Shared.Vector3,System.Double,System.Int32,System.Int32,Mint.Server.World.EntityFilter)">
+            <summary>Orders by ascending 3D distance, then ID. Range zero is unbounded; limit -1 returns all matches.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Dimension.IsVisible(System.Int32,System.Int32)">
+            <summary>Tests normal entity visibility; negative public viewers also see dimension zero.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.GameHash.Compute(System.String)">
+            <summary>Hashes UTF-8 bytes with ASCII A-Z folding. Other Unicode characters are not case folded or normalized.</summary>
+            <remarks>Invalid UTF-16 sequences use the UTF-8 replacement character, matching the scripting bridge.</remarks>
+        </member>
+        <member name="P:Mint.Server.Shared.Rgba.Zero">
+            <summary>Transparent black, equal to the default struct value.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Rgba.ToArgb">
+            <summary>Packs channels as 0xAARRGGBB; Packed retains its 0xRRGGBBAA format.</summary>
+        </member>
+        <member name="T:Mint.Server.Shared.Vector2">
+            <summary>A double-precision vector. Arithmetic operators follow IEEE 754.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector2.#ctor(System.Double,System.Double)">
+            <summary>A double-precision vector. Arithmetic operators follow IEEE 754.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector2.Normalized">
+            <summary>Returns zero for zero input; rejects non-finite coordinates.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector2.Lerp(Mint.Server.Shared.Vector2,Mint.Server.Shared.Vector2,System.Double)">
+            <summary>Interpolates with the factor clamped to [0, 1].</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector2.MoveTowards(Mint.Server.Shared.Vector2,Mint.Server.Shared.Vector2,System.Double)">
+            <summary>Moves by at most a finite, non-negative distance without overshooting.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector2.op_Explicit(Mint.Server.Shared.Vector2)~System.Numerics.Vector2">
+            <summary>Narrows components to float; precision may be lost and overflow becomes infinity.</summary>
+        </member>
+        <member name="T:Mint.Server.Shared.Vector3">
+            <summary>A double-precision vector. Arithmetic operators follow IEEE 754.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector3.#ctor(System.Double,System.Double,System.Double)">
+            <summary>A double-precision vector. Arithmetic operators follow IEEE 754.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector3.Normalized">
+            <summary>Returns zero for zero input; rejects non-finite coordinates.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector3.Lerp(Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Double)">
+            <summary>Interpolates with the factor clamped to [0, 1].</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector3.MoveTowards(Mint.Server.Shared.Vector3,Mint.Server.Shared.Vector3,System.Double)">
+            <summary>Moves by at most a finite, non-negative distance without overshooting.</summary>
+        </member>
+        <member name="M:Mint.Server.Shared.Vector3.op_Explicit(Mint.Server.Shared.Vector3)~System.Numerics.Vector3">
+            <summary>Narrows components to float; precision may be lost and overflow becomes infinity.</summary>
+        </member>
+    </members>
+</doc>

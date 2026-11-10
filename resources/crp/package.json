@@ -1,0 +1,22 @@
+{
+  "name": "crp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "check-db": "npm run build && node check-db.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "mysql2": "^2.3.3",
+    "nodemailer": "^6.9.16",
+    "sequelize": "^5.22.5"
+  },
+  "devDependencies": {
+    "@mint-sdk/types-client": "^0.8.0",
+    "@mint-sdk/types-natives": "^0.8.0",
+    "@mint-sdk/types-server": "^0.8.0",
+    "@types/node": "^22.19.1",
+    "typescript": "^5.9.3"
+  }
+}

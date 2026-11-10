@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "types": ["@mint-sdk/types-shared", "@mint-sdk/types-server", "node"],
+    "rootDir": "server",
+    "outDir": "dist/server",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmitOnError": true,
+    "forceConsistentCasingInFileNames": true,
+    "composite": true
+  },
+  "include": ["server/**/*.ts"]
+}

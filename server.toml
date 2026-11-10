@@ -1,0 +1,138 @@
+# Debug enables developer commands, live resource reload, and temporary local resources.
+debug = true
+# Select SDK-free GTA startup for every joining client; changes require a new GTA process.
+noSocialClub = false
+# Debug requires a loopback bind. Use debug = false for LAN/public access.
+host = "127.0.0.1"
+port = 22005
+# Total player slots: 1..5000; default 5000 (client catalog capacity).
+players = 100
+# Ordinary visible remote players per client: 1..256; default 256.
+maxStreamingPlayers = 256
+
+# Entity defaults and client software streaming budgets.
+streamingDistance = 400
+maxStreamingVehicles = 60
+maxStreamingWorldEntities = 128
+# Zero keeps ownership migration tied to each entity's streaming distance.
+migrationDistance = 0
+
+# Encoded script event/RPC bytes including packet ID; 64..65536. Unreliable: at most 1024.
+maxClientScriptEventSize = 65536
+maxServerScriptEventSize = 65536
+
+# Independent inbound budgets per authenticated player; changes require a server restart.
+# All values are positive integers (1..4294967295); burst is the bucket capacity.
+# General player, script and control packets: packets/s and packets.
+maxPacketsPerSecond = 120
+maxPacketBurst = 240
+# Controlled entity and vehicle synchronization: packets/s and packets.
+maxControlledPacketsPerSecond = 120
+maxControlledPacketBurst = 240
+# Native synchronization: packets/s and packets, plus bytes/s and bytes.
+maxNativePacketsPerSecond = 6000
+maxNativePacketBurst = 6000
+maxNativeBytesPerSecond = 4194304
+maxNativeByteBurst = 8388608
+# Before authentication, the fixed allowance remains 120 packets/s with a burst of 30.
+
+# Counts active, handshake and queued connections from one IP; 0 disables this cap.
+duplicatePlayers = 0
+# Prefer MINT_SERVER_PASSWORD; the password is never sent to scripts or public metadata.
+password = ""
+connectionQueue = false
+connectionQueueSize = 32
+connectionQueueTimeoutMs = 120000
+
+# Add "file" to enable logs beside this config, rotated at 32 MiB.
+logStreams = ["console"]
+logsToKeep = 10
+logTimeFormat = "%H:%M:%S"
+
+# Shared server capacities.
+limitWorldEntities = 4096
+limitColShapes = 4096
+limitMarkers = 128
+limitCheckpoints = 64
+limitVehicles = 1024
+limitVirtualEntities = 4096
+limitVirtualEntityGroups = 256
+
+name = "Classic RP"
+gamemode = "roleplay"
+# Optional masterlist tags: up to 4 nonempty strings, at most 64 UTF-8 bytes each.
+tags = ["Roleplay"]
+language = "ru"
+description = "Classic RolePlay"
+website = ""
+
+# Initialize listed scripting modules from modules/ in order (e.g. "js", "csharp").
+# Omit modules or use [] to disable server scripting. Resources require their language module.
+modules = ["js"]
+
+# Folders below resources/ beside this config; each contains resource.toml.
+resources = ["dlcpacks/370z", "dlcpacks/918", "dlcpacks/a80", "dlcpacks/amggtr", "dlcpacks/bbentayga", "dlcpacks/bugatti", "dlcpacks/c63w205", "dlcpacks/camry55", "dlcpacks/cityhall", "dlcpacks/dawn", "dlcpacks/fd", "dlcpacks/forest_mansion", "dlcpacks/gabz_pillbox_update", "dlcpacks/gcom_ballas_gang", "dlcpacks/gcom_lsn_room", "dlcpacks/gtr", "dlcpacks/i8", "dlcpacks/int_mafc", "dlcpacks/kfbmods1", "dlcpacks/lc200", "dlcpacks/mrpd", "dlcpacks/pablito_vagos", "dlcpacks/R50", "dlcpacks/rs6", "dlcpacks/rs7", "dlcpacks/rumafia", "dlcpacks/s500w222", "dlcpacks/sheriff", "dlcpacks/skyline", "dlcpacks/smg", "dlcpacks/sq72016", "dlcpacks/srt8", "dlcpacks/sti", "dlcpacks/wraith", "dlcpacks/x5e53", "dlcpacks/lspd_exterieur", "crp"]
+# Production encryption covers DLC and client JS/UI files; debug ignores it.
+encryptResources = true
+# Reserved data/game-data.json beside the executable always supplies the stock GTA catalog.
+# Production: false builds/serves cache/public; true loads a prepared CDN publication.
+# Debug ignores CDN. A URL alone does not enable it.
+cdnEnabled = false
+
+# Upload only cache/public (cache first, resources.json last); keep cache/private local.
+# Set cdnEnabled = true after uploading. This URL is required only when CDN is enabled.
+# cdnUrl = "https://cdn.example/mint"
+
+# Resource HTTP: positive integers. Timeouts 1..2147483647 ms; minimum rate 1..9223372036854775807 B/s.
+# Each complete response gets base timeout + ceil(file bytes / minimum rate) seconds.
+resourceHttpHeaderTimeoutMs = 5000
+resourceHttpResponseBaseTimeoutMs = 10000
+resourceHttpMinimumBytesPerSecond = 524288
+# Worker count 1..256; queued sockets 1..65536. Headers and request line 1..1048576 bytes; line <= headers.
+resourceHttpWorkers = 4
+resourceHttpQueueSize = 256
+resourceHttpMaxHeaderBytes = 16384
+resourceHttpMaxRequestLineBytes = 2048
+# Ordinary files: 1..9223372036854775807 bytes; JS entry: 1..8388608 and <= ordinary file limit.
+# DLC archives keep their format limits. Clients enforce their own download limits as well.
+resourceMaxFileBytes = 67108864
+resourceMaxClientScriptBytes = 8388608
+
+# Optional managed voice. With an explicit loopback host, voiceUrl defaults to
+# the matching local ws:// URL. Other hosts require an explicit voiceUrl.
+voice = true
+# voicePort = 7880
+# voiceUrl = "wss://voice.example.com"
+# voiceTokenTtlSeconds = 300
+# voiceRange = 35
+
+# For an external LiveKit deployment, omit voice/voicePort and configure all
+# three values below plus a 32+ byte MINT_LIVEKIT_API_SECRET in the server process.
+# WS and WSS are accepted; plaintext WS emits a startup warning.
+# voiceUrl = "wss://voice.example.com"
+# voiceApiKey = "mint"
+# voiceRoom = "mint"
+
+# Public servers send a heartbeat to the official MiNT registry. The token never reaches clients.
+announce = false
+# token = "masterlist-secret"
+
+handshakeTimeoutMs = 5000
+
+# Addon DLC overflows the stock pools and GTA exits with code 574. Values are the server cap or the Rage gameconfig, whichever is lower.
+[pools]
+DrawableStore = 262084
+DwdStore = 65535
+FragmentStore = 65535
+TxdStore = 262084
+StaticBounds = 32768
+fwDynamicArchetypeComponent = 40000
+Building = 65000
+MapDataStore = 20040
+MapTypesStore = 3200
+HandlingData = 16000
+"Dummy Object" = 15010
+phInstGtaStore = 15050
+AnimStore = 22100
+PortalInst = 400
+PtFxAssetStore = 600
