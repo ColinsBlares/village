@@ -10,6 +10,5 @@ linux-x64
 data
 node_modules
 dist
-browser
 package-lock.json
 crash.log
