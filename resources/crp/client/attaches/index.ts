@@ -19,6 +19,7 @@ interface Live {
 const specs = new Map<number, Spec>();
 let testHandle = 0;
 const objects = new Map<number, Map<number, Live>>();
+const pinned = new Set<number>();
 let lost = false;
 
 function joaat(text: string): number {
@@ -99,7 +100,8 @@ function remove(player: mint.Player, hash: number): void {
   native.detachEntity(live.handle, true, true);
   native.deleteObject(live.handle);
   if (live.spec.anim && player.valid) {
-    if (player.id === mint.Player.local?.id) native.stopAnimTask(player.scriptID, live.spec.anim.dict, live.spec.anim.name, 3);
+    native.stopAnimTask(player.scriptID, live.spec.anim.dict, live.spec.anim.name, 1);
+    if (player.id === mint.Player.local?.id) native.clearPedSecondaryTask(player.scriptID);
     else native.clearPedTasksImmediately(player.scriptID);
   }
 }
@@ -107,10 +109,12 @@ function remove(player: mint.Player, hash: number): void {
 function apply(player: mint.Player, raw: string): void {
   const next = raw ? raw.split('|').map((item) => Number.parseInt(item, 36)) : [];
   const bag = objects.get(player.id);
+  const local = player.id === mint.Player.local?.id;
   if (bag) {
-    for (const hash of bag.keys()) if (!next.includes(hash)) remove(player, hash);
+    for (const hash of bag.keys()) if (!next.includes(hash) && !(local && pinned.has(hash))) remove(player, hash);
   }
   for (const hash of next) if (!bag?.has(hash)) add(player, hash);
+  if (local) for (const hash of pinned) add(player, hash);
 }
 
 function statics(): void {
@@ -140,6 +144,28 @@ function statics(): void {
   }, true);
 }
 
+export function pinLocal(name: string, on: boolean): void {
+  const local = mint.Player.local;
+  if (!local?.valid) return;
+  const hash = joaat(name);
+  if (!specs.has(hash)) return;
+  if (on) {
+    pinned.add(hash);
+    add(local, hash);
+    return;
+  }
+  pinned.delete(hash);
+  remove(local, hash);
+}
+
+export function holding(name: string): boolean {
+  const local = mint.Player.local;
+  const bag = local ? objects.get(local.id) : undefined;
+  if (!bag) return false;
+  for (const live of bag.values()) if (live.spec.name === name) return true;
+  return false;
+}
+
 export function installAttaches(): void {
   statics();
   mint.onServer('crp:attach:catalog', (raw) => {
@@ -149,6 +175,8 @@ export function installAttaches(): void {
       register(`invItem_${row.id}`, row.model, row.bone, [row.pos[0] ?? 0, row.pos[1] ?? 0, row.pos[2] ?? 0], [row.rot[0] ?? 0, row.rot[1] ?? 0, row.rot[2] ?? 0]);
       if (row.gun) register(`weapon_${row.id}`, row.model, 24818, [0.2, -0.155, -0.1], [13, 180, 10]);
     }
+    const local = mint.Player.local;
+    if (local?.valid) apply(local, String(local.getStreamSyncedMeta('crp:attach') ?? ''));
     for (const player of mint.Player.streamedIn) apply(player, String(player.getStreamSyncedMeta('crp:attach') ?? ''));
   });
   mint.on('streamSyncedMetaChange', (target, key, value) => {

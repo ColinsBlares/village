@@ -17,6 +17,10 @@ const PAYS = ['pay', 'farmerPay', 'tractorPay', 'pilotPay'] as const;
 const here = new WeakMap<mint.Player, DbRow>();
 const work = new WeakMap<mint.Player, { farm: DbRow; type: number; pay: number }>();
 
+export function farmShift(player: mint.Player): boolean {
+  return work.has(player);
+}
+
 function characterId(player: mint.Player): number {
   return Number(getSession(player).character?.id) || 0;
 }

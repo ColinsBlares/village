@@ -108,6 +108,18 @@ export function factionName(player: mint.Player): string {
   return factions.get(id)?.name ?? '';
 }
 
+export function isStateFaction(id: number): boolean {
+  return id >= 1 && id <= 7;
+}
+
+export function isFactionLeader(player: mint.Player): boolean {
+  const character = getSession(player).character;
+  const faction = factions.get(Number(character?.factionId) || 0);
+  if (!character || !faction?.ranks.length) return false;
+  const top = faction.ranks.reduce((best, rank) => (rank.rank > best.rank ? rank : best));
+  return Number(character.factionRank) === top.id;
+}
+
 export function rankName(player: mint.Player): string {
   const character = getSession(player).character;
   const faction = factions.get(Number(character?.factionId) || 0);

@@ -5,8 +5,8 @@ import { giveItem } from '../inventory/index.js';
 import { getSession, type DbRow } from '../player/session.js';
 import { cef } from '../ui/send.js';
 import { notifyError, notifyInfo, notifySuccess } from '../ui/notify.js';
-import { addBank, addCash, removeBank, removeCash } from '../world/money.js';
-import { hideVehicle, placeVehicle, vehicleState } from '../vehicles/index.js';
+import { addBank, addCash, creditBank, removeBank, removeCash } from '../world/money.js';
+import { hideVehicle, placeVehicle, vehiclePrice, vehicleState } from '../vehicles/index.js';
 import { canOwnAnother } from '../vehicles/sell.js';
 
 const SELL = 0.7;
@@ -15,6 +15,7 @@ const MARKET = { x: 61.74, y: -1727.13, z: 29.5 };
 const here = new WeakSet<mint.Player>();
 let spots: DbRow[] = [];
 let nextSpot = 0;
+const parked = new Map<number, number>();
 
 function driver(player: mint.Player): boolean {
   return player.vehicle != null && (player.seat === 1 || player.seat === 0);
@@ -39,9 +40,61 @@ export async function loadCarMarket(): Promise<number> {
   const shape = new mint.ColshapeSphere(MARKET.x, MARKET.y, MARKET.z, 4, 0, true);
   shape.setMeta('carmarket', true);
   const rows = (await table('Vehicle').findAll({ where: { key: 'market' } })) as DbRow[];
-  for (const row of rows) placeVehicle(row);
+  for (const row of rows) {
+    placeVehicle(row);
+    const index = spots.findIndex((spot) => Math.hypot(Number(spot.x) - Number(row.x), Number(spot.y) - Number(row.y)) < 3);
+    if (index >= 0) parked.set(index, Number(row.id));
+  }
   mint.log(`crp: авторынок, мест ${spots.length}, машин ${rows.length}`);
   return spots.length;
+}
+
+async function takeSpot(vehId: number): Promise<DbRow | undefined> {
+  if (!spots.length) return undefined;
+  let index = spots.findIndex((_, spot) => !parked.has(spot));
+  if (index < 0) {
+    index = Math.floor(Math.random() * spots.length);
+    const previous = parked.get(index);
+    if (previous && previous !== vehId) {
+      const row = (await table('Vehicle').findOne({ where: { id: previous } })) as DbRow | null;
+      hideVehicle(previous);
+      if (typeof row?.destroy === 'function') await row.destroy();
+    }
+  }
+  parked.set(index, vehId);
+  return spots[index];
+}
+
+export async function seizeGarage(characterId: number): Promise<void> {
+  const rows = (await table('Vehicle').findAll({
+    where: { key: 'private', owner: characterId, parkingDate: null },
+  })) as DbRow[];
+  if (!rows.length) return;
+  let total = 0;
+  for (const row of rows) {
+    total += Math.trunc(vehiclePrice(String(row.modelName)) * 0.7);
+    const id = Number(row.id);
+    row.key = 'market';
+    row.owners = (Number(row.owners) || 0) + 1;
+    const spot = await takeSpot(id);
+    if (spot) {
+      row.x = spot.x;
+      row.y = spot.y;
+      row.z = spot.z;
+      row.h = spot.h;
+    }
+    await row.save();
+    await dropKeys(id);
+    hideVehicle(id);
+    placeVehicle(row);
+  }
+  const paid = await creditBank(characterId, total);
+  if (!paid) return;
+  const player = mint.Player.all.find((entry) => entry.valid && Number(getSession(entry).character?.id) === characterId);
+  if (!player) return;
+  mint.emitClient(player, 'crp:chat', '!{#f3c800} Ваш дом продан государству за неуплату');
+  mint.emitClient(player, 'crp:chat', `!{#f3c800} Весь транспорт из гаража продан государству за !{#80c102}$${total}`);
+  mint.emitClient(player, 'crp:chat', '!{#f3c800} Деньги поступили на ваш банковский счет');
 }
 
 export function installCarMarket(): void {
@@ -94,7 +147,8 @@ export function installCarMarket(): void {
       return notifyError(player, 'Это не ваш транспорт', 'Ошибка');
     }
     const sum = Math.round(state.props.price * SELL);
-    const spot = spots.length ? spots[nextSpot % spots.length] : undefined;
+    const spotIndex = spots.length ? nextSpot % spots.length : -1;
+    const spot = spotIndex >= 0 ? spots[spotIndex] : undefined;
     if (!(await addCash(player, sum))) return notifyError(player, 'Не удалось выдать деньги', 'Авторынок');
     nextSpot += 1;
     const vehId = Number(state.row.id);
@@ -105,6 +159,7 @@ export function installCarMarket(): void {
       state.row.y = spot.y;
       state.row.z = spot.z;
       state.row.h = spot.h;
+      parked.set(spotIndex, vehId);
     }
     await state.row.save();
     await dropKeys(vehId);

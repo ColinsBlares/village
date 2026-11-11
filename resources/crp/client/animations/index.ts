@@ -1,8 +1,27 @@
 import * as mint from 'mint-client';
 import * as native from 'natives';
+import { busyHas } from '../ui/busy.js';
 
 let active = false;
 let animId = 0;
+let ownId: number | null = null;
+let ownLine = '';
+
+export function setOwnAnim(id: number): void {
+  ownId = id;
+  ownLine = '';
+}
+
+function stopOwn(): void {
+  if (ownId == null) return;
+  const local = mint.Player.local;
+  const parts = ownLine.split(' ');
+  ownId = null;
+  ownLine = '';
+  if (!local?.valid) return;
+  if (parts[0] && parts[1] && !native.isEntityPlayingAnim(local.scriptID, parts[0], parts[1], 3)) return;
+  mint.emitServer('crp:anim:stop');
+}
 
 export function animatorOn(): boolean {
   return active;
@@ -25,10 +44,26 @@ function play(id: number): void {
 }
 
 export function installAnimator(): void {
+  mint.onServer('crp:anim:line', (id, line) => {
+    if (ownId == null || Number(id) !== ownId) return;
+    ownLine = String(line ?? '');
+  });
   mint.onServer('crp:animator', () => {
     active = !active;
     if (active) play(animId);
     else mint.emitServer('crp:anim:stop');
+  });
+  mint.on('keydown', (key) => {
+    if (key !== 32 || ownId == null || native.isPauseMenuActive() || busyHas()) return;
+    stopOwn();
+  });
+  mint.on('enteredVehicle', (vehicle) => {
+    const local = mint.Player.local;
+    if (!local?.valid || local.vehicle !== vehicle) return;
+    const playing = local.getSyncedMeta('crp:anim');
+    if (ownId == null && (typeof playing !== 'string' || !playing)) return;
+    ownId = null;
+    mint.emitServer('crp:anim:stop');
   });
   mint.on('keyup', (key) => {
     if (!active) return;

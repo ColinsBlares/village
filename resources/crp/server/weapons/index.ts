@@ -4,7 +4,9 @@ import { getSession, type DbRow } from '../player/session.js';
 import { allowWeapon, denyWeapon } from '../anticheat/index.js';
 import { cef } from '../ui/send.js';
 import { notifyError, notifySuccess } from '../ui/notify.js';
+import { joaat } from '../attaches/index.js';
 import { clearHeld, showHeld } from '../inventory/hands.js';
+import { sendInventory } from '../inventory/index.js';
 
 const AMMO: Record<number, number[]> = {
   37: [20, 44, 46, 47, 48, 80, 87, 88, 89, 90],
@@ -62,7 +64,42 @@ export function syncHands(player: mint.Player, item: DbRow, inHands: boolean): v
   player.removeWeapon(hash >>> 0);
 }
 
+const THROWABLES = ['weapon_grenade', 'weapon_bzgas', 'weapon_molotov', 'weapon_stickybomb', 'weapon_proxmine', 'weapon_snowball', 'weapon_pipebomb', 'weapon_ball', 'weapon_smokegrenade', 'weapon_flare'];
+
+function throwable(hash: number): boolean {
+  const value = hash >>> 0;
+  return THROWABLES.some((name) => joaat(name) === value || (mint.hash(name) >>> 0) === value);
+}
+
 export function installWeapons(): void {
+  mint.onClient('crp:weapon:ammo', async (player, hash, ammo) => {
+    const next = Math.trunc(Number(ammo));
+    const weaponHash = Number(hash) >>> 0;
+    if (!Number.isInteger(next) || next < 0 || next > 1000 || !weaponHash) return;
+    const character = getSession(player).character;
+    if (!character) return;
+    const item = (await table('CharacterInventory').findOne({
+      where: { playerId: character.id, parentId: null, index: 13 },
+      include: [{ model: table('CharacterInventoryParam'), as: 'params' }],
+    })) as DbRow | null;
+    if (!item) return;
+    const params = paramsOf(item);
+    if ((Number(params.weaponHash) >>> 0) !== weaponHash) return;
+    const loaded = Number(params.ammo) || 0;
+    if (next >= loaded) return;
+    await setParam(item, 'ammo', next);
+  });
+  mint.onClient('crp:weapon:throw', async (player, rawId) => {
+    const weapon = await loadItem(player, Number(rawId));
+    if (!weapon || weapon.parentId != null || Number(weapon.index) !== 13) return;
+    const hash = Number(paramsOf(weapon).weaponHash) >>> 0;
+    if (!throwable(hash)) return;
+    if (typeof weapon.destroy === 'function') await weapon.destroy();
+    clearHeld(player);
+    denyWeapon(player, hash);
+    player.removeWeapon(hash);
+    await sendInventory(player);
+  });
   mint.onClient('crp:weapon:unload', async (player, sqlId, ammo) => {
     const header = 'Разрядка оружия';
     const weapon = await loadItem(player, Number(sqlId));

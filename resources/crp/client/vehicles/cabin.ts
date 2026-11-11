@@ -62,7 +62,7 @@ export function handleVehicleCabin(name: string, args: unknown[]): boolean {
   }
   if (name === 'vehicles.siren.sound') {
     const vehicle = mint.Player.local?.vehicle;
-    if (vehicle) mint.emitServer('crp:veh:siren', vehicle.id);
+    if (vehicle) mint.emitServer('crp:veh:siren', vehicle.remoteID);
     return true;
   }
   if (name === 'vehicles.sell.show') {
@@ -99,7 +99,7 @@ inputWindow.value = "";`);
   }
   if (name === 'interaction.ejectlist.get') {
     const vehicle = mint.Player.local?.vehicle;
-    if (vehicle) mint.emitServer('crp:veh:eject:list', vehicle.id);
+    if (vehicle) mint.emitServer('crp:veh:eject:list', vehicle.remoteID);
     return true;
   }
   if (name === 'interaction.eject') {

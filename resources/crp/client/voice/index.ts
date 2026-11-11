@@ -1,6 +1,8 @@
 import * as mint from 'mint-client';
+import * as native from 'natives';
 import { pushCef } from '../cef/view.js';
 import { worldHudOn } from '../hud/index.js';
+import { busyHas } from '../ui/busy.js';
 
 let talking = false;
 let radio = false;
@@ -17,11 +19,21 @@ export function installVoiceKeys(): void {
       voiceIcon(true);
       mint.emitServer('crp:voice:talk', true);
     }
-    if (key === 20 && !radio) {
+    if (key === 20 && !radio && !native.isPauseMenuActive() && !busyHas('chat')) {
       radio = true;
       voiceIcon(true);
       mint.emitServer('crp:voice:radio', true);
     }
+  });
+  mint.onServer('crp:voice:denied', () => {
+    radio = false;
+    voiceIcon(talking);
+  });
+  mint.onServer('crp:voice:hear', () => {
+    native.playSoundFrontend(-1, 'Start_Squelch', 'CB_RADIO_SFX', true);
+  });
+  mint.onServer('crp:voice:silence', () => {
+    native.playSoundFrontend(-1, 'End_Squelch', 'CB_RADIO_SFX', true);
   });
 
   mint.on('keyup', (key) => {

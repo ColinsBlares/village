@@ -1,7 +1,7 @@
 import * as mint from 'mint-server';
 import { table } from '../core/db.js';
 import { setColshapeHandlers } from '../core/colshapes.js';
-import { factionInfo, rankNumber } from '../factions/index.js';
+import { factionInfo, isFactionLeader, rankNumber } from '../factions/index.js';
 import { getSession, type DbRow } from '../player/session.js';
 import { cef } from '../ui/send.js';
 import { notifyError, notifyInfo, notifySuccess } from '../ui/notify.js';
@@ -12,6 +12,15 @@ import { pushBiz } from '../player/menu.js';
 const TYPES = ['Заправка', 'Магазин', 'Одежда', 'Барбершоп', 'Тату', 'Маски', 'Оружие', 'Закусочная', 'Автосалон', 'СТО', 'Клуб', 'Банк'];
 const FACTION_TYPES = new Set([10]);
 const at = new WeakMap<mint.Player, number>();
+const takenOrders = new Set<number>();
+
+export function takeBizOrder(bizId: number): void {
+  takenOrders.add(bizId);
+}
+
+export function releaseBizOrder(bizId: number): void {
+  takenOrders.delete(bizId);
+}
 
 function typeName(type: number): string {
   return TYPES[type] ?? `Бизнес ${type}`;
@@ -31,6 +40,37 @@ function daysLeft(date: unknown): number {
   return Math.ceil((time - Date.now()) / 86400000);
 }
 
+export function bizDailyRent(row: DbRow): number {
+  return Number(row.price) * (Number(row.type) === 11 ? 0.002 : 0.01);
+}
+
+export function bizBankView(row: DbRow): Record<string, unknown> {
+  const date = row.date ? new Date(String(row.date)) : null;
+  const now = new Date();
+  const left = date && !Number.isNaN(date.getTime())
+    ? Math.ceil(Math.abs(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000)
+    : 0;
+  return {
+    id: row.id,
+    name: row.name,
+    type: typeName(Number(row.type)),
+    cashBox: Number(row.cashBox) || 0,
+    days: left,
+    rent: Math.trunc(bizDailyRent(row)),
+  };
+}
+
+export async function releaseBiz(row: DbRow): Promise<number | null> {
+  if (row.characterId == null) return null;
+  const characterId = Number(row.characterId);
+  row.characterId = null;
+  row.characterNick = null;
+  row.date = null;
+  row.cashBox = 0;
+  await row.save();
+  return characterId;
+}
+
 export function bizApp(row: DbRow): Record<string, unknown> {
   const order = Number(row.productsOrder) || 0;
   return {
@@ -40,7 +80,7 @@ export function bizApp(row: DbRow): Record<string, unknown> {
     cashBox: Number(row.cashBox) || 0,
     pos: [Number(row.x), Number(row.y), Number(row.z)],
     days: daysLeft(row.date),
-    rent: Math.trunc(Number(row.price) * 0.01),
+    rent: Math.trunc(bizDailyRent(row)),
     resourcesMax: Number(row.productsMaxCount) || 0,
     resources: Number(row.productsCount) || 0,
     price: Number(row.price) || 0,
@@ -94,7 +134,7 @@ export function installBizes(): void {
       owner: owned ? roof(biz) || 'Нет' : biz.characterNick,
       faction: roof(biz),
       type: typeName(Number(biz.type)),
-      rent: Math.trunc(Number(biz.price) * 0.01),
+      rent: Math.trunc(bizDailyRent(biz)),
       price: Number(biz.price) || 0,
       actions,
       pos: [Number(biz.x), Number(biz.y), Number(biz.z)],
@@ -144,28 +184,55 @@ export function installBizes(): void {
   });
 
   mint.onClient('crp:biz:order', async (player, raw) => {
-    const data = JSON.parse(String(raw ?? '{}')) as { id?: number; count?: number; price?: number };
+    const data = JSON.parse(String(raw ?? '{}')) as { id?: number; count?: number; price?: number; faction?: boolean };
     const count = Math.trunc(Number(data.count));
     const price = Math.trunc(Number(data.price));
+    const faction = data.faction === true;
+    const answer = (code: number) => {
+      const event = faction ? 'biz.faction.order.ans' : 'biz.order.ans';
+      cef(player, `mp.event.call(${JSON.stringify(event)}, ${code}${faction ? '' : ', false'});`);
+    };
     const biz = (await table('Biz').findOne({ where: { id: Number(data.id) || at.get(player) } })) as DbRow | null;
     const character = getSession(player).character;
-    if (!biz || !character || count < 1 || price < 1) return cef(player, `mp.event.call('biz.order.ans', 0, false);`);
-    if (Number(biz.characterId) !== Number(character.id)) return cef(player, `mp.event.call('biz.order.ans', 0, false);`);
+    if (!biz || !character || count < 1 || price < 1 || Number(biz.productsOrder) > 0) return answer(0);
+    if ((Number(biz.productsCount) || 0) + count > (Number(biz.productsMaxCount) || 1000)) return answer(3);
+    const club = factionOwned(biz);
     const sum = count * price;
-    if ((Number(biz.cashBox) || 0) < sum) return cef(player, `mp.event.call('biz.order.ans', 2, false);`);
-    if ((Number(biz.productsCount) || 0) + count > (Number(biz.productsMaxCount) || 1000)) return cef(player, `mp.event.call('biz.order.ans', 3, false);`);
-    biz.cashBox = Number(biz.cashBox) - sum;
+    if (club) {
+      if (Number(character.factionId) !== Number(biz.factionId) || !isFactionLeader(player)) return answer(0);
+      const row = (await table('Faction').findOne({ where: { id: biz.factionId } })) as DbRow | null;
+      if (!row || (Number(row.cash) || 0) < sum) return answer(2);
+      row.cash = (Number(row.cash) || 0) - sum;
+      await row.save();
+    } else {
+      if (Number(biz.characterId) !== Number(character.id)) return answer(0);
+      if ((Number(biz.cashBox) || 0) < sum) return answer(2);
+      biz.cashBox = Number(biz.cashBox) - sum;
+    }
     biz.productsOrder = count;
     biz.productsOrderPrice = sum;
     await biz.save();
-    cef(player, `mp.event.call('biz.order.ans', 1, false);`);
+    answer(1);
     notifySuccess(player, `Заказ ${count} ед. за $${sum} отправлен на склад`, String(biz.name));
   });
 
   mint.onClient('crp:biz:order:cancel', async (player, rawId) => {
     const biz = (await table('Biz').findOne({ where: { id: Number(rawId) } })) as DbRow | null;
     const character = getSession(player).character;
-    if (!biz || !character || Number(biz.characterId) !== Number(character.id)) return;
+    if (!biz || !character) return;
+    const club = factionOwned(biz);
+    if (club) {
+      if (Number(character.factionId) !== Number(biz.factionId) || !isFactionLeader(player)) return;
+    } else if (Number(biz.characterId) !== Number(character.id)) return;
+    if (takenOrders.has(Number(biz.id))) return;
+    const refund = Math.trunc((Number(biz.productsOrderPrice) || 0) * 0.8);
+    if (club && refund) {
+      const row = (await table('Faction').findOne({ where: { id: biz.factionId } })) as DbRow | null;
+      if (row) {
+        row.cash = (Number(row.cash) || 0) + refund;
+        await row.save();
+      }
+    } else if (refund) biz.cashBox = (Number(biz.cashBox) || 0) + refund;
     biz.productsOrder = 0;
     biz.productsOrderPrice = 0;
     await biz.save();

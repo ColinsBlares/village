@@ -7,6 +7,7 @@ import { getSession, type DbRow } from '../player/session.js';
 import { cef } from '../ui/send.js';
 import { notifyError, notifyInfo, notifySuccess } from '../ui/notify.js';
 import { addCash, removeCash } from '../world/money.js';
+import { releaseBizOrder, takeBizOrder } from '../bizes/index.js';
 import { vehicleState } from '../vehicles/index.js';
 
 const LOAD = { x: 916.11, y: -1560.74, z: 17.75 };
@@ -253,6 +254,7 @@ export function installCarrier(): void {
     order.orderPrice -= pay;
     if (order.prodCount <= 0) orders = orders.filter((item) => item.bizId !== order.bizId);
     cargo.set(vehicle.id, { type: 'order', name: order.bizName, count, bizId: order.bizId, pay, x: order.x, y: order.y, z: order.z });
+    takeBizOrder(order.bizId);
     label(vehicle, `${order.bizName}: ${count} ед.`);
     mint.emitClient(player, 'crp:waypoint', order.x, order.y);
     notifySuccess(player, `Заказ ${order.bizName} принят`, header);
@@ -295,6 +297,7 @@ async function deliver(player: mint.Player, vehicle: mint.Vehicle, current: Carg
   if (row) {
     row.productsCount = (Number(row.productsCount) || 0) + current.count;
     row.productsOrder = Math.max(0, (Number(row.productsOrder) || 0) - current.count);
+    if (row.productsOrder <= 0) releaseBizOrder(Number(row.id));
     await row.save();
   }
   await addCash(player, current.pay ?? 0);

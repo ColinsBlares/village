@@ -20,6 +20,7 @@ interface Piece {
   price: number;
   variation: number;
   textures: number[];
+  dlc?: number;
   torso?: number;
   undershirt?: number;
   pockets?: unknown;
@@ -157,8 +158,10 @@ function preview(group: string, index: number, textureIndex: number): void {
     native.setPedComponentVariation(id, 3, item.torso ?? 0, 0, 0);
     native.setPedComponentVariation(id, 8, item.undershirt ?? 0, 0, 0);
   }
-  if (info.component != null) native.setPedComponentVariation(id, info.component, item.variation, texture, 0);
-  else if (info.prop != null) native.setPedPropIndex(id, info.prop, item.variation, texture, true);
+  if (info.component != null) {
+    if (item.dlc) mint.setPedDlcClothes(id, item.dlc, info.component, item.variation, texture, 0);
+    else native.setPedComponentVariation(id, info.component, item.variation, texture, 0);
+  } else if (info.prop != null) native.setPedPropIndex(id, info.prop, item.variation, texture, true);
   const clime = listOf(item.clime);
   const pockets = listOf(item.pockets);
   const parts: string[] = [];
@@ -359,6 +362,14 @@ export function handleShop(name: string, args: unknown[]): boolean {
   }
   if (name === 'bank.house.push') {
     mint.emitServer('bank.house.push', Math.floor(Number(args[1]) || 0), Math.floor(Number(args[2]) || 0));
+    return true;
+  }
+  if (name === 'bank.biz.push') {
+    mint.emitServer('bank.biz.push', Math.floor(Number(args[1]) || 0), Math.floor(Number(args[2]) || 0));
+    return true;
+  }
+  if (name === 'bank.biz.cashbox.push' || name === 'bank.biz.cashbox.pop') {
+    mint.emitServer(name, Math.floor(Number(args[1]) || 0), Math.floor(Number(args[2]) || 0));
     return true;
   }
   if (name === 'bank.transfer.ask') {

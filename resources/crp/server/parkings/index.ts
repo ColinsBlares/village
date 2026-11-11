@@ -1,5 +1,6 @@
 import * as mint from 'mint-server';
 import { table } from '../core/db.js';
+import { writeCrash } from '../core/log.js';
 import { houseForCharacter } from '../houses/index.js';
 import { getSession, type DbRow } from '../player/session.js';
 import { cef } from '../ui/send.js';
@@ -23,11 +24,11 @@ export async function loadParkings(): Promise<number> {
   return rows.length;
 }
 
-function closest(player: mint.Player): number {
+function closest(x: number, y: number): number {
   let id = 0;
   let best = Number.POSITIVE_INFINITY;
   for (const [parkingId, row] of spots) {
-    const next = Math.hypot(Number(row.x) - player.pos.x, Number(row.y) - player.pos.y);
+    const next = Math.hypot(Number(row.x) - x, Number(row.y) - y);
     if (next < best) {
       best = next;
       id = parkingId;
@@ -73,17 +74,21 @@ export function installParkings(): void {
     notifySuccess(player, 'Вы забрали т/с с парковки', 'Успешно');
     mint.emitClient(player, 'crp:chat', `!{#80c102} Вы забрали транспорт с парковки за !{#009eec}$${price}`);
   });
-  mint.on('playerDisconnect', async (player) => {
-    const character = getSession(player).character;
-    if (!character || houseForCharacter(Number(character.id))) return;
-    const parkingId = closest(player);
-    const rows = (await table('Vehicle').findAll({ where: { key: 'private', owner: character.id, parkingDate: null } })) as DbRow[];
-    const now = new Date();
-    for (const row of rows) {
-      row.parkingId = parkingId;
-      row.parkingDate = now;
-      await row.save();
-      hideVehicle(Number(row.id));
-    }
+  mint.on('playerDisconnect', (player, _reason, snapshot) => {
+    void parkOnQuit(player, snapshot).catch((err: unknown) => writeCrash('parking.quit', err));
   });
+}
+
+async function parkOnQuit(player: mint.Player, snapshot: mint.PlayerDisconnectSnapshot): Promise<void> {
+  const character = getSession(player).character;
+  if (!character || houseForCharacter(Number(character.id))) return;
+  const parkingId = closest(snapshot.position.x, snapshot.position.y);
+  const rows = (await table('Vehicle').findAll({ where: { key: 'private', owner: character.id, parkingDate: null } })) as DbRow[];
+  const now = new Date();
+  for (const row of rows) {
+    row.parkingId = parkingId;
+    row.parkingDate = now;
+    await row.save();
+    hideVehicle(Number(row.id));
+  }
 }

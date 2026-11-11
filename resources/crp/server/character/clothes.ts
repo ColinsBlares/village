@@ -1,4 +1,5 @@
 import { allowArmour } from '../anticheat/index.js';
+import { clothDlcHash } from '../clothes/index.js';
 import { table } from '../core/db.js';
 import type { DbRow } from '../player/session.js';
 
@@ -6,6 +7,19 @@ export interface ClothPiece {
   component: number;
   drawable: number;
   texture: number;
+  dlc?: number;
+}
+
+type Dresser = {
+  setClothes: (component: number, drawable: number, texture: number, palette?: number) => boolean;
+  setProp: (component: number, drawable: number, texture: number) => boolean;
+  setDlcClothes?: (dlc: number, component: number, drawable: number, texture: number, palette?: number) => boolean;
+  armour: number;
+};
+
+function putCloth(player: Pick<Dresser, 'setClothes' | 'setDlcClothes'>, piece: ClothPiece): void {
+  if (piece.dlc) player.setDlcClothes?.(piece.dlc, piece.component, piece.drawable, piece.texture, 0);
+  else player.setClothes(piece.component, piece.drawable, piece.texture, 0);
 }
 
 const CLOTHES: Record<number, number> = { 2: 7, 3: 9, 8: 4, 9: 6, 13: 5 };
@@ -19,7 +33,9 @@ function piecesOf(rows: DbRow[]): { clothes: ClothPiece[]; props: ClothPiece[] }
     const itemId = Number(row.itemId);
     if (itemId === 7) {
       clothes.push({ component: 3, drawable: params.torso || 0, texture: params.tTexture || 0 });
-      clothes.push({ component: 11, drawable: params.variation || 0, texture: params.texture || 0 });
+      const top: ClothPiece = { component: 11, drawable: params.variation || 0, texture: params.texture || 0 };
+      if (params.dlc) top.dlc = params.dlc;
+      clothes.push(top);
       if (params.undershirt != null) {
         clothes.push({ component: 8, drawable: params.undershirt, texture: params.uTexture || 0 });
       }
@@ -33,7 +49,9 @@ function piecesOf(rows: DbRow[]): { clothes: ClothPiece[]; props: ClothPiece[] }
       continue;
     }
     if (CLOTHES[itemId] != null) {
-      clothes.push({ component: CLOTHES[itemId], drawable: params.variation || 0, texture: params.texture || 0 });
+      const piece: ClothPiece = { component: CLOTHES[itemId], drawable: params.variation || 0, texture: params.texture || 0 };
+      if (params.dlc) piece.dlc = params.dlc;
+      clothes.push(piece);
       continue;
     }
     if (PROPS[itemId] != null) {
@@ -47,8 +65,17 @@ function paramsOf(row: DbRow): Record<string, number> {
   const list = (row.params ?? row.CharacterInventoryParams ?? []) as DbRow[];
   const params: Record<string, number> = {};
   for (const param of list) {
-    const value = Number(param.value);
-    if (Number.isFinite(value)) params[String(param.key)] = value;
+    const key = String(param.key);
+    const raw = String(param.value ?? '');
+    const numeric = Number(raw);
+    if (Number.isFinite(numeric)) {
+      params[key] = numeric;
+      continue;
+    }
+    if (key === 'dlc') {
+      const hashed = clothDlcHash(raw);
+      if (hashed) params.dlc = hashed;
+    }
   }
   return params;
 }
@@ -75,9 +102,14 @@ export function applyNaked(player: { setClothes: (component: number, drawable: n
   player.setClothes(9, 0, 0, 0);
 }
 
-export function wearItem(player: { setClothes: (component: number, drawable: number, texture: number, palette?: number) => boolean; setProp: (component: number, drawable: number, texture: number) => boolean; armour: number }, itemId: number, params: Record<string, number>): void {
+export function wearItem(player: Dresser, itemId: number, params: Record<string, number>): void {
   if (CLOTHES[itemId] != null) {
-    player.setClothes(CLOTHES[itemId], params.variation || 0, params.texture || 0, 0);
+    putCloth(player, {
+      component: CLOTHES[itemId],
+      drawable: params.variation || 0,
+      texture: params.texture || 0,
+      dlc: params.dlc || undefined,
+    });
     return;
   }
   if (PROPS[itemId] != null) {
@@ -92,7 +124,12 @@ export function wearItem(player: { setClothes: (component: number, drawable: num
   }
   if (itemId === 7) {
     player.setClothes(3, params.torso || 0, params.tTexture || 0, 0);
-    player.setClothes(11, params.variation || 0, params.texture || 0, 0);
+    putCloth(player, {
+      component: 11,
+      drawable: params.variation || 0,
+      texture: params.texture || 0,
+      dlc: params.dlc || undefined,
+    });
     if (params.undershirt != null) player.setClothes(8, params.undershirt, params.uTexture || 0, 0);
     if (params.decal != null) player.setClothes(10, params.decal, params.dTexture || 0, 0);
     return;
@@ -126,9 +163,9 @@ export function clearItem(player: { setClothes: (component: number, drawable: nu
   }
 }
 
-export async function applyWorn(player: { setClothes: (component: number, drawable: number, texture: number, palette?: number) => boolean; setProp: (component: number, drawable: number, texture: number) => boolean }, characterId: number, gender: number): Promise<void> {
+export async function applyWorn(player: Pick<Dresser, 'setClothes' | 'setProp' | 'setDlcClothes'>, characterId: number, gender: number): Promise<void> {
   applyNaked(player, gender);
   const worn = await loadWorn(characterId);
-  for (const piece of worn.clothes) player.setClothes(piece.component, piece.drawable, piece.texture, 0);
+  for (const piece of worn.clothes) putCloth(player, piece);
   for (const piece of worn.props) player.setProp(piece.component, piece.drawable, piece.texture);
 }

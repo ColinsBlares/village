@@ -2,6 +2,7 @@ import * as mint from 'mint-server';
 import { table } from '../core/db.js';
 import { factionInfo, factionKind, rankNumber } from '../factions/index.js';
 import { getSession, type DbRow } from '../player/session.js';
+import { joaat } from '../attaches/index.js';
 import { cef } from '../ui/send.js';
 import { notifyError, notifyInfo, notifySuccess } from '../ui/notify.js';
 
@@ -85,6 +86,65 @@ function homeZone(zone: DbRow): boolean {
     if (Math.abs(spot.x - Number(zone.x)) < 100 && Math.abs(spot.y - Number(zone.y)) < 100) return true;
   }
   return false;
+}
+
+const CAR = 2741846334;
+const HAND = 2725352035;
+const FALL = 3452007600;
+const WEAPONS: [string, string][] = [
+  ['weapon_combatpistol', 'Combat Pistol'],
+  ['weapon_smg', 'SMG'],
+  ['weapon_pumpshotgun', 'Pump Shotgun'],
+  ['weapon_carbinerifle', 'Carbine Rifle'],
+  ['weapon_microsmg', 'Micro SMG'],
+  ['weapon_machinepistol', 'Machine Pistol'],
+  ['weapon_compactrifle', 'Compact Rifle'],
+  ['weapon_carbinerifle_mk2', 'Carbine Rifle Mk II'],
+  ['weapon_combatpdw', 'Combat PDW'],
+  ['weapon_pumpshotgun_mk2', 'Pump Shotgun Mk II'],
+  ['weapon_heavypistol', 'Heavy Pistol'],
+  ['weapon_advancedrifle', 'Advanced Rifle'],
+  ['weapon_assaultsmg', 'Assault SMG'],
+  ['weapon_pistol', 'Pistol'],
+  ['weapon_knife', 'Knife'],
+  ['weapon_bat', 'Bat'],
+];
+const WEAPON_NAMES = new Map(WEAPONS.map(([id, name]) => [joaat(id), name]));
+
+function cause(hash: number): string | null {
+  const value = hash >>> 0;
+  if (value === FALL) return null;
+  if (value === CAR) return 'car';
+  if (value === HAND) return 'hand';
+  return WEAPON_NAMES.get(value) ?? 'оружие';
+}
+
+function fighters(ids: number[]): mint.Player[] {
+  const list: mint.Player[] = [];
+  for (const player of mint.Player.all) {
+    if (!player.valid) continue;
+    const faction = Number(getSession(player).character?.factionId) || 0;
+    if (ids.includes(faction)) list.push(player);
+  }
+  return list;
+}
+
+function armyFighters(): mint.Player[] {
+  if (!army) return [];
+  const list: mint.Player[] = [];
+  for (const player of mint.Player.all) {
+    if (player.valid && army.teams.has(player.id)) list.push(player);
+  }
+  return list;
+}
+
+function logKill(viewers: mint.Player[], victim: mint.Player, killer: mint.Player, weapon: number, victimSide: number, killerSide: number): void {
+  const target = JSON.stringify({ name: String(getSession(victim).character?.name ?? victim.name), factionId: victimSide });
+  const reason = cause(weapon);
+  const code = reason == null
+    ? `killList.add(${JSON.stringify(target)});`
+    : `killList.add(${JSON.stringify(target)}, ${JSON.stringify(JSON.stringify({ name: String(getSession(killer).character?.name ?? killer.name), factionId: killerSide }))}, ${JSON.stringify(reason)});`;
+  for (const player of viewers) cef(player, code);
 }
 
 function score(player: mint.Player, left: number, right: number, leftScore: number, rightScore: number, mine: number): void {
@@ -306,15 +366,17 @@ export function installWars(): void {
     }
   });
 
-  mint.on('playerDeath', (victim, killer) => {
+  mint.on('playerDeath', (victim, killer, weapon) => {
     if (!victim.valid || !(killer instanceof mint.Player) || killer.id === victim.id) return;
     const victimFaction = Number(getSession(victim).character?.factionId) || 0;
     const killerFaction = Number(getSession(killer).character?.factionId) || 0;
+    const hash = Number(weapon) || 0;
     if (band && bandPlayer(victim) && bandPlayer(killer) && victimFaction !== killerFaction) {
       if (killerFaction === band.left.id) band.left.score += 1;
       else if (killerFaction === band.right.id) band.right.score += 1;
       else return;
       const value = killerFaction === band.left.id ? band.left.score : band.right.score;
+      logKill(fighters([band.left.id, band.right.id]), victim, killer, hash, victimFaction, killerFaction);
       setPoint(killerFaction, value);
     }
     if (biz && mafiaPlayer(victim) && mafiaPlayer(killer) && victimFaction !== killerFaction) {
@@ -324,6 +386,7 @@ export function installWars(): void {
       else if (killerFaction === biz.right.id) biz.right.score += 1;
       else return;
       const value = killerFaction === biz.left.id ? biz.left.score : biz.right.score;
+      logKill(fighters([biz.left.id, biz.right.id]), victim, killer, hash, victimFaction, killerFaction);
       setPoint(killerFaction, value);
     }
     if (army && army.teams.has(victim.id) && army.teams.has(killer.id)) {
@@ -332,6 +395,7 @@ export function installWars(): void {
       if (!team || team === other) return;
       if (team === 1) army.left.score += 1;
       else army.right.score += 1;
+      logKill(armyFighters(), victim, killer, hash, other, team);
       setPoint(team, team === 1 ? army.left.score : army.right.score);
     }
   });

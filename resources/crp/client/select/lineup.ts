@@ -7,6 +7,7 @@ interface Piece {
   component: number;
   drawable: number;
   texture: number;
+  dlc?: number;
 }
 
 interface Preview {
@@ -133,7 +134,8 @@ function spawnPreview(preview: Preview, index: number, z: number): void {
   native.setPedComponentVariation(ped, 4, male ? 18 : 17, male ? 2 : 0, 0);
   native.setPedComponentVariation(ped, 6, male ? 34 : 35, 0, 0);
   for (const piece of preview.clothes) {
-    native.setPedComponentVariation(ped, piece.component, piece.drawable, piece.texture, 0);
+    if (piece.dlc) mint.setPedDlcClothes(ped, piece.dlc, piece.component, piece.drawable, piece.texture, 0);
+    else native.setPedComponentVariation(ped, piece.component, piece.drawable, piece.texture, 0);
   }
   peds.push(ped);
 }

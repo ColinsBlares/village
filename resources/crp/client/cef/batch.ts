@@ -100,6 +100,7 @@ const ROUTES: Record<string, string> = {
   'wedding.add.accept': 'crp:wedding:accept',
   'wedding.add.cancel': 'crp:wedding:cancel',
   'chargestations.charge': 'crp:charge',
+  'craft.bonfire.addFirewood': 'crp:craft:wood',
   'craft.item.craft': 'crp:craft',
   'craft.queue.take': 'crp:craft:take',
   'craft.queue.update': 'crp:craft:update',
@@ -165,6 +166,7 @@ const ROUTES: Record<string, string> = {
   'mapCase.pd.emergency.call': 'crp:pd:backup',
   'mapCase.fib.emergency.call': 'crp:fib:backup',
   'vehicles.props.add': 'crp:veh:props',
+  'vehicles.music.ended': 'crp:veh:music:ended',
   'bugTracker.bug.create': 'crp:bug:create',
   'terminal.command.handle': 'crp:terminal',
   'factions.cash.offer.cancel': 'crp:faction:cash:cancel',
@@ -243,8 +245,12 @@ export function handleBatchRemote(name: string, args: unknown[]): boolean {
   }
   const event = ROUTES[args[1]];
   if (!event) return false;
+  if (args[1] === 'mason.items.buy' || args[1] === 'mason.clothes.buy' || args[1] === 'woodman.items.buy' || args[1] === 'woodman.clothes.buy') {
+    mint.emitServer(event, JSON.stringify({ clothes: String(args[1]).includes('clothes'), index: Number(args[2]) || 0 }));
+    return true;
+  }
   if (event === 'crp:biz:order' && args.length > 4) {
-    mint.emitServer(event, JSON.stringify({ id: args[2], count: args[3], price: args[4] }));
+    mint.emitServer(event, JSON.stringify({ id: args[2], count: args[3], price: args[4], faction: args[5] === true || args[5] === 1 || args[5] === '1' }));
     return true;
   }
   if (event === 'crp:biz:player' && args.length > 3) {

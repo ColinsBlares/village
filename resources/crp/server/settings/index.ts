@@ -28,6 +28,10 @@ function clamp(value: number, max: number): number {
   return Math.max(0, Math.min(max, Math.trunc(value)));
 }
 
+function pushView(player: mint.Player, row: DbRow): void {
+  mint.emitClient(player, 'crp:settings:view', Number(row.nicknames) !== 0, Number(row.ghetto) !== 0);
+}
+
 function pushStyle(player: mint.Player, row: DbRow): void {
   const walk = WALK[clamp(Number(row.walking) || 0, WALK.length - 1)];
   const mood = MOOD[clamp(Number(row.mood) || 0, MOOD.length - 1)];
@@ -60,6 +64,7 @@ export async function applySettings(player: mint.Player): Promise<void> {
   if (!row) row = (await table('CharacterSettings').create({ characterId: id })) as DbRow;
   rows.set(player, row);
   pushStyle(player, row);
+  pushView(player, row);
 }
 
 export function installSettings(): void {
@@ -81,6 +86,7 @@ export function installSettings(): void {
     if (!changed) return;
     await row.save();
     pushStyle(player, row);
+    pushView(player, row);
   });
 
   mint.onClient('crp:settings:password', async (player, raw) => {

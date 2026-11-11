@@ -4,7 +4,7 @@ import { setColshapeHandlers } from '../core/colshapes.js';
 import { giveItem } from '../inventory/index.js';
 import type { DbRow } from '../player/session.js';
 import { getSession } from '../player/session.js';
-import { sendPhone } from '../phone/index.js';
+import { changePhoneNumber, sendPhone } from '../phone/index.js';
 import { cef } from '../ui/send.js';
 import { notifyError, notifySuccess } from '../ui/notify.js';
 import { addFuel, vehicleState } from '../vehicles/index.js';
@@ -48,6 +48,23 @@ async function pay(player: mint.Player, amount: number, method: number): Promise
 
 function marketPrice(shop: DbRow, key: keyof typeof MARKET): number {
   return Math.round(MARKET[key] * 10 * (Number(shop.priceMultiplier) || 1));
+}
+
+async function hasStock(shop: DbRow, units: number): Promise<boolean> {
+  const bizId = Number(shop.bizId) || 0;
+  if (!bizId) return true;
+  const biz = (await table('Biz').findOne({ where: { id: bizId } })) as DbRow | null;
+  return !!biz && (Number(biz.productsCount) || 0) >= units;
+}
+
+async function takeStock(shop: DbRow, units: number, income: number): Promise<void> {
+  const bizId = Number(shop.bizId) || 0;
+  if (!bizId) return;
+  const biz = (await table('Biz').findOne({ where: { id: bizId } })) as DbRow | null;
+  if (!biz) return;
+  biz.productsCount = Math.max(0, (Number(biz.productsCount) || 0) - units);
+  biz.cashBox = (Number(biz.cashBox) || 0) + income;
+  await biz.save();
 }
 
 function openMarket(player: mint.Player, shop: DbRow): void {
@@ -189,6 +206,11 @@ export function installShops(): void {
       return;
     }
     const price = marketPrice(shop, 'phone');
+    const units = Math.trunc(MARKET.phone * 0.7);
+    if (!(await hasStock(shop, units))) {
+      cef(player, `supermarket.notify("В магазине недостаточно товара");`);
+      return;
+    }
     const paid = await pay(player, price, Number(method) || 0);
     if (!paid) {
       cef(player, `supermarket.notify("Недостаточно денег");`);
@@ -210,9 +232,47 @@ export function installShops(): void {
       return;
     }
     await table('Phone').create({ characterId: character.id, number, money: 0 });
-    await sendPhone(player);
+    await takeStock(shop, units, price);
+    await sendPhone(player, true);
     cef(player, `supermarket.notify("Вы купили телефон");`);
     notifySuccess(player, 'Чтобы достать телефон, нажмите стрелку вверх', 'Телефон');
+  });
+
+  mint.onClient('crp:market:number', async (player, rawNumber, method) => {
+    const character = getSession(player).character;
+    const spot = standing.get(player);
+    const shop = spot?.kind === 'market' ? markets.get(spot.id) : undefined;
+    const number = String(rawNumber ?? '').trim();
+    if (!character || !shop) return;
+    if (number.length !== 6 || /\D/.test(number) || number.startsWith('0')) {
+      cef(player, `supermarket.notify("Номер: 6 цифр, не с нуля");`);
+      return;
+    }
+    const phone = await table('Phone').findOne({ where: { characterId: character.id } });
+    if (!phone) {
+      cef(player, `supermarket.notify("Сначала купите телефон");`);
+      return;
+    }
+    const price = marketPrice(shop, 'numberChange');
+    const units = Math.trunc(MARKET.numberChange * 0.7);
+    if (!(await hasStock(shop, units))) {
+      cef(player, `supermarket.notify("В магазине недостаточно товара");`);
+      return;
+    }
+    const paid = await pay(player, price, Number(method) || 0);
+    if (!paid) {
+      cef(player, `supermarket.notify("Недостаточно денег");`);
+      return;
+    }
+    const changed = await changePhoneNumber(player, number);
+    if (!changed) {
+      if (Number(method) === 1) await addBank(player, price);
+      else await addCash(player, price);
+      cef(player, `supermarket.notify("Такой номер уже занят");`);
+      return;
+    }
+    await takeStock(shop, units, price);
+    cef(player, `supermarket.notify("Номер изменён");`);
   });
 
   mint.onClient('crp:eatery:buy', async (player, productId, method) => {

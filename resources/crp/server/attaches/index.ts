@@ -56,24 +56,28 @@ export function syncGun(player: mint.Player, itemId: number, on: boolean): void 
   addAttachment(player, `weapon_${itemId}`, !on);
 }
 
+function readAttach(raw: unknown): { bone: number; pos: number[]; rot: number[] } {
+  const fallback = { bone: 11363, pos: [0.08, -0.15, -0.25], rot: [-100, 0, 0] };
+  let parsed: unknown = raw;
+  if (typeof raw === 'string') {
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return fallback;
+    }
+  }
+  if (!parsed || typeof parsed !== 'object') return fallback;
+  const info = parsed as { bone?: number; pos?: number[]; rot?: number[] };
+  if (!Array.isArray(info.pos) || !Array.isArray(info.rot)) return fallback;
+  return { bone: Number(info.bone) || fallback.bone, pos: info.pos.map(Number), rot: info.rot.map(Number) };
+}
+
 export async function sendAttachCatalog(player: mint.Player): Promise<void> {
   if (!catalog) {
     const rows = (await table('InventoryItem').findAll()) as DbRow[];
     const list = rows.filter((row) => row.model).map((row) => {
-      let bone = 11363;
-      let pos = [0.08, -0.15, -0.25];
-      let rot = [-100, 0, 0];
-      try {
-        const parsed = JSON.parse(String(row.attachInfo ?? '')) as { bone?: number; pos?: number[]; rot?: number[] };
-        if (parsed?.pos && parsed.rot) {
-          bone = Number(parsed.bone) || bone;
-          pos = parsed.pos;
-          rot = parsed.rot;
-        }
-      } catch {
-        bone = 11363;
-      }
-      return { id: Number(row.id), model: String(row.model), bone, pos, rot, gun: isBodyGun(Number(row.id)) };
+      const info = readAttach(row.attachInfo);
+      return { id: Number(row.id), model: String(row.model), bone: info.bone, pos: info.pos, rot: info.rot, gun: isBodyGun(Number(row.id)) };
     });
     catalog = JSON.stringify(list);
   }

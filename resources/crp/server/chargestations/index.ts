@@ -15,10 +15,12 @@ export async function loadChargeStations(): Promise<number> {
     setColshapeHandlers(shape, {
       onEnter: (player) => {
         here.set(player, station);
-        mint.emitClient(player, 'crp:prompt', 'charge');
+        if (!player.vehicle) mint.emitClient(player, 'crp:prompt', 'Чтобы зарядить транспортное средство, вы должны находиться в нем');
       },
       onExit: (player) => {
-        if (here.get(player)?.id === station.id) here.delete(player);
+        if (here.get(player)?.id !== station.id) return;
+        here.delete(player);
+        mint.emitClient(player, 'crp:prompt', '');
       },
     });
     const blip = new mint.PointBlip(354, Number(station.x), Number(station.y), Number(station.z), 5, 0.8, true, 0, String(station.name ?? 'Зарядка'));

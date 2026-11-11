@@ -230,7 +230,9 @@ export async function createReport(player: mint.Player, text: string): Promise<v
   await report.save();
   chat(player, `!{#87c924}Сообщение отправлено в репорт #${report.id}. Ответ администрации появится в чате.`);
   for (const current of mint.Player.all) {
-    if (level(current) > 0) chat(current, `!{#87c924}[Репорт #${report.id}] ${character.name}[${player.id}]: ${message}`);
+    if (level(current) < 1) continue;
+    chat(current, `!{#87c924}[Репорт #${report.id}] ${character.name}[${player.id}]: ${message}`);
+    void openPanel(current, false);
   }
 }
 
@@ -286,6 +288,9 @@ export function installAdmin(): void {
     void runCommand(player, command, parts.slice(1)).catch((err: unknown) => {
       mint.log(`crp: команда ${command}: ${err instanceof Error ? err.message : String(err)}`);
     });
+  });
+  mint.onClient('crp:report', (player, text) => {
+    void createReport(player, String(text ?? ''));
   });
   mint.onClient('crp:admin:panel', (player) => {
     if (player?.valid) void openPanel(player, false);

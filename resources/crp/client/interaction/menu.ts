@@ -40,6 +40,17 @@ export function handleInteractionClick(menu: string, item: string): boolean {
   if (menu === 'player_interaction') {
     const target = player();
     if (!target) return true;
+    if (item === 'Бросить кости') {
+      closeInteractionMenu();
+      pushCef(`inputWindow.name = 'dice';
+inputWindow.header = ${JSON.stringify(`Игра в кости (ID: ${target.id})`)};
+inputWindow.hint = "Введите сумму";
+inputWindow.inputHint = "Сумма игры...";
+inputWindow.value = "";
+inputWindow.show = true;
+inputWindow.playerId = ${target.id};`);
+      return true;
+    }
     if (item === 'Познакомиться') {
       if (hasFamiliar(target.name)) {
         fail(`Вы уже знаете ${target.name}`, 'Знакомство');

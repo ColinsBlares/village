@@ -1,5 +1,5 @@
 # Debug enables developer commands, live resource reload, and temporary local resources.
-debug = true
+debug = false
 # Select SDK-free GTA startup for every joining client; changes require a new GTA process.
 noSocialClub = false
 # Debug requires a loopback bind. Use debug = false for LAN/public access.
@@ -71,7 +71,7 @@ website = ""
 modules = ["js"]
 
 # Folders below resources/ beside this config; each contains resource.toml.
-resources = ["dlcpacks/370z", "dlcpacks/918", "dlcpacks/a80", "dlcpacks/amggtr", "dlcpacks/bbentayga", "dlcpacks/bugatti", "dlcpacks/c63w205", "dlcpacks/camry55", "dlcpacks/cityhall", "dlcpacks/dawn", "dlcpacks/fd", "dlcpacks/forest_mansion", "dlcpacks/gabz_pillbox_update", "dlcpacks/gcom_ballas_gang", "dlcpacks/gcom_lsn_room", "dlcpacks/gtr", "dlcpacks/i8", "dlcpacks/int_mafc", "dlcpacks/kfbmods1", "dlcpacks/lc200", "dlcpacks/mrpd", "dlcpacks/pablito_vagos", "dlcpacks/R50", "dlcpacks/rs6", "dlcpacks/rs7", "dlcpacks/rumafia", "dlcpacks/s500w222", "dlcpacks/sheriff", "dlcpacks/skyline", "dlcpacks/smg", "dlcpacks/sq72016", "dlcpacks/srt8", "dlcpacks/sti", "dlcpacks/wraith", "dlcpacks/x5e53", "dlcpacks/lspd_exterieur", "crp"]
+resources = ["dlcpacks/370z", "dlcpacks/918", "dlcpacks/a80", "dlcpacks/amggtr", "dlcpacks/bbentayga", "dlcpacks/bugatti", "dlcpacks/c63w205", "dlcpacks/camry55", "dlcpacks/cityhall", "dlcpacks/dawn", "dlcpacks/fd", "dlcpacks/forest_mansion", "dlcpacks/gabz_pillbox_update", "dlcpacks/gcom_ballas_gang", "dlcpacks/gcom_lsn_room", "dlcpacks/gtr", "dlcpacks/i8", "dlcpacks/int_mafc", "dlcpacks/kfbmods1", "dlcpacks/lc200", "dlcpacks/mrpd", "dlcpacks/pablito_vagos", "dlcpacks/R50", "dlcpacks/rs6", "dlcpacks/rs7", "dlcpacks/rumafia", "dlcpacks/s500w222", "dlcpacks/sheriff", "dlcpacks/skyline", "dlcpacks/smg", "dlcpacks/sq72016", "dlcpacks/srt8", "dlcpacks/sti", "dlcpacks/wraith", "dlcpacks/x5e53", "dlcpacks/19raptor", "dlcpacks/mpfeet", "dlcpacks/mpjbib", "crp"]
 # Production encryption covers DLC and client JS/UI files; debug ignores it.
 encryptResources = true
 # Reserved data/game-data.json beside the executable always supplies the stock GTA catalog.

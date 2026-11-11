@@ -134,6 +134,15 @@ export function handleTaxi(name: string, args: unknown[]): boolean {
     busyRemove('taxi_rent');
     return true;
   }
+  if (name === 'taxi.jobmenu.close') {
+    pushCef('selectMenu.show = false;');
+    return true;
+  }
+  if (name === 'taxi.jobmenu.employment') {
+    pushCef('selectMenu.show = false;');
+    mint.emitServer('crp:taxi:job');
+    return true;
+  }
   if (name === 'callRemote' && args[1] === 'taxi.employment') {
     mint.emitServer('crp:taxi:job');
     return true;

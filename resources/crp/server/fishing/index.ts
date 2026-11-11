@@ -46,15 +46,26 @@ export async function loadFishing(): Promise<number> {
     setColshapeHandlers(shape, {
       onEnter: (player) => {
         atFisher.add(player);
-        mint.emitClient(player, 'crp:fish:zone', true);
+        mint.emitClient(player, 'crp:fish:menu', ROD_PRICE);
       },
       onExit: (player) => {
         atFisher.delete(player);
-        mint.emitClient(player, 'crp:fish:zone', false);
+        mint.emitClient(player, 'crp:fish:menu', 0);
       },
     });
-    const blip = new mint.PointBlip(68, Number(spot.x), Number(spot.y), Number(spot.z), 3, 0.8, true, 0, 'Рыбалка');
+    const blip = new mint.PointBlip(68, Number(spot.x), Number(spot.y), Number(spot.z), 26, 0.8, true, 0, 'Рыбалка');
     void blip;
+    const heading = ((Number(spot.heading) || 0) + 90) * (Math.PI / 180);
+    const markX = Number(spot.x) + 0.8 * Math.cos(heading);
+    const markY = Number(spot.y) + 0.8 * Math.sin(heading);
+    new mint.Marker(
+      mint.MarkerType.MarkerCylinder,
+      markX, markY, Number(spot.z) - 1.2,
+      0, 0, 0, 0, 0, 0,
+      0.4, 0.4, 0.4,
+      200, 255, 255, 125,
+      0,
+    );
   }
   return spots.length;
 }
@@ -130,26 +141,36 @@ export function installFishing(): void {
   });
 
   mint.onClient('crp:fish:rod', async (player) => {
-    if (!atFisher.has(player)) return notifyError(player, 'Подойдите к рыбаку', 'Удочка');
-    if (await rodOf(player)) return notifyError(player, 'Удочка уже есть', 'Удочка');
-    if (!(await removeCash(player, ROD_PRICE))) return notifyError(player, `Необходимо $${ROD_PRICE}`, 'Удочка');
+    if (!atFisher.has(player)) {
+      notifyError(player, 'Подойдите к рыбаку', 'Удочка');
+      return mint.emitClient(player, 'crp:fish:rod:ans', 0);
+    }
+    if (await rodOf(player)) return mint.emitClient(player, 'crp:fish:rod:ans', 2, 'Удочка уже есть');
+    if (!(await removeCash(player, ROD_PRICE))) return mint.emitClient(player, 'crp:fish:rod:ans', 3);
     const ok = await giveItem(player, ROD, { health: 100 });
     if (!ok) {
       await addCash(player, ROD_PRICE);
-      return notifyError(player, 'Нет места в инвентаре', 'Удочка');
+      return mint.emitClient(player, 'crp:fish:rod:ans', 2, 'Нет места в инвентаре');
     }
-    notifySuccess(player, 'Удочка куплена', 'Рыбалка');
+    notifySuccess(player, 'Удочка добавлена в инвентарь', 'Рыбалка');
+    mint.emitClient(player, 'crp:fish:rod:ans', 1);
   });
 
   mint.onClient('crp:fish:sell', async (player) => {
-    if (!atFisher.has(player)) return notifyError(player, 'Подойдите к скупщику', 'Рыба');
+    if (!atFisher.has(player)) {
+      notifyError(player, 'Подойдите к скупщику', 'Рыба');
+      return mint.emitClient(player, 'crp:fish:sell:ans', 0);
+    }
     const character = getSession(player).character;
     if (!character) return;
     const rows = (await table('CharacterInventory').findAll({
       where: { playerId: character.id, itemId: FISH },
       include: [{ model: table('CharacterInventoryParam'), as: 'params' }],
     })) as DbRow[];
-    if (!rows.length) return notifyError(player, 'У вас нет рыбы', 'Рыба');
+    if (!rows.length) {
+      notifyError(player, 'У вас нет рыбы', 'Ошибка');
+      return mint.emitClient(player, 'crp:fish:sell:ans', 0);
+    }
     let sum = 0;
     for (const row of rows) {
       const params = (row.params ?? []) as DbRow[];
@@ -161,6 +182,7 @@ export function installFishing(): void {
     }
     await sendInventory(player);
     await addCash(player, sum);
-    notifySuccess(player, `Рыба продана за $${sum}`, 'Рыба');
+    notifySuccess(player, `Вы продали рыбы на $${sum}`, 'Продажа');
+    mint.emitClient(player, 'crp:fish:sell:ans', 1);
   });
 }

@@ -1,4 +1,4 @@
-import type * as mint from 'mint-server';
+import * as mint from 'mint-server';
 import { db } from '../core/db.js';
 import { getSession, type DbRow } from '../player/session.js';
 import { cef } from '../ui/send.js';
@@ -96,4 +96,22 @@ export function addBank(player: mint.Player, amount: number): Promise<boolean> {
 
 export function removeBank(player: mint.Player, amount: number): Promise<boolean> {
   return change(player, 'bank', -Math.abs(amount));
+}
+
+export async function creditBank(characterId: number, amount: number): Promise<boolean> {
+  const sum = Math.trunc(amount);
+  if (!Number.isFinite(sum) || sum <= 0) return false;
+  const online = mint.Player.all.find((entry) => entry.valid && Number(getSession(entry).character?.id) === characterId);
+  if (online) return addBank(online, sum);
+  try {
+    await withLock(characterId, () => {
+      const sequelize = db.sequelize as unknown as {
+        transaction<T>(fn: (t: unknown) => Promise<T>): Promise<T>;
+      };
+      return sequelize.transaction((t) => deltaColumn(characterId, 'bank', sum, t));
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }

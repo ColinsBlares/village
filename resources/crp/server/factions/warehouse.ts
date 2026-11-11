@@ -1,7 +1,8 @@
 import * as mint from 'mint-server';
 import { table } from '../core/db.js';
 import { setColshapeHandlers } from '../core/colshapes.js';
-import { playAnimation, stopAnimation } from '../animations/index.js';
+import { addAttachment } from '../attaches/index.js';
+import { stopAnimation } from '../animations/index.js';
 import { factionInfo } from './index.js';
 import { getSession, type DbRow } from '../player/session.js';
 import { cef } from '../ui/send.js';
@@ -26,7 +27,6 @@ interface Stock {
 
 interface Carry {
   type: 'ammo' | 'medicines';
-  prop: mint.Object | null;
 }
 
 interface Cargo {
@@ -40,10 +40,9 @@ const cargo = new WeakMap<mint.Vehicle, Cargo>();
 const supply = new WeakMap<mint.Player, 'ammo' | 'medicines'>();
 const site = new WeakMap<mint.Player, number>();
 
-const PROPS = {
-  ammo: { model: 'prop_box_ammo04a', pos: [0.05, 0, -0.25], rot: [-15, 100, 95] },
-  medicines: { model: 'ex_office_swag_pills4', pos: [0.2, 0, -0.2], rot: [-100, 0, 20] },
-} as const;
+function boxName(type: 'ammo' | 'medicines'): string {
+  return type === 'ammo' ? 'ammoBox' : 'medicinesBox';
+}
 
 function prompt(player: mint.Player, name: string | null): void {
   cef(player, name ? `prompt.showByName(${JSON.stringify(name)});` : 'prompt.hide();');
@@ -84,35 +83,14 @@ async function handsBusy(player: mint.Player): Promise<boolean> {
 function clearBox(player: mint.Player): void {
   const current = carry.get(player);
   carry.delete(player);
-  try {
-    current?.prop?.destroy();
-  } catch {
-    /* проп уже уничтожен */
-  }
+  if (current && player.valid) addAttachment(player, boxName(current.type), true);
   if (player.valid) stopAnimation(player);
 }
 
 function giveBox(player: mint.Player, type: 'ammo' | 'medicines'): void {
   clearBox(player);
-  const spec = PROPS[type];
-  let prop: mint.Object | null = null;
-  try {
-    prop = new mint.Object(mint.hash(spec.model), player.pos.x, player.pos.y, player.pos.z, 0, 0, 0, player.dimension, true);
-    const rot = spec.rot.map((value) => (value * Math.PI) / 180);
-    prop.attachTo(
-      player,
-      11363,
-      0,
-      new mint.Vector3(spec.pos[0], spec.pos[1], spec.pos[2]),
-      new mint.Vector3(rot[0], rot[1], rot[2]),
-      false,
-      true,
-    );
-  } catch {
-    prop = null;
-  }
-  carry.set(player, { type, prop });
-  playAnimation(player, 'anim@heists@box_carry@', 'idle', 49);
+  addAttachment(player, boxName(type));
+  carry.set(player, { type });
 }
 
 async function setCount(stock: Stock, type: 'ammo' | 'medicines', count: number): Promise<void> {
@@ -385,6 +363,10 @@ export function installWarehouse(): void {
     if (!load?.count) return notifyError(player, 'Авто не содержит ящики', header);
     vehicle.setStreamSyncedMeta('crp:unload', true);
     notifySuccess(player, 'Разгрузка началась', header);
+  });
+  mint.onClient('crp:attach:lost', (player, name) => {
+    if (name !== 'ammoBox' && name !== 'medicinesBox') return;
+    clearBox(player);
   });
   mint.on('playerDisconnect', (player) => {
     clearBox(player);

@@ -12,6 +12,7 @@ import { addDrunkenness } from '../clubs/drunk.js';
 import { fuelHere } from '../shops/index.js';
 import { addFuel, vehicleState } from '../vehicles/index.js';
 import { sendInventory } from './index.js';
+import { createBonfire, spendItems } from '../craft/index.js';
 
 const MED_HEALTH = 20;
 const PATCH_HEALTH = 5;
@@ -276,11 +277,33 @@ export function installItemUse(): void {
     notifySuccess(target, `${getSession(player).character?.name} вас реанимировал`, header);
   });
   mint.onClient('crp:item:use', async (player, raw) => {
-    const data = JSON.parse(String(raw ?? '{}')) as { sqlId?: number; index?: number };
+    const data = JSON.parse(String(raw ?? '{}')) as { sqlId?: number; index?: number; pos?: { x?: number; y?: number; z?: number } };
     const item = await loadItem(player, Number(data.sqlId));
     if (!item) return notifyError(player, 'Предмет не найден', 'Инвентарь');
     const title = await itemName(Number(item.itemId));
     if (!hands(item)) return notifyError(player, `${title} не в руках`, title);
+    if (Number(item.itemId) === 139) {
+      if (data.index !== 0) return;
+      if (player.vehicle) return notifyError(player, 'Недоступно в авто', title);
+      const matches = countOf(item).value;
+      if (!matches) return notifyError(player, 'Количество спичек: 0 ед.', title);
+      const spot = data.pos && typeof data.pos === 'object' ? data.pos as { x?: number; y?: number; z?: number } : null;
+      const pos = {
+        x: Number(spot?.x),
+        y: Number(spot?.y),
+        z: Number(spot?.z),
+      };
+      if (!Number.isFinite(pos.x) || !Number.isFinite(pos.y) || !Number.isFinite(pos.z) || player.pos.distanceTo(new mint.Vector3(pos.x, pos.y, pos.z)) > 8) {
+        pos.x = player.pos.x;
+        pos.y = player.pos.y;
+        pos.z = player.pos.z;
+      }
+      if (!(await spendItems(player, [{ itemId: 131, count: 3 }]))) return notifyError(player, 'Недостаточно дерева, нужно 3 шт.', title);
+      await changeCount(player, item, matches - 1);
+      createBonfire(player, pos);
+      notifySuccess(player, 'Вы развели костер', title);
+      return;
+    }
     if (Number(item.itemId) !== 56) return;
     const params = paramsOf(item);
     const litres = Number(params.litres) || 0;

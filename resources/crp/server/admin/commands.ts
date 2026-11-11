@@ -496,9 +496,35 @@ export const commands: Record<string, Command> = {
   '/clothes': {
     access: 3,
     description: 'Выдача тестовой одежды',
-    args: '[тип] [вариация] [текстура]',
+    args: '[тип]:n',
     handler(player, args) {
-      player.setClothes(Number(args[0]) || 0, Number(args[1]) || 0, Number(args[2]) || 0, 0);
+      const component = Number(args[0]) || 0;
+      const variation = args[1];
+      if (variation == null || variation === '') {
+        const slot = mint.getGameDataRecord('clothes', player.model >>> 0)?.components[component];
+        const count = slot?.textureCounts.length ?? 0;
+        if (!count) return notifyError(player, `Нет данных по слоту ${component}`);
+        notifyInfo(player, `Слот ${component}: 0..${count - 1}, аддон mpfeet — ${count}`);
+        return;
+      }
+      if (Number.isNaN(Number(variation))) {
+        const name = String(variation).toLowerCase();
+        const female = Number(getSession(player).character?.gender) === 1;
+        const names = name.startsWith('mp_m_') || name.startsWith('mp_f_')
+          ? [name]
+          : [`mp_${female ? 'f' : 'm'}_${name}`, `mp_${female ? 'f' : 'm'}_freemode_01_mp_${female ? 'f' : 'm'}_${name}`, name];
+        const drawable = Number(args[2]) || 0;
+        const texture = Number(args[3]) || 0;
+        for (const collection of names) {
+          const dlc = mint.hash(collection);
+          if (!player.setDlcClothes(dlc, component, drawable, texture, 0)) continue;
+          const worn = player.getDlcClothes(component);
+          notifyInfo(player, `${collection} слот ${component} dlc=${worn.dlc} drawable=${worn.drawable} tex=${worn.texture}`);
+          return;
+        }
+        return notifyError(player, `Коллекция не наделась: ${names.join(', ')}`);
+      }
+      player.setClothes(component, Number(variation) || 0, Number(args[2]) || 0, 0);
     },
   },
   '/prop': {

@@ -12,6 +12,10 @@ function broadcast(text: string): void {
   }
 }
 
+export function inStream(player: mint.Player): boolean {
+  return ownerId != null && members.has(player.id);
+}
+
 export function relayStream(player: mint.Player, text: string): void {
   if (ownerId == null || !members.has(player.id)) return;
   const owner = mint.Player.getByID(ownerId);

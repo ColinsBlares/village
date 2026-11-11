@@ -90,6 +90,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER(11),
             defaultValue: 1,
             allowNull: false,
+        },
+        dlc: {
+            type: DataTypes.STRING(32),
+            allowNull: true,
         }
     }, {
         timestamps: false

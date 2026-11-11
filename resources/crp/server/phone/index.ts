@@ -25,6 +25,27 @@ export function phoneOf(player: mint.Player): { id: number; number: string } | n
   return numbers.get(player.id) ?? null;
 }
 
+export async function changePhoneNumber(player: mint.Player, raw: string): Promise<boolean> {
+  const mine = phoneOf(player);
+  const next = String(raw ?? '').trim();
+  if (!mine || next.length === 0 || mine.number === next) return false;
+  const taken = await table('Phone').findOne({ where: { number: next } });
+  if (taken) return false;
+  const phone = (await table('Phone').findOne({ where: { id: mine.id } })) as DbRow | null;
+  if (!phone) return false;
+  const copies = (await table('PhoneContact').findAll({ where: { phoneId: mine.id, number: next } })) as DbRow[];
+  for (const copy of copies) await copy.destroy();
+  const previous = mine.number;
+  phone.number = next;
+  await phone.save();
+  numbers.set(player.id, { id: mine.id, number: next });
+  if (player.valid) {
+    cef(player, `mp.event.call('phone.contact.mine.update', ${JSON.stringify(previous)}, ${JSON.stringify(next)});`);
+    await sendPhone(player);
+  }
+  return true;
+}
+
 function byNumber(number: string): mint.Player | null {
   for (const player of mint.Player.all) {
     if (numbers.get(player.id)?.number === number) return player;
@@ -57,7 +78,7 @@ function listOf(row: DbRow, key: string): unknown[] {
   return Array.isArray(value) ? value : [];
 }
 
-export async function sendPhone(player: mint.Player): Promise<void> {
+export async function sendPhone(player: mint.Player, gallery = false): Promise<void> {
   const character = getSession(player).character;
   if (!character || !player.valid) return;
   let phone: DbRow | null = null;
@@ -81,7 +102,21 @@ export async function sendPhone(player: mint.Player): Promise<void> {
     biz: biz ? [bizApp(biz)] : [],
     contacts: json ? listOf(json, 'PhoneContacts') : [],
   };
-  const dialogs = json ? listOf(json, 'PhoneDialogs') : [];
+  const dialogs = json ? listOf(json, 'PhoneDialogs') as DbRow[] : [];
+  if (dialogs.length) {
+    const ids = dialogs.map((dialog) => Number(dialog.id)).filter((id) => id > 0);
+    const messages = ids.length
+      ? (await table('PhoneMessage').findAll({ where: { phoneDialogId: ids }, order: [['id', 'ASC']] })) as DbRow[]
+      : [];
+    const grouped = new Map<number, { text: string; isMine: boolean; date: unknown }[]>();
+    for (const row of messages) {
+      const id = Number(row.phoneDialogId);
+      const list = grouped.get(id) ?? [];
+      list.push({ text: String(row.text ?? ''), isMine: Number(row.isMine) === 1, date: row.date });
+      grouped.set(id, list);
+    }
+    for (const dialog of dialogs) dialog.PhoneMessages = grouped.get(Number(dialog.id)) ?? [];
+  }
   const apps = Number(character.job) === 2 ? ['taxi'] : [];
   if (phone) numbers.set(player.id, { id: Number(phone.id), number: String(phone.number) });
   else numbers.delete(player.id);
@@ -93,6 +128,21 @@ export async function sendPhone(player: mint.Player): Promise<void> {
   const extra = club ? `phone.app.add('factionBiz', ${JSON.stringify(bizApp(club))});` : '';
   cef(player, `mp.event.call('phone.load', ${JSON.stringify(info)}, ${JSON.stringify(dialogs)}, ${JSON.stringify(apps)}); ${extra}`);
   pushNumber(player, phone ? phone.number : null);
+  if (gallery && phone) void sendGallery(player, Number(phone.id));
+}
+
+async function sendGallery(player: mint.Player, phoneId: number): Promise<void> {
+  const rows = (await table('PhonePhoto').findAll({
+    where: { phoneId },
+    order: [['id', 'DESC']],
+    limit: 24,
+  })) as DbRow[];
+  if (!player.valid) return;
+  cef(player, `mp.event.call('phone.gallery.begin');`);
+  for (const row of rows) {
+    cef(player, `mp.event.call('phone.gallery.item', ${Number(row.id)}, ${JSON.stringify(String(row.src ?? ''))}, ${JSON.stringify(row.facing === 'front' ? 'front' : 'back')}, ${Number(row.shotAt) || 0}, ${row.wallpaper ? 1 : 0});`);
+  }
+  cef(player, `mp.event.call('phone.gallery.end');`);
 }
 
 async function dialogWith(phoneId: number, number: string): Promise<DbRow> {
@@ -218,6 +268,18 @@ export function installPhone(): void {
     cef(other, `mp.event.call('phone.message.set', ${JSON.stringify(message)}, ${JSON.stringify(mine.number)});`);
   });
 
+  mint.onClient('crp:phone:messages', async (player, rawNumber) => {
+    const mine = phoneOf(player);
+    const number = String(rawNumber ?? '');
+    if (!mine) return;
+    const dialog = (await table('PhoneDialog').findOne({ where: { phoneId: mine.id, number } })) as DbRow | null;
+    const rows = dialog
+      ? (await table('PhoneMessage').findAll({ where: { phoneDialogId: dialog.id }, order: [['id', 'ASC']] })) as DbRow[]
+      : [];
+    const messages = rows.map((row) => ({ text: String(row.text ?? ''), isMine: Number(row.isMine) === 1, date: row.date }));
+    if (player.valid) cef(player, `mp.event.call('phone.message.load', ${JSON.stringify(messages)}, ${JSON.stringify(number)});`);
+  });
+
   mint.onClient('crp:phone:read', async (player, rawNumber) => {
     const mine = phoneOf(player);
     if (!mine) return;
@@ -264,6 +326,64 @@ export function installPhone(): void {
     contact.name = contactName;
     await contact.save();
     await sendPhone(player);
+  });
+
+  mint.onClient('crp:phone:contact:remove', async (player, rawNumber) => {
+    const mine = phoneOf(player);
+    const number = String(rawNumber ?? '');
+    if (!mine || !number) return;
+    const contact = (await table('PhoneContact').findOne({ where: { phoneId: mine.id, number } })) as DbRow | null;
+    if (!contact) {
+      cef(player, `mp.event.call('phone.error', 4);`);
+      return;
+    }
+    await contact.destroy();
+    await sendPhone(player);
+  });
+
+  mint.onClient('crp:phone:gallery:add', async (player, src, facing, localId) => {
+    const mine = phoneOf(player);
+    const image = String(src ?? '');
+    if (!mine) return;
+    const clip = image.startsWith('clip:');
+    if (clip) {
+      if (image.length > 180000 || !image.includes('data:image/jpeg')) return;
+    } else if (!image.startsWith('data:image/jpeg') || image.length < 32 || image.length > 140000) return;
+    const side = facing === 'front' ? 'front' : 'back';
+    const row = (await table('PhonePhoto').create({
+      phoneId: mine.id,
+      src: image,
+      facing: side,
+      shotAt: Date.now(),
+      wallpaper: 0,
+    })) as DbRow;
+    const rows = (await table('PhonePhoto').findAll({
+      where: { phoneId: mine.id },
+      order: [['id', 'DESC']],
+    })) as DbRow[];
+    for (const extra of rows.slice(24)) await extra.destroy();
+    if (player.valid) cef(player, `mp.event.call('phone.gallery.added', ${Number(row.id)}, ${JSON.stringify(String(localId ?? ''))});`);
+  });
+
+  mint.onClient('crp:phone:gallery:remove', async (player, rawId) => {
+    const mine = phoneOf(player);
+    const photoId = Number(rawId);
+    if (!mine || !Number.isInteger(photoId) || photoId <= 0) return;
+    const row = (await table('PhonePhoto').findOne({ where: { id: photoId, phoneId: mine.id } })) as DbRow | null;
+    if (row) await row.destroy();
+  });
+
+  mint.onClient('crp:phone:gallery:wall', async (player, rawId) => {
+    const mine = phoneOf(player);
+    const photoId = Number(rawId);
+    if (!mine || !Number.isInteger(photoId) || photoId <= 0) return;
+    const rows = (await table('PhonePhoto').findAll({ where: { phoneId: mine.id } })) as DbRow[];
+    for (const row of rows) {
+      const next = Number(row.id) === photoId ? 1 : 0;
+      if (Number(row.wallpaper) === next) continue;
+      row.wallpaper = next;
+      await row.save();
+    }
   });
 
   mint.on('playerDisconnect', (player) => {

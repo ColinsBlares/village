@@ -3,7 +3,10 @@ import { table } from '../core/db.js';
 import { writeCrash } from '../core/log.js';
 import { getSession, type DbRow } from '../player/session.js';
 import { cef } from '../ui/send.js';
-import { bodySlots, clientItems, itemCatalog } from './items.js';
+import { wearItem } from '../character/clothes.js';
+import { bodySlots, clientItems, itemCatalog, rowParams } from './items.js';
+import { showHeld } from './hands.js';
+import { characterItems, commonWeight, maxPlayerWeight, pocketSlotInRows } from './slots.js';
 import { installItemUse } from './use.js';
 import { installBootInventory } from './boot.js';
 import { installHolderInventory } from './holder.js';
@@ -21,26 +24,52 @@ function collectIds(value: unknown, into: Set<number>): void {
   }
 }
 
+async function freeSlot(rows: DbRow[], itemId: number): Promise<{ parentId: number | null; pocketIndex: number | null; index: number } | null> {
+  if (!rows.some((row) => row.parentId == null && Number(row.index) === 13)) {
+    return { parentId: null, pocketIndex: null, index: 13 };
+  }
+  for (const [slot, list] of Object.entries(bodySlots())) {
+    const index = Number(slot);
+    if (!list?.includes(itemId)) continue;
+    if (!rows.some((row) => row.parentId == null && Number(row.index) === index)) {
+      return { parentId: null, pocketIndex: null, index };
+    }
+  }
+  return pocketSlotInRows(rows, itemId);
+}
+
 export async function giveItem(player: mint.Player, itemId: number, params: Record<string, unknown> = {}): Promise<boolean> {
   const character = getSession(player).character;
   if (!character) return false;
-  const rows = (await table('CharacterInventory').findAll({
-    where: { playerId: character.id, parentId: null },
-  })) as DbRow[];
-  const used = new Set(rows.map((row) => Number(row.index)));
-  let index = 0;
-  while (used.has(index)) index += 1;
+  const sex = params.sex;
+  if (sex != null && sex !== '' && Number(sex) !== Number(!Number(character.gender))) return false;
+  const rows = await characterItems(character.id);
+  if (params.weaponHash && rows.some((row) => Number(row.itemId) === itemId && rowParams(row).weaponHash)) return false;
+  const info = (await table('InventoryItem').findOne({ where: { id: itemId } })) as DbRow | null;
+  const nextWeight = (await commonWeight(character.id)) + (Number(info?.weight) || 0) * (Number(params.count) || 1);
+  if (nextWeight > maxPlayerWeight()) return false;
+  const slot = await freeSlot(rows, itemId);
+  if (!slot) return false;
   const created = (await table('CharacterInventory').create({
     playerId: character.id,
     itemId,
-    pocketIndex: 0,
-    index,
-    parentId: null,
+    pocketIndex: slot.pocketIndex,
+    index: slot.index,
+    parentId: slot.parentId,
   })) as DbRow;
   for (const [key, value] of Object.entries(params)) {
     await table('CharacterInventoryParam').create({ itemId: created.id, key, value: String(value) });
   }
   await sendInventory(player);
+  if (slot.parentId == null && slot.index === 13) void showHeld(player, created);
+  else if (slot.parentId == null) {
+    const numeric: Record<string, number> = {};
+    for (const [key, value] of Object.entries(params)) {
+      const num = Number(value);
+      if (Number.isFinite(num)) numeric[key] = num;
+    }
+    wearItem(player, itemId, numeric);
+  }
   return true;
 }
 

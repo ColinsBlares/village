@@ -1,5 +1,6 @@
 import * as mint from 'mint-client';
 import * as native from 'natives';
+import { pushCef } from '../cef/view.js';
 
 let locked = false;
 
@@ -21,6 +22,19 @@ function animType(vehicle: mint.Vehicle): number {
   if (kind === 8) return 2;
   if (kind === 7) return 3;
   return 0;
+}
+
+export function handleServiceJob(name: string): boolean {
+  if (name === 'carservice.jobmenu.close') {
+    pushCef('selectMenu.show = false;');
+    return true;
+  }
+  if (name === 'carservice.jobshape.employment') {
+    pushCef('selectMenu.show = false;');
+    mint.emitServer('crp:service:job');
+    return true;
+  }
+  return false;
 }
 
 export function installServiceClient(): void {

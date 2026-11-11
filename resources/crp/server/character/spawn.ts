@@ -17,6 +17,7 @@ import { sendPhone } from '../phone/index.js';
 import { armPlayer } from '../anticheat/index.js';
 import { initJobSkills } from '../jobs/index.js';
 import { pushPlayerMenu } from '../player/menu.js';
+import { announcePlayer, loadPlayerList, pushOnline } from '../hud/players.js';
 import { resumeArrest } from '../police/index.js';
 import { sendFamiliarList } from '../familiar/index.js';
 import { syncFamily } from '../family/control.js';
@@ -28,6 +29,7 @@ import { checkPromocode } from '../promocodes/index.js';
 import { syncDoors } from '../world/doors.js';
 import { applySettings } from '../settings/index.js';
 import { sendDrunkInit } from '../clubs/drunk.js';
+import { warnTaxes } from '../world/tax.js';
 
 const STREETS = [
   [-252.915, -338.68, 29.706],
@@ -110,7 +112,7 @@ export async function finishEnter(player: mint.Player): Promise<void> {
   void openFaction(player).catch((err: unknown) => writeCrash('factions.open', err));
   void sendAttachCatalog(player).then(() => syncWornGuns(player)).catch((err: unknown) => writeCrash('attaches.catalog', err));
   void spawnOwnedVehicles(player).catch((err: unknown) => writeCrash('vehicles.private', err));
-  void sendPhone(player).catch((err: unknown) => writeCrash('phone.send', err));
+  void sendPhone(player, true).catch((err: unknown) => writeCrash('phone.send', err));
   resumeArrest(player);
   player.emit('crp:faction:places', JSON.stringify(placesFor(Number(character.factionId) || 0)));
   player.setStreamSyncedMeta('crp:name', String(character.name ?? ''));
@@ -126,10 +128,14 @@ export async function finishEnter(player: mint.Player): Promise<void> {
   sendChangelist(player);
   void syncSpouse(player).catch((err: unknown) => writeCrash('wedding.sync', err));
   void checkPromocode(player).catch((err: unknown) => writeCrash('promo.check', err));
+  warnTaxes(player);
   syncDoors(player);
   sendDrunkInit(player);
   sendBandZones(player);
   const admin = Number(character.admin) || 0;
+  pushOnline();
+  announcePlayer(player);
+  if (admin > 0) loadPlayerList(player);
   if (admin > 0) {
     player.emit('crp:admin:level', admin);
     cef(player, 'terminal.enable = true;');

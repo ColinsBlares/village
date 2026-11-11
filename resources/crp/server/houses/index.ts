@@ -17,11 +17,21 @@ export interface HouseRecord {
   info: DbRow;
   interior: DbRow;
   garage: DbRow | null;
+  blip: mint.PointBlip | null;
 }
 
 const houses = new Map<number, HouseRecord>();
 const spots = new WeakMap<mint.Colshape, HouseSpot>();
 const standing = new WeakMap<mint.Player, HouseSpot>();
+
+function paintHouse(house: HouseRecord): void {
+  const blip = house.blip;
+  if (!blip?.valid) return;
+  const owned = house.info.characterId != null;
+  blip.color = owned ? 1 : 2;
+  blip.name = owned ? 'Дом' : 'Продажа собственности';
+  blip.shortRange = true;
+}
 
 function rentOf(house: HouseRecord): number {
   return Math.trunc(Number(house.info.price) * (Number(house.interior.rent) || 0));
@@ -81,10 +91,10 @@ export async function loadHouses(): Promise<number> {
     const interior = interiorById.get(Number(info.interiorId));
     if (!interior) continue;
     const garage = (interior.Garage ?? interior.garage ?? null) as DbRow | null;
-    const record: HouseRecord = { info, interior, garage };
+    const record: HouseRecord = { info, interior, garage, blip: null };
     houses.set(Number(info.id), record);
-    const owned = info.characterId != null;
-    new mint.PointBlip(40, Number(info.pickupX), Number(info.pickupY), Number(info.pickupZ), owned ? 1 : 2, 0.8, true, 0, `Дом ${info.id}`);
+    record.blip = new mint.PointBlip(40, Number(info.pickupX), Number(info.pickupY), Number(info.pickupZ), 2, 0.8, true, 0, 'Продажа собственности');
+    paintHouse(record);
     const enter = new mint.ColshapeCylinder(Number(info.pickupX), Number(info.pickupY), Number(info.pickupZ), 2, 2, 0, true);
     spots.set(enter, { id: Number(info.id), place: 0 });
     setColshapeHandlers(enter, {
@@ -120,6 +130,10 @@ export function houseById(id: number): HouseRecord | null {
   return houses.get(id) ?? null;
 }
 
+export function syncOwnedHouse(player: mint.Player): void {
+  syncHouseMenu(player);
+}
+
 function syncHouseMenu(player: mint.Player): void {
   const house = houseForCharacter(Number(getSession(player).character?.id));
   const data: Record<string, unknown> = {};
@@ -141,6 +155,23 @@ export function houseForCharacter(characterId: number): HouseRecord | null {
     if (Number(house.info.characterId) === characterId) return house;
   }
   return null;
+}
+
+export function ownedHouses(): HouseRecord[] {
+  return [...houses.values()].filter((house) => house.info.characterId != null);
+}
+
+export async function releaseHouse(house: HouseRecord): Promise<number | null> {
+  if (house.info.characterId == null) return null;
+  const characterId = Number(house.info.characterId);
+  house.info.characterId = null;
+  house.info.characterNick = null;
+  house.info.date = null;
+  house.info.isOpened = true;
+  house.info.holder = 0;
+  paintHouse(house);
+  await house.info.save();
+  return characterId;
 }
 
 export async function enterHouse(player: mint.Player, place: number): Promise<void> {
@@ -220,6 +251,7 @@ export async function buyHouse(player: mint.Player, method: number): Promise<voi
   house.info.characterNick = character.name;
   house.info.date = new Date(Date.now() + 24 * 60 * 60 * 1000);
   await house.info.save();
+  paintHouse(house);
   cef(player, `mp.event.call('house.buy.ans', 1, ${JSON.stringify(String(character.name ?? ''))});`);
   notifyInfo(player, 'Оплатите имущество в банке в течение 24 часов, иначе оно будет продано', 'Внимание');
   syncHouseMenu(player);
@@ -292,6 +324,7 @@ export function installHouses(): void {
     house.info.characterNick = getSession(player).character?.name;
     house.info.date = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await house.info.save();
+    paintHouse(house);
     finish(1);
     notifyInfo(player, 'Оплатите имущество в банке в течение 24 часов, иначе оно будет продано', 'Внимание');
     syncHouseMenu(player);
@@ -316,6 +349,7 @@ export function installHouses(): void {
     house.info.characterNick = null;
     house.info.date = null;
     await house.info.save();
+    paintHouse(house);
     await addBank(player, payback);
     cef(player, `mp.event.call('house.sell.toGov.ans', 1);`);
     notifySuccess(player, `Дом продан штату за $${payback}`, 'Дом');

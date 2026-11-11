@@ -6,7 +6,7 @@ import { giveItem } from '../inventory/index.js';
 import { getSession, type DbRow } from '../player/session.js';
 import { cef } from '../ui/send.js';
 import { removeBank, removeCash } from '../world/money.js';
-import { ITEM_IDS, clothesOf, loadClothes, type Cloth } from '../clothes/index.js';
+import { ITEM_IDS, clothDlcHash, clothesOf, loadClothes, type Cloth } from '../clothes/index.js';
 import { onBizPrice } from '../bizes/prices.js';
 
 const PRODUCT_PRICE = 20;
@@ -18,6 +18,7 @@ interface Piece {
   price: number;
   variation: number;
   textures: number[];
+  dlc?: number;
   torso?: number;
   undershirt?: number;
   pockets?: unknown;
@@ -65,6 +66,8 @@ function pieceOf(row: Cloth): Piece {
     variation: Number(row.variation) || 0,
     textures: numbers(row.textures),
   };
+  const dlc = clothDlcHash(row.dlc);
+  if (dlc) piece.dlc = dlc;
   if (row.torso != null) piece.torso = Number(row.torso) || 0;
   if (row.undershirt != null) piece.undershirt = Number(row.undershirt) || 0;
   if (row.pockets != null) piece.pockets = row.pockets;
@@ -192,6 +195,7 @@ export function installClothing(): void {
       texture: item.textures[textureIndex] ?? 0,
       name: item.name,
     };
+    if (item.dlc) params.dlc = item.dlc;
     if (item.torso != null) params.torso = item.torso;
     if (item.undershirt != null) {
       params.undershirt = item.undershirt;

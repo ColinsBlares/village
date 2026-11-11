@@ -3,6 +3,7 @@ import * as native from 'natives';
 import { cefPixels, pushCef } from '../cef/view.js';
 
 let active = false;
+let shown = true;
 let lastAnchor = -1;
 let nextAnchor = 0;
 
@@ -14,8 +15,17 @@ export function worldHudOn(): boolean {
 
 export function enableWorldHud(): void {
   active = true;
+  shown = true;
   lastAnchor = -1;
   pushAnchor();
+  native.displayRadar(true);
+}
+
+export function setHudShown(): void {
+  if (!active) return;
+  shown = !shown;
+  native.displayRadar(shown);
+  pushCef(`mp.event.call('hud.show', ${shown});`);
 }
 
 export function disableWorldHud(): void {
@@ -41,7 +51,7 @@ function pushPlace(): void {
 
 export function tickHud(): void {
   if (!active) return;
-  native.displayRadar(true);
+  native.displayRadar(shown);
   for (const id of HIDDEN) native.hideHudComponentThisFrame(id);
   if (Date.now() >= nextAnchor) {
     pushAnchor();

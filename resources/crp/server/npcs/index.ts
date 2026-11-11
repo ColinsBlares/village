@@ -29,10 +29,12 @@ export async function loadNpcs(): Promise<number> {
       onEnter: (player) => {
         if (row.kind === 'hostile') return;
         near.set(player, row);
-        mint.emitClient(player, 'crp:prompt', 'npc');
+        mint.emitClient(player, 'crp:prompt', 'Используйте <span>E</span> для того, чтобы поговорить');
       },
       onExit: (player) => {
-        if (near.get(player)?.id === row.id) near.delete(player);
+        if (near.get(player)?.id !== row.id) return;
+        near.delete(player);
+        mint.emitClient(player, 'crp:prompt', '');
       },
     });
     if (row.blip === true || row.blip === 1) {

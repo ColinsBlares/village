@@ -6,9 +6,11 @@ import { nearestVehicle, openVehicleInteraction, partPoint, setVehicleTarget } f
 import { interactionOpen, setInteractionOpen } from './state.js';
 const RANGE_PLAYER = 2;
 const RANGE_VEHICLE = 7;
+const CASINO = { x: 1100.59, y: 219.76 };
 
 let current: mint.Player | null = null;
 let selfDocs = false;
+let diceListed = false;
 
 export function setSelfDocuments(on: boolean): void {
   selfDocs = on;
@@ -111,10 +113,25 @@ function drawHint(point: { x: number; y: number; z: number }): void {
   native.clearDrawOrigin();
 }
 
+function syncDice(local: mint.Player): void {
+  const dx = local.pos.x - CASINO.x;
+  const dy = local.pos.y - CASINO.y;
+  const inside = local.dimension === 1 && dx * dx + dy * dy < 120 * 120;
+  if (inside === diceListed) return;
+  diceListed = inside;
+  if (inside) {
+    pushCef(`interactionMenu.addItems('player_interaction', ${JSON.stringify([{ text: 'Бросить кости', icon: 'dice.svg' }])});`);
+    return;
+  }
+  pushCef(`interactionMenu.deleteItem('player_interaction', 'Бросить кости');`);
+}
+
 export function installInteraction(): void {
   mint.everyTick(() => {
     const local = mint.Player.local;
-    if (!local?.valid || local.vehicle || interactionOpen()) return;
+    if (!local?.valid) return;
+    syncDice(local);
+    if (local.vehicle || interactionOpen()) return;
     const point = hintPoint(local);
     if (point) drawHint(point);
   });

@@ -3,7 +3,7 @@ import * as native from 'natives';
 import { pushCef } from '../cef/view.js';
 import { animatorOn } from '../animations/index.js';
 import { busyHas } from '../ui/busy.js';
-import { bootTarget } from '../factions/index.js';
+import { bootTarget, partPoint } from '../factions/index.js';
 
 const OFFSETS = [
   [0, 1.5, 0.4], [0, -1.5, 0.4], [-0.9, 0.6, 0.4], [0.9, 0.6, 0.4],
@@ -162,7 +162,38 @@ function vehicleFrom(target: mint.BaseObject): mint.Vehicle | null {
   return mint.Vehicle.getByScriptID((target as mint.Vehicle).scriptID);
 }
 
+function drawTag(text: string, x: number, y: number, z: number, scale: number, red: number, green: number, blue: number): void {
+  text.split('\n').forEach((line, index) => {
+    native.setDrawOrigin(x, y, z, false);
+    native.setTextFont(0);
+    native.setTextScale(scale, scale);
+    native.setTextColour(red, green, blue, 255);
+    native.setTextOutline();
+    native.setTextCentre(true);
+    native.beginTextCommandDisplayText('STRING');
+    native.addTextComponentSubstringPlayerName(line.trim());
+    native.endTextCommandDisplayText(0, index * 0.028, 0);
+    native.clearDrawOrigin();
+  });
+}
+
 export function installVehicleSync(): void {
+  mint.everyTick(() => {
+    const local = mint.Player.local;
+    if (!local?.valid) return;
+    for (const vehicle of mint.Vehicle.all) {
+      const dx = vehicle.pos.x - local.pos.x;
+      const dy = vehicle.pos.y - local.pos.y;
+      const dz = vehicle.pos.z - local.pos.z;
+      if (dx * dx + dy * dy + dz * dz > 100) continue;
+      const cargo = vehicle.getStreamSyncedMeta('crp:cargo');
+      if (typeof cargo === 'string' && cargo) drawTag(cargo, vehicle.pos.x, vehicle.pos.y, vehicle.pos.z + 2.7, 0.35, 255, 255, 255);
+      if (vehicle.getStreamSyncedMeta('crp:unload') === true) {
+        const boot = partPoint(vehicle, 'boot');
+        drawTag('Разгрузка...', boot.x, boot.y, boot.z + 1, 0.25, 187, 255, 0);
+      }
+    }
+  });
   mint.onServer('crp:veh:door', (id, door, open) => {
     const vehicle = mint.Vehicle.getByRemoteID(Number(id));
     if (!vehicle?.valid) return;
@@ -230,6 +261,19 @@ export function installVehicleSync(): void {
     if (damageSent.get(vehicle as mint.Vehicle) === key) return;
     damageSent.set(vehicle as mint.Vehicle, key);
     mint.emitServer('crp:veh:damage', JSON.stringify(clean ? [0, 0, 0, 0] : snapshot));
+  }, 1000);
+
+  mint.setInterval(() => {
+    for (const vehicle of mint.Vehicle.all) {
+      if (!vehicle.valid) continue;
+      const rolled = Number(vehicle.getStreamSyncedMeta('windowsDown')) || 0;
+      const bits = damageOf(vehicle)?.[1] ?? 0;
+      if (!bits && !rolled) continue;
+      for (let n = 0; n < 4; n += 1) {
+        if (rolled & (1 << n)) native.rollDownWindow(idOf(vehicle), n);
+        else if (bits & (1 << n)) native.smashVehicleWindow(idOf(vehicle), n);
+      }
+    }
   }, 1000);
 
   mint.setInterval(() => {

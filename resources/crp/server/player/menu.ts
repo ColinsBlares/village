@@ -7,6 +7,7 @@ import { getSession, type DbRow } from './session.js';
 import { cef } from '../ui/send.js';
 import { notifySuccess } from '../ui/notify.js';
 import { settingsPayload } from '../settings/index.js';
+import { syncPlayerFaction } from '../hud/players.js';
 
 export function installPlayerMenu(): void {
   mint.onClient('crp:menu:kick', (player) => {
@@ -84,6 +85,7 @@ export function pushFaction(player: mint.Player): void {
     factionName: factionName(player),
     factionRank: rankName(player),
   })});`);
+  syncPlayerFaction(player);
 }
 
 export function pushFactionRank(player: mint.Player): void {

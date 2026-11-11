@@ -47,6 +47,7 @@ export function playCatalog(player: mint.Player, id: number): void {
   const parts = catalog[index].split(' ');
   if (!parts[0] || !parts[1]) return;
   playAnimation(player, parts[0], parts[1], 1, 1);
+  mint.emitClient(player, 'crp:anim:line', index, `${parts[0]} ${parts[1]}`);
 }
 
 export function playTimed(player: mint.Player, dict: string, name: string, flag: number, ms: number): void {

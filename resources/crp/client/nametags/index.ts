@@ -1,5 +1,12 @@
 import * as mint from 'mint-client';
 import * as native from 'natives';
+import { setZoneVisible } from '../bands/zones.js';
+
+let show = true;
+
+export function setNametags(on: boolean): void {
+  show = on;
+}
 
 function draw(text: string, x: number, y: number, color: [number, number, number, number]): void {
   native.setTextFont(4);
@@ -13,9 +20,13 @@ function draw(text: string, x: number, y: number, color: [number, number, number
 }
 
 export function installNametags(): void {
+  mint.onServer('crp:settings:view', (nicks, ghetto) => {
+    show = nicks !== false && nicks !== 0;
+    setZoneVisible(ghetto !== false && ghetto !== 0);
+  });
   mint.everyTick(() => {
     const local = mint.Player.local;
-    if (!local?.valid) return;
+    if (!show || !local?.valid) return;
     const faction = Number(local.getStreamSyncedMeta('crp:faction')) || 0;
     for (const player of mint.Player.streamedIn) {
       if (player === local || !player.valid || player.getStreamSyncedMeta('crp:vanished')) continue;

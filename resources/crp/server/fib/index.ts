@@ -20,7 +20,8 @@ export function installFib(): void {
     if (target.getSyncedMeta('crp:spy') == null) {
       const item = await takeItem(player, [4]);
       if (!item) return notifyError(player, 'Жучок не найден', header);
-      target.setSyncedMeta('crp:spy', player.id);
+      const agentId = Number(getSession(player).character?.id) || 0;
+      target.setSyncedMeta('crp:spy', `${player.id}:${agentId}`);
       notifySuccess(player, `Прослушка на ${nameOf(target)} установлена`, header);
       return;
     }

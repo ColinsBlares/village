@@ -12,7 +12,7 @@ import { getPlace } from './place.js';
 
 const GROUND_MAX = 30;
 const GROUND_DIST = 2;
-const GROUND_MS = 2 * 60 * 1000;
+export const GROUND_MS = 2 * 60 * 1000;
 
 interface DropRow {
   oldId: number;
@@ -157,6 +157,32 @@ export async function dropOwnedItem(
   } finally {
     dropping.delete(lock);
   }
+}
+
+export function dropFresh(
+  owner: mint.Player,
+  itemId: number,
+  title: string,
+  model: string,
+  pos: { x: number; y: number; z: number },
+  yaw: number,
+): boolean {
+  if (!owner.valid) return false;
+  const list = byOwner.get(owner.id) ?? [];
+  if (list.length >= GROUND_MAX) return false;
+  const object = new mint.Object(mint.hash(model), pos.x, pos.y, pos.z, 0, 0, yaw, owner.dimension, true);
+  object.rot = new mint.Vector3(0, 0, yaw);
+  object.setStreamSyncedMeta('crp:ground', itemId);
+  object.setStreamSyncedMeta('crp:groundName', title);
+  const timer = setTimeout(() => removeDrop(object.id), GROUND_MS);
+  drops.set(object.id, {
+    ownerId: owner.id,
+    rows: [{ oldId: 1, oldParentId: null, itemId, pocketIndex: null, index: 0, params: {} }],
+    object,
+    timer,
+  });
+  trackOwner(owner.id, object.id);
+  return true;
 }
 
 export function installGroundItems(): void {

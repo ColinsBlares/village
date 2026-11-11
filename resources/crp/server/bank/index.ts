@@ -1,6 +1,7 @@
 import * as mint from 'mint-server';
 import { table } from '../core/db.js';
 import { setColshapeHandlers } from '../core/colshapes.js';
+import { bizBankView, bizDailyRent } from '../bizes/index.js';
 import { houseById, houseForCharacter } from '../houses/index.js';
 import { getSession, type DbRow } from '../player/session.js';
 import { cef } from '../ui/send.js';
@@ -33,6 +34,7 @@ interface Card extends DbRow {
 }
 
 const here = new WeakSet<mint.Player>();
+const cashLock = new Set<number>();
 
 function call(player: mint.Player, event: string, payload: unknown): void {
   cef(player, `mp.event.call(${JSON.stringify(event)}, ${JSON.stringify([payload])});`);
@@ -75,13 +77,14 @@ async function info(player: mint.Player): Promise<Record<string, unknown> | null
   const deposit = (await table('BankDeposit').findOne({ where: { characterId: character.id } })) as DbRow | null;
   const house = houseForCharacter(Number(character.id));
   const phone = (await table('Phone').findOne({ where: { characterId: character.id } })) as (DbRow & { money: number }) | null;
+  const biz = (await table('Biz').findOne({ where: { characterId: character.id } })) as DbRow | null;
   return {
     name: character.name,
     cash: character.cash,
     money: active ? active.balance : character.bank,
     phoneMoney: phone ? phone.money : null,
     number: String(character.id),
-    biz: [],
+    biz: biz ? [bizBankView(biz)] : [],
     houses: house
       ? [{
           name: house.info.id,
@@ -272,6 +275,22 @@ export function installBank(): void {
     call(player, 'bank.house.push.ans', 1);
     await refresh(player);
   });
+  mint.onClient('bank.biz.push', async (player: mint.Player, ...args: unknown[]) => {
+    const character = getSession(player).character;
+    const id = Math.floor(Number(args[0]));
+    const days = Math.floor(Number(args[1]));
+    const biz = (await table('Biz').findOne({ where: { id } })) as DbRow | null;
+    if (!character || !biz || days <= 0 || Number(biz.characterId) !== Number(character.id) || biz.date == null) return call(player, 'bank.biz.push.ans', 0);
+    const left = dateDays(biz.date);
+    if (days + left > 30) return call(player, 'bank.biz.push.ans', 0);
+    const due = Math.trunc(bizDailyRent(biz) * days);
+    if ((Number(character.bank) || 0) < due) return call(player, 'bank.biz.push.ans', 2);
+    if (!(await removeBank(player, due))) return call(player, 'bank.biz.push.ans', 0);
+    biz.date = new Date(Date.now() + (days + left) * 86400000);
+    await biz.save();
+    call(player, 'bank.biz.push.ans', 1);
+    await refresh(player);
+  });
   mint.onClient('bank.card.open', async (player: mint.Player, ...args: unknown[]) => {
     if (!here.has(player)) return call(player, 'bank.card.open.ans', 0);
     const type = String(args[0] ?? '');
@@ -393,6 +412,51 @@ export function installBank(): void {
     if (balance && !(await addBank(player, balance))) return call(player, 'bank.deposit.close.ans', 0);
     call(player, 'bank.deposit.close.ans', 1);
     await refresh(player);
+  });
+  mint.onClient('bank.biz.cashbox.push', async (player: mint.Player, ...args: unknown[]) => {
+    const character = getSession(player).character;
+    const id = Math.floor(Number(args[0]));
+    const sum = Math.floor(Number(args[1]));
+    if (!character || !Number.isFinite(id) || sum <= 0) return call(player, 'bank.biz.cashbox.push.ans', 0);
+    const biz = (await table('Biz').findOne({ where: { id } })) as DbRow | null;
+    if (!biz || Number(biz.characterId) !== Number(character.id)) return call(player, 'bank.biz.cashbox.push.ans', 0);
+    if ((Number(character.bank) || 0) < sum) return call(player, 'bank.biz.cashbox.push.ans', 2);
+    if (cashLock.has(id)) return call(player, 'bank.biz.cashbox.push.ans', 0);
+    cashLock.add(id);
+    try {
+      const paid = await removeBank(player, sum);
+      if (!paid) return call(player, 'bank.biz.cashbox.push.ans', 0);
+      biz.cashBox = (Number(biz.cashBox) || 0) + sum;
+      await biz.save();
+      call(player, 'bank.biz.cashbox.push.ans', 1);
+      await refresh(player);
+    } finally {
+      cashLock.delete(id);
+    }
+  });
+  mint.onClient('bank.biz.cashbox.pop', async (player: mint.Player, ...args: unknown[]) => {
+    const character = getSession(player).character;
+    const id = Math.floor(Number(args[0]));
+    const sum = Math.floor(Number(args[1]));
+    if (!character || !Number.isFinite(id) || sum <= 0) return call(player, 'bank.biz.cashbox.pop.ans', 0);
+    const biz = (await table('Biz').findOne({ where: { id } })) as DbRow | null;
+    if (!biz || Number(biz.characterId) !== Number(character.id)) return call(player, 'bank.biz.cashbox.pop.ans', 0);
+    if ((Number(biz.cashBox) || 0) < sum) return call(player, 'bank.biz.cashbox.pop.ans', 4);
+    if (cashLock.has(id)) return call(player, 'bank.biz.cashbox.pop.ans', 0);
+    cashLock.add(id);
+    biz.cashBox = (Number(biz.cashBox) || 0) - sum;
+    try {
+      const paid = await addBank(player, sum);
+      if (!paid) {
+        biz.cashBox = (Number(biz.cashBox) || 0) + sum;
+        return call(player, 'bank.biz.cashbox.pop.ans', 0);
+      }
+      await biz.save();
+      call(player, 'bank.biz.cashbox.pop.ans', 1);
+      await refresh(player);
+    } finally {
+      cashLock.delete(id);
+    }
   });
   mint.on('playerDisconnect', (player: mint.Player) => here.delete(player));
 }

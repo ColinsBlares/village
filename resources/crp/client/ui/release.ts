@@ -1,4 +1,6 @@
+import { closePlayerList } from '../hud/players.js';
 import { closeChat } from '../chat/index.js';
+import { closeMusicPanel } from '../vehicles/music.js';
 import { focusUi, inWorld, pushCef } from '../cef/view.js';
 import { closeDocuments } from '../documents/index.js';
 import { closeInteractionMenu } from '../interaction/index.js';
@@ -7,7 +9,9 @@ import { busyClear } from './busy.js';
 
 export function releaseUi(): void {
   if (!inWorld()) return;
+  closePlayerList();
   closeChat();
+  closeMusicPanel();
   closeInteractionMenu();
   closeDocuments();
   closeMoneyGive();

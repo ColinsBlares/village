@@ -7,6 +7,8 @@ import { notifyError, notifyInfo, notifySuccess } from '../ui/notify.js';
 import { installVehicleCabin } from './cabin.js';
 import { installVehicleSell } from './sell.js';
 import { installOwnVehicles } from './own.js';
+import { installVehicleMusic } from './music.js';
+import { installVehicleRadio } from './radio.js';
 
 interface VehicleProps {
   name: string;
@@ -451,6 +453,8 @@ export function installVehicles(): void {
   installVehicleSell();
   installOwnVehicles();
   installVehicleCabin();
+  installVehicleMusic();
+  installVehicleRadio();
   installIdleRespawn();
   mint.on('playerEnteredVehicle', (player, vehicle, seat) => {
     if (!getSession(player).character) return;
